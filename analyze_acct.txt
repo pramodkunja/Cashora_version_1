@@ -1,0 +1,30 @@
+﻿Analyzing 3 items...                                            
+
+warning - Unused import: 'package:dio/dio.dart' - lib\data\repositories\accountant_repository.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\data\repositories\accountant_repository.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\accountant_repository.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\accountant_repository.dart:57:7 - avoid_print
+warning - Unused import: '../../../../data/repositories/payment_repository.dart' - lib\modules\accountant\controllers\accountant_payments_controller.dart:5:8 - unused_import
+warning - Unused import: '../../../../data/models/payment_response_model.dart' - lib\modules\accountant\controllers\accountant_payments_controller.dart:7:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\modules\accountant\controllers\accountant_payments_controller.dart:32:39 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\accountant\controllers\accountant_payments_controller.dart:33:44 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_payments_controller.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_payments_controller.dart:56:7 - avoid_print
+
+flutter : 10 issues found. 
+(ran in 4.1s)
+At line:1 char:1
++ flutter analyze lib/modules/
+accountant/controllers/account
+ant_payment ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo            
+  : NotSpecified: (10 is    
+sues found. (ran in 4.1    
+s):String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId   
+  : NativeCommandError
+ 

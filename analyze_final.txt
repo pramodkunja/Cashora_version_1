@@ -1,0 +1,93 @@
+﻿Analyzing 6 items...                                            
+
+   info - Don't invoke 'print' in production code - lib\data\repositories\payment_repository.dart:120:7 - avoid_print
+warning - The value of the field '_paymentRepository' isn't used - lib\modules\accountant\controllers\payment_flow_controller.dart:14:32 - unused_field
+warning - The value of the field '_currentPayoutId' isn't used - lib\modules\accountant\controllers\payment_flow_controller.dart:34:11 - unused_field
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:58:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:66:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:68:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:77:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:83:7 - avoid_print
+warning - The declaration '_navigateToSuccess' isn't referenced - lib\modules\accountant\controllers\payment_flow_controller.dart:102:8 - unused_element
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:121:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:145:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:177:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\controllers\payment_flow_controller.dart:212:46 - deprecated_member_use
+warning - The declaration '_navigateToFailure' isn't referenced - lib\modules\accountant\controllers\payment_flow_controller.dart:242:8 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:51:45 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\accountant\views\payment_flow\bill_details_view.dart:108:33 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:439:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:457:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\completed_request_details_view.dart:485:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:41:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:51:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:209:53 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:215:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:216:15 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:36:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:62:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:65:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:93:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:38:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:69:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:228:58 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\accountant\views\payment_flow\request_details_view.dart:5:8 - unused_import
+warning - The value of the local variable 'approver' isn't used - lib\modules\accountant\views\payment_flow\request_details_view.dart:21:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:96:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:114:52 - deprecated_member_use
+  error - The method 'initiatePayment' isn't defined for the type 'PaymentFlowController' - lib\modules\accountant\views\payment_flow\request_details_view.dart:152:40 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:223:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:237:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:337:33 - deprecated_member_use
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\accountant\views\payment_flow\request_details_view.dart:378:62 - invalid_use_of_protected_member
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:402:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:405:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:417:46 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\payment_flow\verify_payment_view.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\accountant\views\payment_flow\verify_payment_view.dart:3:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\profile\controllers\profile_controller.dart:53:7 - avoid_print
+   info - Parameter 'key' could be a super parameter - lib\modules\profile\views\edit_profile_view.dart:11:9 - use_super_parameters
+warning - Unused import: 'dart:ui' - lib\modules\profile\views\profile_view.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/buttons/primary_button.dart' - lib\modules\profile\views\profile_view.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\profile\views\profile_view.dart:19:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\profile\views\profile_view.dart:101:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\profile\views\profile_view.dart:271:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\profile\views\profile_view.dart:319:29 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\profile\views\settings_view.dart:11:9 - use_super_parameters
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\modules\profile\views\settings_view.dart:104:25 - deprecated_member_use
+warning - Unused import: 'package:mobile_scanner/mobile_scanner.dart' - lib\modules\requestor\controllers\create_request_controller.dart:8:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\create_request_controller.dart:80:7 - avoid_print
+warning - The operand can't be 'null', so the condition is always 'true' - lib\modules\requestor\controllers\create_request_controller.dart:87:20 - unnecessary_null_comparison
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\create_request_controller.dart:96:7 - avoid_print
+warning - Unused import: 'dart:io' - lib\modules\requestor\views\create_request\request_details_view.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\create_request\request_details_view.dart:16:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:54:48 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\create_request\request_details_view.dart:89:19 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:221:45 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\modules\requestor\views\create_request\request_details_view.dart:447:26 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:498:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:522:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:562:26 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:564:45 - deprecated_member_use
+
+flutter : 69 issues 
+found. (ran in 5.2s)
+At line:1 char:1
++ flutter analyze 
+lib/modules/profile lib
+/modules/requestor/cont
+rollers ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified: (69 is   
+ sues found. (ran in 
+5.2    s):String) [], 
+RemoteEx    ception
+    + 
+FullyQualifiedErrorId  
+   : NativeCommandError
+ 

@@ -1,0 +1,39 @@
+﻿Analyzing 3 items...                                            
+
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:24:7 - avoid_print
+   info - Statements in a for should be enclosed in a block - lib\data\repositories\request_repository.dart:61:36 - curly_braces_in_flow_control_structures
+   info - Statements in a for should be enclosed in a block - lib\data\repositories\request_repository.dart:110:36 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:143:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:172:7 - avoid_print
+warning - Unused import: 'package:mobile_scanner/mobile_scanner.dart' - lib\modules\requestor\controllers\create_request_controller.dart:8:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\create_request_controller.dart:81:7 - avoid_print
+warning - The operand can't be 'null', so the condition is always 'true' - lib\modules\requestor\controllers\create_request_controller.dart:88:20 - unnecessary_null_comparison
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\create_request_controller.dart:97:7 - avoid_print
+warning - Unused import: 'dart:io' - lib\modules\requestor\views\create_request\request_details_view.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\create_request\request_details_view.dart:16:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:54:48 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\create_request\request_details_view.dart:89:19 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:221:45 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\modules\requestor\views\create_request\request_details_view.dart:473:26 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:524:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:548:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:588:26 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:590:45 - deprecated_member_use
+
+flutter : 19 issues found. 
+(ran in 17.6s)
+At line:1 char:1
++ flutter analyze lib/data/r
+epositories/request_reposito
+ry.dart lib/mod ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+:     NotSpecified: (19 
+issues     found. (ran in 
+17.6s):St    ring) [], 
+RemoteException
+    + FullyQualifiedErrorId 
+:     NativeCommandError
+ 

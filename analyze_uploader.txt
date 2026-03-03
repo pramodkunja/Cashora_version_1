@@ -1,0 +1,25 @@
+﻿Analyzing 3 items...                                            
+
+   info - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead - lib\core\services\web_form_upload_web.dart:7:1 - deprecated_member_use
+   info - Angle brackets will be interpreted as HTML - lib\core\services\web_form_upload_web.dart:12:66 - unintended_html_in_doc_comment
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:34:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:45:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:64:3 - avoid_print
+
+flutter : 5 issues found. 
+(ran in 0.4s)
+At line:1 char:1
++ flutter analyze lib/core/s
+ervices/web_form_upload_web.
+dart lib/core/s ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (5 iss  
+  ues found. (ran in 0.4s   
+ ):String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 

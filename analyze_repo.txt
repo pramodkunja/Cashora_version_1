@@ -1,0 +1,26 @@
+﻿Analyzing request_repository.dart...                            
+
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:24:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:51:9 - avoid_print
+   info - Statements in a for should be enclosed in a block - lib\data\repositories\request_repository.dart:58:36 - curly_braces_in_flow_control_structures
+   info - Statements in a for should be enclosed in a block - lib\data\repositories\request_repository.dart:98:36 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:130:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:159:7 - avoid_print
+
+flutter : 6 issues found. 
+(ran in 2.9s)
+At line:1 char:1
++ flutter analyze lib/data/r
+epositories/request_reposito
+ry.dart 2>&1 |  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (6 iss  
+  ues found. (ran in 2.9s   
+ ):String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 

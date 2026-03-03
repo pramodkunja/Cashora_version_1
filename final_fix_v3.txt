@@ -1,0 +1,609 @@
+﻿Analyzing Cashora_Version_1...                                  
+
+   info - The constant name 'ADMIN' isn't a lowerCamelCase identifier - lib\core\constants\user_roles.dart:2:23 - constant_identifier_names
+   info - The constant name 'SUPER_ADMIN' isn't a lowerCamelCase identifier - lib\core\constants\user_roles.dart:3:23 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT' isn't a lowerCamelCase identifier - lib\core\constants\user_roles.dart:4:23 - constant_identifier_names
+   info - The constant name 'REQUESTOR' isn't a lowerCamelCase identifier - lib\core\constants\user_roles.dart:5:23 - constant_identifier_names
+warning - The declaration '_checkAndLock' isn't referenced - lib\core\managers\app_lifecycle_manager.dart:33:16 - unused_element
+   info - Don't invoke 'print' in production code - lib\core\services\auth_service.dart:58:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\biometric_service.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\biometric_service.dart:30:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\biometric_service.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\biometric_service.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:32:5 - avoid_print
+  error - The method 'getPaymentStatus' isn't defined for the type 'PaymentRepository' - lib\core\services\payment_status_service.dart:50:51 - undefined_method
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:60:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:73:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:86:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:89:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:106:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\payment_status_service.dart:115:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:40:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:42:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:57:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:71:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:72:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:81:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:82:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:83:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:87:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:125:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:139:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:149:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:150:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:152:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:157:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:190:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:194:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:211:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:212:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:213:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:214:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:217:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:223:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:227:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:232:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:241:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\phonepe_service.dart:251:5 - avoid_print
+warning - The value of the local variable 'bytes' isn't used - lib\core\services\qr_service.dart:13:23 - unused_local_variable
+   info - Don't invoke 'print' in production code - lib\core\services\qr_service.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\qr_service.dart:27:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\qr_service.dart:34:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\qr_service.dart:87:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\qr_service.dart:119:7 - avoid_print
+   info - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead - lib\core\services\web_form_upload_web.dart:7:1 - deprecated_member_use
+   info - Angle brackets will be interpreted as HTML - lib\core\services\web_form_upload_web.dart:27:66 - unintended_html_in_doc_comment
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:51:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:63:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\web_form_upload_web.dart:84:3 - avoid_print
+   info - Parameter 'key' could be a super parameter - lib\core\widgets\common_search_bar.dart:9:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\core\widgets\custom_date_picker_dialog.dart:11:9 - use_super_parameters
+warning - The value of the local variable 'currentYear' isn't used - lib\core\widgets\custom_date_picker_dialog.dart:175:11 - unused_local_variable
+   info - Dangling library doc comment - lib\data\models\phonepe_models.dart:2:1 - dangling_library_doc_comments
+warning - Unused import: 'package:dio/dio.dart' - lib\data\repositories\accountant_repository.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\data\repositories\accountant_repository.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\accountant_repository.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\accountant_repository.dart:57:7 - avoid_print
+warning - Unused import: 'package:dio/dio.dart' - lib\data\repositories\admin_repository.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\data\repositories\admin_repository.dart:28:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\admin_repository.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\admin_repository.dart:74:7 - avoid_print
+warning - Unused import: 'package:dio/dio.dart' - lib\data\repositories\organization_repository.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\data\repositories\payment_repository.dart:120:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\payment_repository.dart:135:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:24:7 - avoid_print
+   info - Statements in a for should be enclosed in a block - lib\data\repositories\request_repository.dart:61:36 - curly_braces_in_flow_control_structures
+   info - Statements in a for should be enclosed in a block - lib\data\repositories\request_repository.dart:110:36 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:143:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\repositories\request_repository.dart:172:7 - avoid_print
+warning - Unused import: 'package:dio/dio.dart' - lib\data\repositories\user_repository.dart:1:8 - unused_import
+warning - Unused import: 'package:google_fonts/google_fonts.dart' - lib\main.dart:3:8 - unused_import
+warning - Unused import: 'routes/app_routes.dart' - lib\main.dart:14:8 - unused_import
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\accountant\controllers\accountant_dashboard_controller.dart:4:8 - unused_import
+warning - Unused import: '../../../../data/repositories/payment_repository.dart' - lib\modules\accountant\controllers\accountant_payments_controller.dart:5:8 - unused_import
+warning - Unused import: '../../../../data/models/payment_response_model.dart' - lib\modules\accountant\controllers\accountant_payments_controller.dart:7:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\modules\accountant\controllers\accountant_payments_controller.dart:32:39 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\accountant\controllers\accountant_payments_controller.dart:33:44 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_payments_controller.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_payments_controller.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_profile_controller.dart:34:7 - avoid_print
+warning - Unused import: '../../../../core/services/storage_service.dart' - lib\modules\accountant\controllers\payment_flow_controller.dart:11:8 - unused_import
+warning - The value of the field '_currentPayoutId' isn't used - lib\modules\accountant\controllers\payment_flow_controller.dart:36:11 - unused_field
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:68:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:70:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:85:7 - avoid_print
+warning - The declaration '_navigateToSuccess' isn't referenced - lib\modules\accountant\controllers\payment_flow_controller.dart:104:8 - unused_element
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:123:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:147:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:179:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\controllers\payment_flow_controller.dart:214:46 - deprecated_member_use
+warning - The declaration '_navigateToFailure' isn't referenced - lib\modules\accountant\controllers\payment_flow_controller.dart:244:8 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\controllers\payment_flow_controller.dart:287:39 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:300:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\controllers\payment_flow_controller.dart:304:37 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_dashboard_view.dart:11:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_home_view.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:62:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:96:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:104:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:118:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:131:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:151:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:190:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:201:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:222:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:236:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:255:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:260:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:295:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:486:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:493:54 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\accountant\views\accountant_payments_view.dart:5:8 - unused_import
+warning - Unused import: '../controllers/accountant_dashboard_controller.dart' - lib\modules\accountant\views\accountant_payments_view.dart:7:8 - unused_import
+warning - Unused import: 'tabs/generic_payment_list_tab.dart' - lib\modules\accountant\views\accountant_payments_view.dart:11:8 - unused_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_payments_view.dart:12:8 - unused_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:13:8 - duplicate_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_payments_view.dart:13:8 - unused_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:16:8 - duplicate_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:17:8 - duplicate_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:18:8 - duplicate_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_payments_view.dart:18:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_payments_view.dart:21:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_payments_view.dart:61:34 - deprecated_member_use
+warning - Unused import: 'package:flutter_screenutil/flutter_screenutil.dart' - lib\modules\accountant\views\accountant_profile_view.dart:3:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/buttons/primary_button.dart' - lib\modules\accountant\views\accountant_profile_view.dart:7:8 - unused_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_profile_view.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_profile_view.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_profile_view.dart:184:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_profile_view.dart:229:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:188:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:365:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:384:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:465:32 - deprecated_member_use
+warning - Unused import: '../../../../utils/widgets/custom_search_bar.dart' - lib\modules\accountant\views\cash_flow_history_view.dart:8:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\cash_flow_history_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:70:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:111:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:159:67 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:285:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:51:45 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\accountant\views\payment_flow\bill_details_view.dart:108:33 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:424:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:442:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\completed_request_details_view.dart:484:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:41:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:51:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:209:53 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:215:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:216:15 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:36:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:62:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:65:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:93:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:38:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:69:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:228:58 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\accountant\views\payment_flow\request_details_view.dart:5:8 - unused_import
+warning - The value of the local variable 'approver' isn't used - lib\modules\accountant\views\payment_flow\request_details_view.dart:21:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:103:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:121:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:172:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:221:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:296:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:310:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:410:33 - deprecated_member_use
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\accountant\views\payment_flow\request_details_view.dart:454:64 - invalid_use_of_protected_member
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\accountant\views\payment_flow\request_details_view.dart:480:64 - invalid_use_of_protected_member
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:516:24 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:518:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:525:30 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\payment_flow\verify_payment_view.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\accountant\views\payment_flow\verify_payment_view.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\tabs\completed_payments_tab.dart:13:9 - use_super_parameters
+warning - Unused import: '../../../../utils/widgets/app_loader.dart' - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:6:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:33:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:64:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:110:40 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\tabs\pending_payments_tab.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:43:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:69:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:198:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:253:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:273:54 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\widgets\accountant_bottom_bar.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\widgets\accountant_bottom_bar.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\widgets\accountant_bottom_bar.dart:25:33 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\widgets\update_balances_dialog.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\widgets\update_balances_dialog.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\widgets\update_balances_dialog.dart:64:50 - deprecated_member_use
+warning - Unused import: 'package:flutter/material.dart' - lib\modules\admin\controllers\admin_approvals_controller.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\admin\controllers\admin_approvals_controller.dart:4:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_approvals_controller.dart:71:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_approvals_controller.dart:72:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_approvals_controller.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_approvals_controller.dart:75:9 - avoid_print
+warning - Duplicate import - lib\modules\admin\controllers\admin_clarification_status_controller.dart:3:8 - duplicate_import
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\admin\controllers\admin_clarification_status_controller.dart:4:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_clarification_status_controller.dart:65:7 - avoid_print
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\admin\controllers\admin_dashboard_controller.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\admin\controllers\admin_history_controller.dart:2:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\controllers\admin_history_controller.dart:30:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\controllers\admin_history_controller.dart:34:9 - curly_braces_in_flow_control_structures
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_history_controller.dart:80:7 - avoid_print
+   info - The variable name 'expense_id' isn't a lowerCamelCase identifier - lib\modules\admin\controllers\admin_request_details_controller.dart:91:15 - non_constant_identifier_names
+warning - The operand can't be 'null', so the condition is always 'true' - lib\modules\admin\controllers\admin_set_limits_controller.dart:34:20 - unnecessary_null_comparison
+   info - Don't invoke 'print' in production code - lib\modules\admin\controllers\admin_user_controller.dart:152:9 - avoid_print
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\admin\controllers\admin_user_controller.dart:249:35 - invalid_use_of_protected_member
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\admin\controllers\admin_user_controller.dart:321:35 - invalid_use_of_protected_member
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\controllers\admin_user_controller.dart:445:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\controllers\admin_user_controller.dart:450:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\utils\request_mapper.dart:10:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\utils\request_mapper.dart:13:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\utils\request_mapper.dart:35:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\utils\request_mapper.dart:38:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\utils\request_mapper.dart:55:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\utils\request_mapper.dart:64:11 - curly_braces_in_flow_control_structures
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\admin\views\admin_approvals_view.dart:8:8 - unused_import
+warning - Unused import: 'widgets/admin_bottom_bar.dart' - lib\modules\admin\views\admin_approvals_view.dart:11:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_approvals_view.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_approvals_view.dart:60:52 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\modules\admin\views\admin_approvals_view.dart:126:29 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_approvals_view.dart:155:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_approvals_view.dart:218:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_approvals_view.dart:221:75 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_approvals_view.dart:248:63 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_clarification_status_view.dart:13:9 - use_super_parameters
+warning - The value of the local variable 'isDark' isn't used - lib\modules\admin\views\admin_clarification_status_view.dart:17:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:49:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:159:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:162:53 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\admin\views\admin_clarification_status_view.dart:272:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\admin\views\admin_clarification_status_view.dart:273:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:323:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:341:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:383:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:414:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:545:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_status_view.dart:600:49 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_clarification_status_view.dart:677:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_clarification_status_view.dart:680:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_clarification_status_view.dart:697:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_clarification_status_view.dart:706:11 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_clarification_status_view.dart:726:7 - curly_braces_in_flow_control_structures
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_clarification_success_view.dart:10:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_success_view.dart:38:50 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_clarification_view.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_view.dart:39:41 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_clarification_view.dart:95:25 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_view.dart:120:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_clarification_view.dart:144:34 - deprecated_member_use
+warning - Unused import: 'widgets/admin_bottom_bar.dart' - lib\modules\admin\views\admin_dashboard_view.dart:11:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_dashboard_view.dart:16:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_dashboard_view.dart:64:43 - deprecated_member_use
+warning - Unused import: '../../../../utils/widgets/app_loader.dart' - lib\modules\admin\views\admin_history_view.dart:3:8 - unused_import
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\admin\views\admin_history_view.dart:8:8 - unused_import
+warning - Unused import: '../controllers/admin_approvals_controller.dart' - lib\modules\admin\views\admin_history_view.dart:10:8 - unused_import
+warning - Unused import: 'widgets/admin_bottom_bar.dart' - lib\modules\admin\views\admin_history_view.dart:11:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_history_view.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_history_view.dart:240:33 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_main_view.dart:11:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_rejection_success_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_rejection_success_view.dart:43:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_rejection_success_view.dart:48:52 - deprecated_member_use
+warning - Unused import: '../../../../utils/widgets/attachment_card.dart' - lib\modules\admin\views\admin_request_details_view.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_request_details_view.dart:13:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:129:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:199:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:409:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:425:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:524:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:612:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:643:33 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:698:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:700:9 - curly_braces_in_flow_control_structures
+warning - The '!' will have no effect because the receiver can't be null - lib\modules\admin\views\admin_request_details_view.dart:735:55 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\modules\admin\views\admin_request_details_view.dart:748:60 - unnecessary_non_null_assertion
+warning - The declaration '_buildPaymentStatusCard' isn't referenced - lib\modules\admin\views\admin_request_details_view.dart:893:10 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:911:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:950:40 - deprecated_member_use
+warning - The declaration '_buildApprovalHistory' isn't referenced - lib\modules\admin\views\admin_request_details_view.dart:967:10 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:1014:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:1076:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:1087:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:1101:42 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:1189:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:1192:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:1222:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:1225:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:1242:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\admin\views\admin_request_details_view.dart:1251:11 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\admin_request_details_view.dart:1320:35 - deprecated_member_use
+warning - Unused import: 'dart:ui' - lib\modules\admin\views\admin_set_limits_view.dart:5:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_set_limits_view.dart:14:9 - use_super_parameters
+warning - Unused import: '../controllers/admin_approvals_controller.dart' - lib\modules\admin\views\admin_success_view.dart:8:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\admin_success_view.dart:12:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\user_management\admin_add_user_view.dart:12:9 - use_super_parameters
+warning - Unused import: '../../../../utils/widgets/buttons/primary_button.dart' - lib\modules\admin\views\user_management\admin_deactivate_user_view.dart:6:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\user_management\admin_deactivate_user_view.dart:11:9 - use_super_parameters
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\admin\views\user_management\admin_deactivate_user_view.dart:22:50 - invalid_use_of_protected_member
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_deactivate_user_view.dart:103:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_deactivate_user_view.dart:144:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_deactivate_user_view.dart:145:44 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\user_management\admin_edit_user_view.dart:12:9 - use_super_parameters
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\admin\views\user_management\admin_edit_user_view.dart:17:44 - invalid_use_of_protected_member
+warning - The value of the local variable 'email' isn't used - lib\modules\admin\views\user_management\admin_edit_user_view.dart:35:12 - unused_local_variable
+warning - The value of the local variable 'phone' isn't used - lib\modules\admin\views\user_management\admin_edit_user_view.dart:36:12 - unused_local_variable
+warning - The value of the local variable 'role' isn't used - lib\modules\admin\views\user_management\admin_edit_user_view.dart:37:12 - unused_local_variable
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\admin\views\user_management\admin_edit_user_view.dart:46:52 - invalid_use_of_protected_member
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\admin\views\user_management\admin_edit_user_view.dart:50:74 - invalid_use_of_protected_member
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\admin\views\user_management\admin_user_list_view.dart:7:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/app_loader.dart' - lib\modules\admin\views\user_management\admin_user_list_view.dart:10:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\user_management\admin_user_list_view.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_list_view.dart:234:35 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\user_management\admin_user_success_view.dart:10:9 - use_super_parameters
+   info - Don't invoke 'print' in production code - lib\modules\admin\views\user_management\admin_user_success_view.dart:14:5 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:64:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:149:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:186:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:250:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:251:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:257:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\user_management\admin_user_success_view.dart:258:56 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\admin\views\widgets\admin_action_card.dart:4:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\widgets\admin_action_card.dart:15:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\widgets\admin_action_card.dart:36:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\widgets\admin_action_card.dart:47:31 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\admin\views\widgets\admin_app_bar.dart:4:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\widgets\admin_app_bar.dart:15:9 - use_super_parameters
+warning - Unused import: 'package:get/get.dart' - lib\modules\admin\views\widgets\admin_bottom_bar.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\widgets\admin_bottom_bar.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\widgets\admin_bottom_bar.dart:25:33 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\widgets\admin_overview_card.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\widgets\admin_overview_card.dart:27:33 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\widgets\admin_rejection_dialog.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\widgets\admin_rejection_dialog.dart:92:62 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\admin\views\widgets\welcome_message.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\admin\views\widgets\welcome_message.dart:95:52 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\auth\views\login_view.dart:13:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\auth\views\login_view.dart:77:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\auth\views\login_view.dart:137:61 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\auth\views\login_view.dart:250:9 - use_super_parameters
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\forgot_password\views\forgot_password_view.dart:5:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/buttons/primary_button.dart' - lib\modules\forgot_password\views\forgot_password_view.dart:8:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\forgot_password\views\forgot_password_view.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\forgot_password\views\forgot_password_view.dart:95:54 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\home\views\home_view.dart:7:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\lock\views\lock_view.dart:13:9 - use_super_parameters
+   info - 'WillPopScope' is deprecated and shouldn't be used. Use PopScope instead. The Android predictive back feature will not work with WillPopScope. This feature was deprecated after v3.12.0-1.0.pre - lib\modules\lock\views\lock_view.dart:41:12 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\lock\views\lock_view.dart:44:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\lock\views\lock_view.dart:57:41 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\notifications\controllers\accountant_notifications_controller.dart:3:8 - unused_import
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\notifications\controllers\requestor_notifications_controller.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\notifications\views\accountant_notifications_view.dart:10:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\notifications\views\accountant_notifications_view.dart:130:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\notifications\views\accountant_notifications_view.dart:133:33 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\notifications\views\admin_notifications_view.dart:9:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\notifications\views\requestor_notifications_view.dart:10:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\notifications\views\requestor_notifications_view.dart:142:37 - deprecated_member_use
+warning - The declaration '_buildSectionHeader' isn't referenced - lib\modules\notifications\views\requestor_notifications_view.dart:226:10 - unused_element
+warning - Unused import: 'package:google_fonts/google_fonts.dart' - lib\modules\organization_setup\views\organization_setup_view.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\organization_setup\views\organization_setup_view.dart:12:9 - use_super_parameters
+   info - Don't invoke 'print' in production code - lib\modules\organization_setup\views\organization_setup_view.dart:200:21 - avoid_print
+   info - Use interpolation to compose strings and values - lib\modules\organization_setup\views\organization_setup_view.dart:200:27 - prefer_interpolation_to_compose_strings
+warning - The declaration '_buildStep' isn't referenced - lib\modules\organization_setup\views\organization_setup_view.dart:278:10 - unused_element
+   info - Parameter 'key' could be a super parameter - lib\modules\organization_setup\views\organization_success_view.dart:11:9 - use_super_parameters
+   info - Statements in a for should be enclosed in a block - lib\modules\otp_verification\controllers\otp_verification_controller.dart:123:35 - curly_braces_in_flow_control_structures
+   info - Statements in a for should be enclosed in a block - lib\modules\otp_verification\controllers\otp_verification_controller.dart:124:31 - curly_braces_in_flow_control_structures
+   info - Parameter 'key' could be a super parameter - lib\modules\otp_verification\views\otp_verification_view.dart:13:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\otp_verification\views\otp_verification_view.dart:183:44 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\profile\controllers\profile_controller.dart:53:7 - avoid_print
+   info - Parameter 'key' could be a super parameter - lib\modules\profile\views\edit_profile_view.dart:11:9 - use_super_parameters
+warning - Unused import: 'dart:ui' - lib\modules\profile\views\profile_view.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/buttons/primary_button.dart' - lib\modules\profile\views\profile_view.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\profile\views\profile_view.dart:19:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\profile\views\profile_view.dart:101:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\profile\views\profile_view.dart:271:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\profile\views\profile_view.dart:319:29 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\profile\views\settings_view.dart:11:9 - use_super_parameters
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\modules\profile\views\settings_view.dart:104:25 - deprecated_member_use
+warning - Unused import: 'package:mobile_scanner/mobile_scanner.dart' - lib\modules\requestor\controllers\create_request_controller.dart:8:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\create_request_controller.dart:81:7 - avoid_print
+warning - The operand can't be 'null', so the condition is always 'true' - lib\modules\requestor\controllers\create_request_controller.dart:88:20 - unnecessary_null_comparison
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\create_request_controller.dart:97:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\controllers\my_requests_controller.dart:64:47 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\controllers\my_requests_controller.dart:126:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\controllers\my_requests_controller.dart:131:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\controllers\my_requests_controller.dart:133:7 - curly_braces_in_flow_control_structures
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\requestor\controllers\provide_clarification_controller.dart:5:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\controllers\requestor_controller.dart:34:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\controllers\requestor_controller.dart:43:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\controllers\requestor_controller.dart:52:32 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\requestor\controllers\requestor_controller.dart:109:7 - avoid_print
+   info - Unnecessary override - lib\modules\requestor\controllers\requestor_controller.dart:114:8 - unnecessary_overrides
+   info - Unnecessary override - lib\modules\requestor\controllers\requestor_controller.dart:119:8 - unnecessary_overrides
+warning - Unused import: 'dart:io' - lib\modules\requestor\views\create_request\request_details_view.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\create_request\request_details_view.dart:16:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:54:48 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\create_request\request_details_view.dart:89:19 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:221:45 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\modules\requestor\views\create_request\request_details_view.dart:473:26 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:524:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:548:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:588:26 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_details_view.dart:590:45 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\create_request\request_success_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:84:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:139:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:171:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:181:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:210:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:211:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:215:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:216:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\request_success_view.dart:267:43 - deprecated_member_use
+warning - Unused import: 'dart:io' - lib\modules\requestor\views\create_request\review_request_view.dart:1:8 - unused_import
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/foundation.dart' - lib\modules\requestor\views\create_request\review_request_view.dart:2:8 - unnecessary_import
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\requestor\views\create_request\review_request_view.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\create_request\review_request_view.dart:17:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\create_request\select_request_type_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\create_request\select_request_type_view.dart:118:37 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\requestor\views\create_request\select_request_type_view.dart:153:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\requestor\views\create_request\select_request_type_view.dart:154:15 - deprecated_member_use
+warning - Unused import: 'dart:math' - lib\modules\requestor\views\monthly_spent_view.dart:7:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\monthly_spent_view.dart:10:9 - use_super_parameters
+warning - The declaration '_buildFilterChip' isn't referenced - lib\modules\requestor\views\monthly_spent_view.dart:214:10 - unused_element
+warning - The value of the local variable 'isCollapsed' isn't used - lib\modules\requestor\views\monthly_spent_view.dart:257:16 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\monthly_spent_view.dart:281:19 - deprecated_member_use
+warning - Unused import: 'widgets/requestor_bottom_bar.dart' - lib\modules\requestor\views\my_requests_view.dart:7:8 - unused_import
+warning - Unused import: '../../../utils/widgets/app_loader.dart' - lib\modules\requestor\views\my_requests_view.dart:11:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\my_requests_view.dart:15:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\my_requests_view.dart:48:41 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\modules\requestor\views\my_requests_view.dart:122:41 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\my_requests_view.dart:154:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\my_requests_view.dart:160:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\my_requests_view.dart:197:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\my_requests_view.dart:260:35 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\provide_clarification_view.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:68:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:81:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:94:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:108:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:215:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:233:52 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\provide_clarification_view.dart:268:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\provide_clarification_view.dart:270:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\provide_clarification_view.dart:273:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\provide_clarification_view.dart:275:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\provide_clarification_view.dart:277:7 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:291:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\provide_clarification_view.dart:322:51 - deprecated_member_use
+warning - Unused import: 'package:image_picker/image_picker.dart' - lib\modules\requestor\views\request_details_read_view.dart:3:8 - unused_import
+warning - Unused import: 'package:open_file/open_file.dart' - lib\modules\requestor\views\request_details_read_view.dart:4:8 - unused_import
+warning - Unused import: 'package:flutter/foundation.dart' - lib\modules\requestor\views\request_details_read_view.dart:5:8 - unused_import
+warning - Unused import: 'package:url_launcher/url_launcher.dart' - lib\modules\requestor\views\request_details_read_view.dart:6:8 - unused_import
+warning - Unused import: 'dart:io' - lib\modules\requestor\views\request_details_read_view.dart:7:8 - unused_import
+warning - Unused import: 'package:dio/dio.dart' - lib\modules\requestor\views\request_details_read_view.dart:8:8 - unused_import
+warning - Unused import: 'package:path_provider/path_provider.dart' - lib\modules\requestor\views\request_details_read_view.dart:9:8 - unused_import
+warning - Unused import: 'package:permission_handler/permission_handler.dart' - lib\modules\requestor\views\request_details_read_view.dart:10:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\request_details_read_view.dart:19:9 - use_super_parameters
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\request_details_read_view.dart:110:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\request_details_read_view.dart:112:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\request_details_read_view.dart:114:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\modules\requestor\views\request_details_read_view.dart:116:7 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\request_details_read_view.dart:221:41 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\modules\requestor\views\request_details_read_view.dart:295:41 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\request_details_read_view.dart:480:33 - deprecated_member_use
+warning - Unused import: 'widgets/requestor_bottom_bar.dart' - lib\modules\requestor\views\requestor_dashboard_view.dart:12:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\requestor_dashboard_view.dart:17:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\requestor_dashboard_view.dart:67:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\requestor_dashboard_view.dart:152:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\requestor_dashboard_view.dart:234:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\requestor_dashboard_view.dart:306:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\requestor_dashboard_view.dart:359:29 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\requestor_main_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\requestor_main_view.dart:33:37 - deprecated_member_use
+warning - Unused import: 'package:image_picker/image_picker.dart' - lib\modules\requestor\views\widgets\rejected_request_view.dart:3:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/attachment_card.dart' - lib\modules\requestor\views\widgets\rejected_request_view.dart:6:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\widgets\rejected_request_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\widgets\rejected_request_view.dart:157:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\widgets\rejected_request_view.dart:219:41 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\requestor\views\widgets\requestor_bottom_bar.dart:10:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\requestor\views\widgets\requestor_bottom_bar.dart:23:33 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\reset_password\views\reset_password_success_view.dart:11:9 - use_super_parameters
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\reset_password\views\reset_password_view.dart:5:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\reset_password\views\reset_password_view.dart:11:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\settings\views\appearance_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\settings\views\appearance_view.dart:123:32 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\settings\views\change_password_view.dart:11:9 - use_super_parameters
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\settings\views\notifications_view.dart:4:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\settings\views\notifications_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\settings\views\notifications_view.dart:49:41 - deprecated_member_use
+warning - Unused import: '../../lock/views/lock_view.dart' - lib\modules\splash\controllers\splash_controller.dart:5:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\splash\views\splash_view.dart:9:9 - use_super_parameters
+warning - Duplicate import - lib\routes\app_pages.dart:7:8 - duplicate_import
+warning - Unused import: '../core/services/storage_service.dart' - lib\routes\app_pages.dart:9:8 - unused_import
+warning - Unused import: '../modules/admin/views/admin_dashboard_view.dart' - lib\routes\app_pages.dart:10:8 - unused_import
+warning - Duplicate import - lib\routes\app_pages.dart:18:8 - duplicate_import
+warning - Unused import: '../modules/home/views/home_view.dart' - lib\routes\app_pages.dart:43:8 - unused_import
+warning - Unused import: '../modules/requestor/views/requestor_dashboard_view.dart' - lib\routes\app_pages.dart:58:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\routes\app_pages.dart:152:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\routes\app_pages.dart:154:7 - curly_braces_in_flow_control_structures
+   info - The constant name 'INITIAL' isn't a lowerCamelCase identifier - lib\routes\app_pages.dart:160:16 - constant_identifier_names
+   info - The constant name 'SPLASH' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:2:16 - constant_identifier_names
+   info - The constant name 'LOCK' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:3:16 - constant_identifier_names
+   info - The constant name 'INITIAL' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:5:16 - constant_identifier_names
+   info - The constant name 'LOGIN' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:7:16 - constant_identifier_names
+   info - The constant name 'ORGANIZATION_SETUP' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:8:16 - constant_identifier_names
+   info - The constant name 'ORGANIZATION_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:9:16 - constant_identifier_names
+   info - The constant name 'FORGOT_PASSWORD' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:10:16 - constant_identifier_names
+   info - The constant name 'OTP_VERIFICATION' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:11:16 - constant_identifier_names
+   info - The constant name 'RESET_PASSWORD' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:12:16 - constant_identifier_names
+   info - The constant name 'RESET_PASSWORD_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:13:16 - constant_identifier_names
+   info - The constant name 'ENTERPRISE_SETUP' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:14:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_DASHBOARD' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:17:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENTS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:18:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PROFILE' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:19:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_REPORTS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:20:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_REQUEST_DETAILS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:23:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_BILL_DETAILS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:25:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_VERIFY' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:27:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_CONFIRM' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:28:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:29:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_FAILED' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:30:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_PAYMENT_COMPLETED_DETAILS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:31:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_ANALYTICS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:33:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_FINANCIAL_REPORTS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:34:16 - constant_identifier_names
+   info - The constant name 'ADMIN_DASHBOARD' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:37:16 - constant_identifier_names
+   info - The constant name 'ADMIN_APPROVALS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:38:16 - constant_identifier_names
+   info - The constant name 'ADMIN_REQUEST_DETAILS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:39:16 - constant_identifier_names
+   info - The constant name 'ADMIN_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:40:16 - constant_identifier_names
+   info - The constant name 'ADMIN_REJECTION_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:41:16 - constant_identifier_names
+   info - The constant name 'ADMIN_CLARIFICATION' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:42:16 - constant_identifier_names
+   info - The constant name 'ADMIN_CLARIFICATION_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:43:16 - constant_identifier_names
+   info - The constant name 'ADMIN_CLARIFICATION_STATUS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:44:16 - constant_identifier_names
+   info - The constant name 'ADMIN_SET_LIMITS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:45:16 - constant_identifier_names
+   info - The constant name 'ADMIN_HISTORY' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:46:16 - constant_identifier_names
+   info - The constant name 'ADMIN_USER_LIST' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:48:16 - constant_identifier_names
+   info - The constant name 'ADMIN_ADD_USER' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:49:16 - constant_identifier_names
+   info - The constant name 'ADMIN_EDIT_USER' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:50:16 - constant_identifier_names
+   info - The constant name 'ADMIN_DEACTIVATE_USER' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:51:16 - constant_identifier_names
+   info - The constant name 'ADMIN_USER_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:52:16 - constant_identifier_names
+   info - The constant name 'PROFILE' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:54:16 - constant_identifier_names
+   info - The constant name 'EDIT_PROFILE' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:55:16 - constant_identifier_names
+   info - The constant name 'SETTINGS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:56:16 - constant_identifier_names
+   info - The constant name 'SETTINGS_NOTIFICATIONS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:57:16 - constant_identifier_names
+   info - The constant name 'SETTINGS_APPEARANCE' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:58:16 - constant_identifier_names
+   info - The constant name 'SETTINGS_CHANGE_PASSWORD' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:59:16 - constant_identifier_names
+   info - The constant name 'REQUESTOR' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:61:16 - constant_identifier_names
+   info - The constant name 'CREATE_REQUEST_TYPE' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:62:16 - constant_identifier_names
+   info - The constant name 'CREATE_REQUEST_DETAILS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:63:16 - constant_identifier_names
+   info - The constant name 'CREATE_REQUEST_REVIEW' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:64:16 - constant_identifier_names
+   info - The constant name 'CREATE_REQUEST_SUCCESS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:65:16 - constant_identifier_names
+   info - The constant name 'MY_REQUESTS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:66:16 - constant_identifier_names
+   info - The constant name 'REQUEST_DETAILS_READ' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:67:16 - constant_identifier_names
+   info - The constant name 'MONTHLY_SPENT' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:68:16 - constant_identifier_names
+   info - The constant name 'REQUESTOR_CLARIFICATION' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:69:16 - constant_identifier_names
+   info - The constant name 'REQUESTOR_NOTIFICATIONS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:72:16 - constant_identifier_names
+   info - The constant name 'ADMIN_NOTIFICATIONS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:73:16 - constant_identifier_names
+   info - The constant name 'ACCOUNTANT_NOTIFICATIONS' isn't a lowerCamelCase identifier - lib\routes\app_routes.dart:74:16 - constant_identifier_names
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\app_text_styles.dart:39:48 - deprecated_member_use
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\utils\app_theme.dart:29:9 - deprecated_member_use
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\utils\app_theme.dart:70:9 - deprecated_member_use
+warning - Unused import: 'dart:io' - lib\utils\validators.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\widgets\app_loader.dart:71:48 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\attachment_card.dart:17:9 - use_super_parameters
+   info - Statements in an if should be enclosed in a block - lib\utils\widgets\attachment_card.dart:45:11 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\widgets\attachment_card.dart:61:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\widgets\attachment_card.dart:72:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\widgets\attachment_card.dart:101:54 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\buttons\primary_button.dart:15:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\buttons\secondary_button.dart:18:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\custom_list_tile.dart:14:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\custom_search_bar.dart:10:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\settings_toggle_tile.dart:12:9 - use_super_parameters
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\utils\widgets\settings_toggle_tile.dart:56:13 - deprecated_member_use
+warning - Unused import: '../../app_colors.dart' - lib\utils\widgets\skeletons\skeleton_loader.dart:4:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\utils\widgets\timeline_item_widget.dart:16:9 - use_super_parameters
+
+flutter : 590 issues found. 
+(ran in 4.3s)
+At line:1 char:1
++ flutter analyze 2>&1 | 
+Out-File -FilePath 
+"final_fix_v3.txt" -Encodin 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (590 i  
+  ssues found. (ran in 4.   
+ 3s):String) [], RemoteE    
+xception
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 

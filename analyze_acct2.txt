@@ -1,0 +1,133 @@
+﻿Analyzing accountant...                                         
+
+warning - Unused import: '../../../../routes/app_routes.dart' - lib\modules\accountant\controllers\accountant_dashboard_controller.dart:4:8 - unused_import
+warning - Unused import: '../../../../data/repositories/payment_repository.dart' - lib\modules\accountant\controllers\accountant_payments_controller.dart:5:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_payments_controller.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_payments_controller.dart:298:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\accountant_profile_controller.dart:34:7 - avoid_print
+warning - The value of the field '_paymentRepository' isn't used - lib\modules\accountant\controllers\payment_flow_controller.dart:14:32 - unused_field
+warning - The value of the field '_currentPayoutId' isn't used - lib\modules\accountant\controllers\payment_flow_controller.dart:34:11 - unused_field
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:58:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:66:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:68:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:77:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:83:7 - avoid_print
+warning - The declaration '_navigateToSuccess' isn't referenced - lib\modules\accountant\controllers\payment_flow_controller.dart:102:8 - unused_element
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:121:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:145:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\modules\accountant\controllers\payment_flow_controller.dart:177:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\controllers\payment_flow_controller.dart:212:46 - deprecated_member_use
+warning - The declaration '_navigateToFailure' isn't referenced - lib\modules\accountant\controllers\payment_flow_controller.dart:242:8 - unused_element
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_dashboard_view.dart:11:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_home_view.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:62:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:96:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:104:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:118:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:131:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:151:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:190:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:201:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:222:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:236:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:255:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:260:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:295:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:486:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_home_view.dart:493:54 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\accountant\views\accountant_payments_view.dart:5:8 - unused_import
+warning - Unused import: '../controllers/accountant_dashboard_controller.dart' - lib\modules\accountant\views\accountant_payments_view.dart:7:8 - unused_import
+warning - Unused import: 'tabs/generic_payment_list_tab.dart' - lib\modules\accountant\views\accountant_payments_view.dart:11:8 - unused_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_payments_view.dart:12:8 - unused_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:13:8 - duplicate_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_payments_view.dart:13:8 - unused_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:16:8 - duplicate_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:17:8 - duplicate_import
+warning - Duplicate import - lib\modules\accountant\views\accountant_payments_view.dart:18:8 - duplicate_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_payments_view.dart:18:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_payments_view.dart:21:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_payments_view.dart:61:34 - deprecated_member_use
+warning - Unused import: 'package:flutter_screenutil/flutter_screenutil.dart' - lib\modules\accountant\views\accountant_profile_view.dart:3:8 - unused_import
+warning - Unused import: '../../../../utils/widgets/buttons/primary_button.dart' - lib\modules\accountant\views\accountant_profile_view.dart:7:8 - unused_import
+warning - Unused import: 'widgets/accountant_bottom_bar.dart' - lib\modules\accountant\views\accountant_profile_view.dart:9:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\accountant_profile_view.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_profile_view.dart:184:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\accountant_profile_view.dart:229:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:188:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:365:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:384:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\analytics\spend_analytics_view.dart:465:32 - deprecated_member_use
+warning - Unused import: '../../../../utils/widgets/custom_search_bar.dart' - lib\modules\accountant\views\cash_flow_history_view.dart:8:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\cash_flow_history_view.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:70:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:111:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:159:67 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\cash_flow_history_view.dart:285:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:51:45 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\modules\accountant\views\payment_flow\bill_details_view.dart:108:33 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:439:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\bill_details_view.dart:457:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\completed_request_details_view.dart:484:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:41:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:51:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:209:53 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:215:15 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\modules\accountant\views\payment_flow\confirm_payment_view.dart:216:15 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:36:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:62:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:65:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_failed_view.dart:93:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:38:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:69:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\payment_success_view.dart:228:58 - deprecated_member_use
+warning - Unused import: '../../../../utils/app_text.dart' - lib\modules\accountant\views\payment_flow\request_details_view.dart:5:8 - unused_import
+warning - The value of the local variable 'approver' isn't used - lib\modules\accountant\views\payment_flow\request_details_view.dart:21:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:96:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:114:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:190:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:204:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:304:33 - deprecated_member_use
+warning - The member 'value' can only be used within instance members of subclasses of 'RxMap' - lib\modules\accountant\views\payment_flow\request_details_view.dart:345:62 - invalid_use_of_protected_member
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:369:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:372:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\payment_flow\request_details_view.dart:384:46 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\payment_flow\verify_payment_view.dart:2:8 - unused_import
+warning - Unused import: '../../../../utils/app_colors.dart' - lib\modules\accountant\views\payment_flow\verify_payment_view.dart:3:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\tabs\completed_payments_tab.dart:13:9 - use_super_parameters
+warning - Unused import: '../../../../utils/widgets/app_loader.dart' - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:6:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:14:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:33:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:64:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\generic_payment_list_tab.dart:110:40 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\tabs\pending_payments_tab.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:43:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:69:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:203:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:258:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\tabs\pending_payments_tab.dart:278:54 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\widgets\accountant_bottom_bar.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\widgets\accountant_bottom_bar.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\widgets\accountant_bottom_bar.dart:25:33 - deprecated_member_use
+warning - Unused import: 'package:get/get.dart' - lib\modules\accountant\views\widgets\update_balances_dialog.dart:2:8 - unused_import
+   info - Parameter 'key' could be a super parameter - lib\modules\accountant\views\widgets\update_balances_dialog.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\modules\accountant\views\widgets\update_balances_dialog.dart:64:50 - deprecated_member_use
+
+flutter : 111 issues 
+found. (ran in 4.2s)
+At line:1 char:1
++ flutter analyze 
+lib/modules/accountant 
+2>&1 | Out-File 
+-FilePath "ana ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : 
+NotSpecified: (111 i   
+ ssues found. (ran in 
+4.    2s):String) [], 
+RemoteE    xception
+    + 
+FullyQualifiedErrorId  
+   : NativeCommandError
+ 
