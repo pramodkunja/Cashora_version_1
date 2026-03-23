@@ -215,7 +215,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                   return _buildCompletedItem(
                     context,
                     payment: item,
-                    id: (item['payment_id'] ?? item['id']?.toString() ?? '')
+                    id: (item['request_id'] ?? item['payment_id'] ?? item['id']?.toString() ?? '')
                         .toString()
                         .toUpperCase(),
                     date: formattedDate,

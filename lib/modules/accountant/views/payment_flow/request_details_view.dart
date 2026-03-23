@@ -229,7 +229,7 @@ class PaymentRequestDetailsView extends GetView<PaymentFlowController> {
             width: double.infinity,
             height: 56.h,
             child: ElevatedButton(
-              onPressed: controller.isLoading.value ? null : () => controller.markAsPaid(),
+              onPressed: () => Get.toNamed(AppRoutes.ACCOUNTANT_PAYMENT_MARK_AS_PAID),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.successGreen,
                 foregroundColor: Colors.white,

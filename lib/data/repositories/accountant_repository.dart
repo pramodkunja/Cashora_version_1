@@ -28,10 +28,14 @@ class AccountantRepository {
   }
 
   /// Returns completed/paid expenses as raw Maps.
-  Future<List<Map<String, dynamic>>> getCompletedExpenses() async {
+  Future<List<Map<String, dynamic>>> getCompletedExpenses({int page = 1, int size = 25}) async {
     try {
       final response = await _networkService.get(
-        '/accountant/expenses/completed',
+        '/accountant/expenses/paid',
+        queryParameters: {
+          'page': page,
+          'size': size,
+        },
       );
       final data = response.data as Map<String, dynamic>;
       final rawList =

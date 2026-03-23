@@ -121,19 +121,59 @@ class PaymentRepository {
       return [];
     }
   }
-  Future<void> markAsPaid(dynamic id) async {
+  Future<void> markAsPaid(
+    dynamic id, {
+    required String method,
+    String? transactionRef,
+    String? paymentNote,
+  }) async {
     try {
       final expenseId = id is int ? id : int.parse(id.toString());
       final storage = Get.find<StorageService>();
       final token = await storage.read('auth_token');
 
+      final payload = <String, dynamic>{
+        'payment_method': method,
+      };
+      if (transactionRef != null && transactionRef.trim().isNotEmpty) {
+        payload['transaction_reference'] = transactionRef.trim();
+      }
+      if (paymentNote != null && paymentNote.trim().isNotEmpty) {
+        payload['payment_note'] = paymentNote.trim();
+      }
+
       await _networkService.post(
         '/accountant/expenses/$expenseId/mark-as-paid',
+        data: payload,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
     } catch (e) {
       print("Error marking as paid: $e");
       rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPaymentMethods() async {
+    try {
+      // No auth required as per specs, but we can pass token if _networkService handles it automatically.
+      final response = await _networkService.get('/accountant/payment-methods');
+      if (response.data is List) {
+        return List<Map<String, dynamic>>.from(response.data);
+      }
+      return [];
+    } catch (e) {
+      print("Error fetching payment methods: $e");
+      // Return a safe fallback based on the spec if API fails
+      return [
+        { "value": "upi",           "label": "UPI" },
+        { "value": "bank_transfer", "label": "Bank Transfer" },
+        { "value": "cash",          "label": "Cash" },
+        { "value": "cheque",        "label": "Cheque" },
+        { "value": "neft",          "label": "NEFT" },
+        { "value": "rtgs",          "label": "RTGS" },
+        { "value": "imps",          "label": "IMPS" },
+        { "value": "other",         "label": "Other" }
+      ];
     }
   }
 

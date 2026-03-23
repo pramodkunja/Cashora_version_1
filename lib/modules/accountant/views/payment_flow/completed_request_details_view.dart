@@ -19,7 +19,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Obx(() {
-          final id = controller.paymentDetails['payment_id'] ?? '---';
+          final id = controller.paymentDetails['id'] ?? controller.paymentDetails['request_id'] ?? '---';
           return Text(
             'Payment #$id',
             style: AppTextStyles.h3.copyWith(color: Colors.black),
@@ -53,23 +53,37 @@ class CompletedRequestDetailsView extends StatelessWidget {
         }
 
         // Parsing Data
-        final amount = double.tryParse(payment['total_paid_amount']?.toString() ?? '0')
+        final amount = double.tryParse(payment['amount']?.toString() ?? '0')
                 ?.toStringAsFixed(2) ??
             '0.00';
-        final requestDate = _formatDate(payment['request_date']?.toString() ?? '');
-        final paymentDate = _formatDate(payment['payment_date']?.toString() ?? '');
+        final requestDate = _formatDate(payment['created_at']?.toString() ?? '');
+        final paymentDate = _formatDate(payment['created_at']?.toString() ?? '');
 
-        final requestorName = payment['requestor_name'] ?? 'Unknown';
+        final requestorMap = payment['requestor'] as Map<String, dynamic>?;
+        final requestorName = requestorMap != null 
+            ? '${requestorMap['first_name'] ?? ''} ${requestorMap['last_name'] ?? ''}'.trim() 
+            : 'Unknown';
+
         final department = payment['department'] ?? '---';
+        final purpose = payment['purpose'] ?? '---';
         final description = payment['description'] ?? '---';
-        final category = payment['category'] ?? '---';
-        final referenceCode = payment['reference_code'] ?? '---';
+        
+        final categoryMap = {
+          'office_supplies': 'Office Supplies',
+          'travel': 'Travel',
+          'meals': 'Meals',
+          'software': 'Software',
+          'hardware': 'Hardware',
+        };
+        final categoryKey = payment['category'] ?? '';
+        final category = categoryMap[categoryKey] ?? categoryKey.toString().replaceAll('_', ' ').capitalizeFirst ?? '---';
+        
+        final referenceCode = payment['request_id'] ?? '---';
 
-        final paymentSource = (payment['payment_source'] ?? 'UPI').toString().toUpperCase();
-        final paymentMode = payment['payment_mode'] ?? '---';
-        final transactionId = payment['transaction_id'] ?? '---'; // UTR
-        final status = payment['payment_status'] ?? 'Success';
-        final processedAt = _formatTime(payment['processed_at']?.toString() ?? '');
+        final paymentMethod = (payment['payment_method'] ?? 'UPI').toString().toUpperCase();
+        final transactionId = payment['transaction_reference'] ?? '---'; // UTR
+        final status = payment['status'] ?? 'paid';
+        final processedAt = _formatTime(payment['created_at']?.toString() ?? '');
 
         final auditTrail = payment['audit_trail'] as List? ?? [];
 
@@ -166,6 +180,20 @@ class CompletedRequestDetailsView extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
+                          purpose,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppText.description, // "Description" label
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSlate,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
                           description,
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
@@ -248,7 +276,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "$paymentSource - $paymentMode",
+                              paymentMethod,
                               style: AppTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),

@@ -45,6 +45,12 @@ class PaymentFlowController extends GetxController {
   final ifscController = TextEditingController();
   final remarksController = TextEditingController();
 
+  // Mark As Paid Form Fields
+  final RxList<Map<String, dynamic>> paymentMethods = <Map<String, dynamic>>[].obs;
+  final RxString selectedPaidMethod = 'upi'.obs;
+  final transactionRefController = TextEditingController();
+  final paymentNoteController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
@@ -94,6 +100,8 @@ class PaymentFlowController extends GetxController {
     accountNumberController.dispose();
     ifscController.dispose();
     remarksController.dispose();
+    transactionRefController.dispose();
+    paymentNoteController.dispose();
     super.onClose();
   }
 
@@ -270,6 +278,18 @@ class PaymentFlowController extends GetxController {
     );
   }
 
+  Future<void> fetchPaymentMethods() async {
+    try {
+      final methods = await _paymentRepository.fetchPaymentMethods();
+      paymentMethods.assignAll(methods);
+      if (methods.isNotEmpty && !methods.any((m) => m['value'] == selectedPaidMethod.value)) {
+        selectedPaidMethod.value = methods.first['value'];
+      }
+    } catch (e) {
+      print("Error loading payment methods: $e");
+    }
+  }
+
   Future<void> markAsPaid() async {
     final id = currentRequest['id'];
     if (id == null) {
@@ -279,7 +299,12 @@ class PaymentFlowController extends GetxController {
 
     try {
       isLoading.value = true;
-      await _paymentRepository.markAsPaid(id);
+      await _paymentRepository.markAsPaid(
+        id,
+        method: selectedPaidMethod.value,
+        transactionRef: transactionRefController.text,
+        paymentNote: paymentNoteController.text,
+      );
       
       Get.snackbar(
         'Success',
@@ -295,12 +320,12 @@ class PaymentFlowController extends GetxController {
         acctController.fetchCompletedPayments();
       }
       
-      Get.back(); // Return to list
+      Get.offAllNamed(AppRoutes.ACCOUNTANT_DASHBOARD); // Return to dashboard
     } catch (e) {
       print("Error marking as paid: $e");
       Get.snackbar(
         'Error',
-        'Failed to mark as paid: $e',
+        'Failed to mark as paid',
         backgroundColor: Colors.red.withOpacity(0.9),
         colorText: Colors.white,
       );

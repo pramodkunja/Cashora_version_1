@@ -83,6 +83,7 @@ import '../modules/accountant/views/payment_flow/payment_success_view.dart';
 import '../modules/accountant/controllers/payment_flow_controller.dart';
 import '../modules/accountant/views/payment_flow/payment_failed_view.dart';
 import '../modules/accountant/views/payment_flow/completed_request_details_view.dart';
+import '../modules/accountant/views/payment_flow/mark_as_paid_view.dart';
 import '../modules/accountant/views/analytics/spend_analytics_view.dart';
 import '../modules/accountant/views/analytics/financial_reports_view.dart';
 import '../core/constants/user_roles.dart'; // Added Import
@@ -429,6 +430,15 @@ class AppPages {
       page: () => const BillDetailsView(),
       binding: BindingsBuilder(() {
         // Reuse existing controller from PaymentRequestDetailsView
+        if (!Get.isRegistered<PaymentFlowController>()) {
+          Get.put(PaymentFlowController());
+        }
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.ACCOUNTANT_PAYMENT_MARK_AS_PAID,
+      page: () => const MarkAsPaidView(),
+      binding: BindingsBuilder(() {
         if (!Get.isRegistered<PaymentFlowController>()) {
           Get.put(PaymentFlowController());
         }

@@ -50,7 +50,7 @@ class AccountantPaymentsController extends GetxController
   Future<void> fetchCompletedPayments() async {
     try {
       isLoading.value = true;
-      final raw = await _repository.getCompletedExpenses();
+      final raw = await _repository.getCompletedExpenses(page: 1, size: 25);
       completedExpenses.value = raw;
     } catch (e) {
       print('Error fetching completed: $e');

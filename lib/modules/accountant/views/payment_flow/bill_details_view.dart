@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Added
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:dio/dio.dart'; // Added
+import 'package:gal/gal.dart'; // Added
+import 'package:path_provider/path_provider.dart'; // Added
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_text_styles.dart';
@@ -28,6 +32,18 @@ class BillDetailsView extends GetView<PaymentFlowController> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
+        actions: [
+          Obx(() {
+            final url = controller.currentImageUrl.value;
+            if (url.isNotEmpty && url.startsWith('http')) {
+              return IconButton(
+                icon: Icon(Icons.download, color: Theme.of(context).iconTheme.color),
+                onPressed: () => _downloadImage(context, url),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+        ],
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -275,7 +291,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
                   boldValue: true,
                 ),
                 Divider(height: 24.h),
-                _buildDetailRow(AppText.upiId, details['pa'] ?? 'Unknown'),
+                _buildDetailRow(AppText.upiId, details['pa'] ?? 'Unknown', isCopyable: true),
                 Divider(height: 24.h),
                 if (details['am'] != null && details['am']!.isNotEmpty)
                   Row(
@@ -349,7 +365,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool boldValue = false}) {
+  Widget _buildDetailRow(String label, String value, {bool boldValue = false, bool isCopyable = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -359,14 +375,98 @@ class BillDetailsView extends GetView<PaymentFlowController> {
             color: AppColors.primaryBlue,
           ),
         ),
-        Text(
-          value,
-          style: boldValue
-              ? AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)
-              : AppTextStyles.bodyMedium,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                value,
+                style: boldValue
+                    ? AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)
+                    : AppTextStyles.bodyMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isCopyable) ...[
+              SizedBox(width: 8.w),
+              InkWell(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: value));
+                  Get.snackbar(
+                    'Copied',
+                    '$label copied to clipboard',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: AppColors.successGreen.withOpacity(0.9),
+                    colorText: Colors.white,
+                    margin: EdgeInsets.all(16.w),
+                  );
+                },
+                child: Icon(Icons.copy, size: 16.sp, color: AppColors.primaryBlue),
+              ),
+            ],
+          ],
         ),
       ],
     );
+  }
+
+  Future<void> _downloadImage(BuildContext context, String url) async {
+    try {
+      bool hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        hasAccess = await Gal.requestAccess();
+      }
+      if (!hasAccess) {
+        if (context.mounted) {
+          Get.snackbar(
+            'Permission Denied',
+            'Cannot save image without gallery access',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppColors.warningOrange.withOpacity(0.9),
+            colorText: Colors.white,
+            margin: EdgeInsets.all(16.w),
+          );
+        }
+        return;
+      }
+
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      final tempDir = await getTemporaryDirectory();
+      final savePath = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await Dio().download(url, savePath);
+      await Gal.putImage(savePath);
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back(); // close dialog
+      }
+      
+      Get.snackbar(
+        'Success',
+        'Image saved to gallery successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.successGreen.withOpacity(0.9),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(16.w),
+      );
+    } catch (e, stackTrace) {
+      print("Download Image Error: $e\n$stackTrace");
+      if (Get.isDialogOpen ?? false) {
+        Get.back(); // close dialog if open
+      }
+      Get.snackbar(
+        'Error',
+        'Failed to save image',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.warningOrange.withOpacity(0.9),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(16.w),
+      );
+    }
   }
 }
 

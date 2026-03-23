@@ -24,6 +24,8 @@ abstract class AppRoutes {
       '/accountant/payment/request-details';
   static const ACCOUNTANT_PAYMENT_BILL_DETAILS =
       '/accountant/payment/bill-details';
+  static const ACCOUNTANT_PAYMENT_MARK_AS_PAID =
+      '/accountant/payment/mark-as-paid';
   static const ACCOUNTANT_PAYMENT_VERIFY = '/accountant/payment/verify';
   static const ACCOUNTANT_PAYMENT_CONFIRM = '/accountant/payment/confirm';
   static const ACCOUNTANT_PAYMENT_SUCCESS = '/accountant/payment/success';
