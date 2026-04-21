@@ -8,6 +8,9 @@ class User {
   final String orgName;
   final String orgCode;
   final String phoneNumber;
+  final int? departmentId;
+  final String departmentName;
+  final String departmentCode;
 
   User({
     required this.id,
@@ -19,6 +22,9 @@ class User {
     this.orgName = '',
     this.orgCode = '',
     this.phoneNumber = '',
+    this.departmentId,
+    this.departmentName = '',
+    this.departmentCode = '',
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -49,6 +55,12 @@ class User {
       }
     }
 
+    // Department — flat fields from profile response
+    final deptIdRaw = json['department_id'];
+    final int? deptId = deptIdRaw is int
+        ? deptIdRaw
+        : (deptIdRaw != null ? int.tryParse(deptIdRaw.toString()) : null);
+
     return User(
       id: json['id']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
@@ -60,6 +72,9 @@ class User {
       orgCode:
           org['org_code']?.toString() ?? json['org_code']?.toString() ?? '',
       phoneNumber: json['phone_number']?.toString() ?? '',
+      departmentId: deptId,
+      departmentName: json['department_name']?.toString() ?? '',
+      departmentCode: json['department_code']?.toString() ?? '',
     );
   }
 

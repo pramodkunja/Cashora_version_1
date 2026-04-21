@@ -1,457 +1,507 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
+import '../../../../utils/widgets/app_loader.dart';
+import '../../../../data/models/accountant_reports_model.dart';
 import '../../controllers/accountant_analytics_controller.dart';
 
 class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
   const SpendAnalyticsView({super.key});
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _red = AppColors.errorRed;
+  static const _redBg = Color(0xFFFEF2F2);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // No back button
-        title: Text(AppText.spendAnalytics, style: AppTextStyles.h2),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        centerTitle: false,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.tune, color: Theme.of(context).iconTheme.color),
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: Obx(() {
+              if (controller.isSpendLoading.value &&
+                  controller.spendAnalytics.value == null) {
+                return const AppLoader();
+              }
+              if (controller.errorMessage.isNotEmpty &&
+                  controller.spendAnalytics.value == null) {
+                return Center(
+                  child: Text(
+                    controller.errorMessage.value,
+                    style: GoogleFonts.inter(fontSize: 13.sp, color: _red),
+                  ),
+                );
+              }
+              final data = controller.spendAnalytics.value;
+              if (data == null) {
+                return Center(
+                  child: Text(
+                    'No data available',
+                    style: GoogleFonts.inter(
+                        fontSize: 14.sp, color: _slate500),
+                  ),
+                );
+              }
+              return _buildContent(data);
+            }),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Filters
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildDropdown(context, controller.selectedTimeRange, [
-                    AppText.thisMonth,
-                    'Last Month',
-                  ]),
-                  const SizedBox(width: 12),
-                  _buildDropdown(context, controller.selectedDepartment, [
-                    'Department',
-                    'Sales',
-                    'IT',
-                  ]),
-                  const SizedBox(width: 12),
-                  _buildDropdown(context, controller.selectedCategory, [
-                    'Category',
-                    'Travel',
-                    'Food',
-                  ]),
-                ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              AppText.spendAnalytics,
+              style: GoogleFonts.inter(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 24),
+          ),
+          GestureDetector(
+            onTap: () {},
+            child: Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.tune_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Score Cards
-            Row(
+  Widget _buildContent(SpendAnalyticsModel data) {
+    final timeRanges = data.filters.timeRanges.isNotEmpty
+        ? data.filters.timeRanges
+        : ['This Month', 'Last Month'];
+    final departments = data.filters.departments.isNotEmpty
+        ? data.filters.departments
+        : ['Department'];
+    final categories = data.filters.categories.isNotEmpty
+        ? data.filters.categories
+        : ['Category'];
+
+    final colors = [
+      _purple,
+      AppColors.indigo,
+      _green,
+      Colors.orange,
+      Colors.pink,
+      Colors.teal,
+    ];
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Filters
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
               children: [
-                Expanded(
-                  child: _buildScoreCard(
-                    context,
-                    AppText.totalSpend,
-                    '\$4,250',
-                    '+12%',
-                    true,
-                    Icons.payments_outlined,
-                    Colors.blue,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildScoreCard(
-                    context,
-                    AppText.avgTransaction,
-                    '\$85.00',
-                    '+2.5%',
-                    true,
-                    Icons.receipt_long,
-                    Colors.purple,
-                  ),
-                ),
+                _filter(controller.selectedTimeRange, timeRanges.cast<String>(),
+                    controller.onTimeRangeChanged),
+                SizedBox(width: 8.w),
+                _filter(controller.selectedDepartment,
+                    departments.cast<String>(), controller.onDepartmentChanged),
+                SizedBox(width: 8.w),
+                _filter(controller.selectedCategory, categories.cast<String>(),
+                    controller.onCategoryChanged),
               ],
             ),
-            const SizedBox(height: 24),
+          ),
 
-            // Monthly Trend Graph
-            _buildSectionHeader(
-              AppText.monthlyTrend,
-              '+15% vs last mo',
-              isPositive: true,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              height: 200,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(20),
+          SizedBox(height: 20.h),
+
+          // Score Cards
+          Row(
+            children: [
+              Expanded(
+                child: _scoreCard(
+                  title: AppText.totalSpend,
+                  value:
+                      '₹${data.scoreCards.totalSpend.amount.toStringAsFixed(0)}',
+                  trend: data.scoreCards.totalSpend.trendText,
+                  isUp: data.scoreCards.totalSpend.isPositiveTrend,
+                  icon: Icons.payments_rounded,
+                ),
               ),
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          Color textColor =
-                              Theme.of(context).textTheme.bodySmall?.color ??
-                              Colors.grey;
-                          switch (value.toInt()) {
-                            case 0:
-                              return Text(
-                                'WEEK 1',
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 10,
-                                ),
-                              );
-                            case 2:
-                              return Text(
-                                'WEEK 2',
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 10,
-                                ),
-                              );
-                            case 4:
-                              return Text(
-                                'WEEK 3',
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 10,
-                                ),
-                              );
-                            case 6:
-                              return Text(
-                                'WEEK 4',
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 10,
-                                ),
-                              );
-                          }
-                          return const Text('');
-                        },
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: const [
-                        FlSpot(0, 1),
-                        FlSpot(1, 1.5),
-                        FlSpot(2, 1.4),
-                        FlSpot(3, 2.2),
-                        FlSpot(3.5, 2.5),
-                        FlSpot(4, 2),
-                        FlSpot(5, 1.5),
-                        FlSpot(6, 3),
-                      ],
-                      isCurved: true,
-                      color: AppColors.primaryBlue,
-                      barWidth: 3,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: AppColors.primaryBlue.withOpacity(0.1),
-                      ),
-                    ),
-                  ],
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _scoreCard(
+                  title: AppText.avgTransaction,
+                  value:
+                      '₹${data.scoreCards.avgTransaction.amount.toStringAsFixed(0)}',
+                  trend: data.scoreCards.avgTransaction.trendText,
+                  isUp: data.scoreCards.avgTransaction.isPositiveTrend,
+                  icon: Icons.receipt_long_rounded,
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 20.h),
+
+          // Trend graph
+          _buildCard(
+            icon: Icons.timeline_rounded,
+            title: AppText.monthlyTrend,
+            trailing: Container(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+              decoration: BoxDecoration(
+                color: data.monthlyTrend.isPositiveTrend ? _greenBg : _redBg,
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Text(
+                data.monthlyTrend.trendSummaryText,
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  color: data.monthlyTrend.isPositiveTrend ? _green : _red,
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            // Spend by Category
-            Text(AppText.spendByCategory, style: AppTextStyles.h3),
-            const SizedBox(height: 4),
-            Text(
-              'Distribution across top categories',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSlate,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    height: 120,
-                    width: 120,
-                    child: Stack(
-                      children: [
-                        PieChart(
-                          PieChartData(
-                            sectionsSpace: 0,
-                            centerSpaceRadius: 40,
-                            sections: [
-                              PieChartSectionData(
-                                color: AppColors.primaryBlue,
-                                value: 45,
-                                radius: 20,
-                                showTitle: false,
-                              ),
-                              PieChartSectionData(
-                                color: AppColors.indigo,
-                                value: 25,
-                                radius: 20,
-                                showTitle: false,
-                              ),
-                              PieChartSectionData(
-                                color: AppColors.successGreen,
-                                value: 20,
-                                radius: 20,
-                                showTitle: false,
-                              ),
-                              PieChartSectionData(
-                                color: AppColors.borderLight,
-                                value: 10,
-                                radius: 20,
-                                showTitle: false,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Center(
-                          child: Text(
-                            'Total',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              fontWeight: FontWeight.bold,
+            child: SizedBox(
+              height: 180.h,
+              child: data.monthlyTrend.graphData.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No graph data',
+                        style: GoogleFonts.inter(
+                            fontSize: 12.sp, color: _slate500),
+                      ),
+                    )
+                  : LineChart(
+                      LineChartData(
+                        gridData: const FlGridData(show: false),
+                        titlesData: FlTitlesData(
+                          leftTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          topTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              interval: 1,
+                              getTitlesWidget: (value, meta) {
+                                final idx = value.toInt();
+                                if (idx >= 0 &&
+                                    idx < data.monthlyTrend.graphData.length) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(top: 6.h),
+                                    child: Text(
+                                      data.monthlyTrend.graphData[idx]
+                                          .weekOrDay,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 10.sp,
+                                        color: _slate500,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
                             ),
                           ),
                         ),
-                      ],
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: data.monthlyTrend.graphData
+                                .asMap()
+                                .entries
+                                .map((e) => FlSpot(
+                                    e.key.toDouble(), e.value.amount))
+                                .toList(),
+                            isCurved: true,
+                            color: _purple,
+                            barWidth: 3,
+                            dotData: const FlDotData(show: false),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              gradient: LinearGradient(
+                                colors: [
+                                  _purple.withOpacity(0.25),
+                                  _purple.withOpacity(0.02),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Spend by Category
+          _buildCard(
+            icon: Icons.pie_chart_rounded,
+            title: AppText.spendByCategory,
+            child: data.spendByCategory.isEmpty
+                ? Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    child: Text(
+                      'No category data',
+                      style: GoogleFonts.inter(
+                          fontSize: 12.sp, color: _slate500),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      SizedBox(
+                        height: 110.w,
+                        width: 110.w,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            PieChart(
+                              PieChartData(
+                                sectionsSpace: 0,
+                                centerSpaceRadius: 34,
+                                sections: data.spendByCategory
+                                    .asMap()
+                                    .entries
+                                    .map<PieChartSectionData>((e) {
+                                  return PieChartSectionData(
+                                    color: colors[e.key % colors.length],
+                                    value: e.value.percentage,
+                                    radius: 18,
+                                    showTitle: false,
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            Text(
+                              'Total',
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w700,
+                                color: _slate500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 14.w),
+                      Expanded(
+                        child: Column(
+                          children:
+                              data.spendByCategory.asMap().entries.map<Widget>((e) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              child: _legend(
+                                colors[e.key % colors.length],
+                                e.value.categoryName,
+                                '${e.value.percentage.toStringAsFixed(1)}%',
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 24),
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Department Spend
+          _buildCard(
+            icon: Icons.business_rounded,
+            title: AppText.departmentSpend,
+            child: data.departmentSpend.isEmpty
+                ? Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    child: Text(
+                      'No department data',
+                      style: GoogleFonts.inter(
+                          fontSize: 12.sp, color: _slate500),
+                    ),
+                  )
+                : Column(
+                    children:
+                        data.departmentSpend.asMap().entries.map<Widget>((e) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 14.h),
+                        child: _progressRow(
+                          e.value.departmentName,
+                          '₹${e.value.amount.toStringAsFixed(0)}',
+                          e.value.progressRatio,
+                          colors[e.key % colors.length],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+
+          SizedBox(height: 20.h),
+
+          // Custom Reports CTA
+          GestureDetector(
+            onTap: () =>
+                Get.toNamed(AppRoutes.ACCOUNTANT_FINANCIAL_REPORTS),
+            child: Container(
+              padding: EdgeInsets.all(18.w),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6B55CE), Color(0xFF8B74E8)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: _purple.withOpacity(0.22),
+                    blurRadius: 16.r,
+                    offset: Offset(0, 6.h),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Icon(Icons.description_rounded,
+                        color: Colors.white, size: 22.sp),
+                  ),
+                  SizedBox(width: 14.w),
                   Expanded(
                     child: Column(
-                      children: [
-                        _buildLegendItem(
-                          AppColors.primaryBlue,
-                          'Office Supplies',
-                          '45%',
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(AppColors.indigo, 'Travel', '25%'),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(
-                          AppColors.successGreen,
-                          'Food & Bev',
-                          '20%',
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(
-                          AppColors.borderLight,
-                          'Others',
-                          '10%',
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Department Spend
-            Text(AppText.departmentSpend, style: AppTextStyles.h3),
-            const SizedBox(height: 4),
-            Text(
-              'Breakdown by internal teams',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSlate,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  _buildProgressRow(
-                    'Sales',
-                    '\$1,850',
-                    0.8,
-                    AppColors.primaryBlue,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildProgressRow(
-                    'Engineering',
-                    '\$1,200',
-                    0.5,
-                    const Color(0xFF6366F1),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildProgressRow(
-                    'Human Resources',
-                    '\$800',
-                    0.3,
-                    const Color(0xFF8B5CF6),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildProgressRow(
-                    'Marketing',
-                    '\$400',
-                    0.15,
-                    const Color(0xFFCBD5E1),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Custom Reports Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () =>
-                    Get.toNamed(AppRoutes.ACCOUNTANT_FINANCIAL_REPORTS),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  padding: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  elevation: 0,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.description, color: Colors.white),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           AppText.customReports,
-                          style: AppTextStyles.buttonText.copyWith(
+                          style: GoogleFonts.inter(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
-                            fontSize: 16,
                           ),
                         ),
+                        SizedBox(height: 2.h),
                         Text(
                           AppText.generateExportInsights,
-                          style: AppTextStyles.bodySmall.copyWith(
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
                             color: Colors.white.withOpacity(0.8),
-                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    const Icon(Icons.arrow_forward, color: Colors.white),
-                  ],
-                ),
+                  ),
+                  Icon(Icons.arrow_forward_rounded,
+                      color: Colors.white, size: 20.sp),
+                ],
               ),
             ),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDropdown(
-    BuildContext context,
-    RxString value,
-    List<String> items,
-  ) {
-    return Obx(
-      () => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Theme.of(context).dividerColor),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
+  Widget _filter(RxString value, List<String> items,
+      Function(String?) onChanged) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: Obx(
+          () => DropdownButton<String>(
             value: items.contains(value.value) ? value.value : items.first,
             items: items
-                .map(
-                  (e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(e, style: AppTextStyles.bodySmall),
-                  ),
-                )
+                .map((e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(
+                        e,
+                        style: GoogleFonts.inter(
+                            fontSize: 12.sp, color: _slate900),
+                      ),
+                    ))
                 .toList(),
-            onChanged: (val) => value.value = val!,
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              size: 16,
-              color: Theme.of(context).iconTheme.color,
-            ),
+            onChanged: onChanged,
+            icon: Icon(Icons.keyboard_arrow_down_rounded,
+                size: 16.sp, color: _slate500),
             isDense: true,
-            dropdownColor: Theme.of(context).cardColor,
+            dropdownColor: Colors.white,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildScoreCard(
-    BuildContext context,
-    String title,
-    String value,
-    String trend,
-    bool isUp,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _scoreCard({
+    required String title,
+    required String value,
+    required String trend,
+    required bool isUp,
+    required IconData icon,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,33 +510,37 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(7.w),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: _purpleLight,
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(icon, color: color, size: 18),
+                child: Icon(icon, color: _purple, size: 14.sp),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: AppColors.successBg,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isUp ? _greenBg : _redBg,
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.trending_up,
-                      size: 12,
-                      color: AppColors.successGreen,
+                    Icon(
+                      isUp
+                          ? Icons.trending_up_rounded
+                          : Icons.trending_down_rounded,
+                      size: 10.sp,
+                      color: isUp ? _green : _red,
                     ),
-                    const SizedBox(width: 2),
+                    SizedBox(width: 2.w),
                     Text(
                       trend,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppColors.successGreen,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.inter(
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isUp ? _green : _red,
                       ),
                     ),
                   ],
@@ -494,94 +548,153 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 14.h),
           Text(
             title,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSlate),
+            style: GoogleFonts.inter(fontSize: 11.sp, color: _slate500),
           ),
-          const SizedBox(height: 4),
-          Text(value, style: AppTextStyles.h2),
+          SizedBox(height: 2.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: GoogleFonts.inter(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: _slate900,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(
-    String title,
-    String subtitle, {
-    bool isPositive = false,
+  Widget _buildCard({
+    required IconData icon,
+    required String title,
+    required Widget child,
+    Widget? trailing,
   }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: AppTextStyles.h3),
-            Text(
-              'Spending velocity over time',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSlate,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: _purpleLight,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, color: _purple, size: 16.sp),
               ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: _slate900,
+                  ),
+                ),
+              ),
+              if (trailing != null) trailing,
+            ],
+          ),
+          SizedBox(height: 14.h),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _legend(Color color, String label, String value) {
+    return Row(
+      children: [
+        Container(
+          width: 8.w,
+          height: 8.w,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: _slate900,
+              fontWeight: FontWeight.w500,
             ),
-          ],
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         Text(
-          subtitle,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: isPositive ? const Color(0xFF16A34A) : Colors.red,
-            fontWeight: FontWeight.bold,
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+            color: _slate900,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildLegendItem(Color color, String label, String value) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
-        Text(
-          value,
-          style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProgressRow(
-    String title,
-    String amount,
-    double progress,
-    Color color,
-  ) {
+  Widget _progressRow(
+      String title, String amount, double progress, Color color) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: AppTextStyles.bodyMedium),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: _slate900,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(width: 8.w),
             Text(
               amount,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.bold,
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: _slate900,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: progress,
-          backgroundColor: Colors.grey[100],
-          color: color,
-          minHeight: 8,
-          borderRadius: BorderRadius.circular(4),
+        SizedBox(height: 6.h),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6.r),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: const Color(0xFFF1F5F9),
+            color: color,
+            minHeight: 7.h,
+          ),
         ),
       ],
     );

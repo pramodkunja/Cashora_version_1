@@ -1,484 +1,275 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/widgets/common_search_bar.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../controllers/monthly_spent_controller.dart';
-import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import 'dart:math';
+import '../../../../utils/app_colors.dart';
 
-class MonthlySpentView extends GetView<MonthlySpentController> {
+class MonthlySpentView extends StatelessWidget {
   const MonthlySpentView({Key? key}) : super(key: key);
+
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _red = AppColors.errorRed;
+  static const _redBg = Color(0xFFFEF2F2);
+  static const _amber = AppColors.warningOrange;
+  static const _amberBg = Color(0xFFFFFBEB);
 
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => MonthlySpentController());
+    final controller = Get.find<MonthlySpentController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // 1. Month Selector App Bar (Pinned)
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: const Color(0xFFF8FAFC),
-              elevation: 0,
-              centerTitle: true,
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 18,
-                  color: Color(0xFF0F172A),
-                ),
-                onPressed: () => Get.back(),
-              ),
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context, controller),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      color: Color(0xFF64748B),
+                  // Search
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10.r,
+                          offset: Offset(0, 2.h),
+                        ),
+                      ],
                     ),
-                    onPressed: controller.previousMonth,
+                    child: TextField(
+                      controller: controller.searchController,
+                      style: GoogleFonts.inter(
+                          fontSize: 14.sp, color: _slate900),
+                      decoration: InputDecoration(
+                        hintText: 'Search transactions',
+                        hintStyle: GoogleFonts.inter(
+                            fontSize: 14.sp, color: _slate300),
+                        prefixIcon: Icon(Icons.search_rounded,
+                            color: _slate500, size: 20.sp),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 14.h),
+                      ),
+                    ),
                   ),
-                  GestureDetector(
-                    onTap: controller.selectMonthYear,
+
+                  SizedBox(height: 16.h),
+
+                  // Filter chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
                     child: Obx(
-                      () => Text(
-                        controller.currentMonth.value,
-                        style: AppTextStyles.h3.copyWith(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.chevron_right,
-                      color: Color(0xFF64748B),
-                    ),
-                    onPressed: controller.nextMonth,
-                  ),
-                ],
-              ),
-            ),
-
-            // 2. Collapsing Total Spent Card
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _TotalSpentHeaderDelegate(controller: controller),
-            ),
-
-            // 3. Spacing
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-            // 4. Sticky Search & Filters
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SearchFilterHeaderDelegate(controller: controller),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-            // 5. List Header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  AppText.monthlySpentTransactions,
-                  style: AppTextStyles.h3.copyWith(
-                    fontSize: 12,
-                    color: const Color(0xFF94A3B8),
-                    letterSpacing: 1.1,
-                  ),
-                ),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-            // 6. Transaction List
-            Obx(() {
-              if (controller.displayedTransactions.isEmpty) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Text(
-                        "No transactions found",
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                    ),
-                  ),
-                );
-              }
-              return SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = controller.displayedTransactions[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 8,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
+                      () => Row(
                         children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: item['color'],
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(item['icon'], color: item['iconColor']),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['title'],
-                                  style: AppTextStyles.h3.copyWith(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  item['date'],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: const Color(0xFF64748B),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                item['amount'].toString().replaceAll('\$', '₹'),
-                                style: AppTextStyles.h3.copyWith(fontSize: 16),
-                              ),
-                              const SizedBox(height: 4),
-                              _buildStatusBadge(item['status']),
-                            ],
-                          ),
+                          _chip(controller, 'All', 0),
+                          SizedBox(width: 8.w),
+                          _chip(controller, 'Paid', 1),
+                          SizedBox(width: 8.w),
+                          _chip(controller, 'Pending', 2),
+                          SizedBox(width: 8.w),
+                          _chip(controller, 'Rejected', 3),
                         ],
                       ),
                     ),
-                  );
-                }, childCount: controller.displayedTransactions.length),
-              );
-            }),
+                  ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          ],
-        ),
+                  SizedBox(height: 20.h),
+
+                  // Transactions list
+                  Obx(() {
+                    final items = controller.displayedTransactions;
+                    if (items.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 48.h),
+                          child: Column(
+                            children: [
+                              Icon(Icons.inbox_rounded,
+                                  size: 48.sp, color: _slate300),
+                              SizedBox(height: 12.h),
+                              Text(
+                                'No transactions found',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: _slate500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: items.map((tx) => _txCard(tx)).toList(),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color bg;
-    Color text;
-    if (status == 'Paid') {
-      bg = const Color(0xFFE0F2FE); // Blue
-      text = const Color(0xFF0EA5E9);
-    } else if (status == 'Pending') {
-      bg = const Color(0xFFFFF7ED); // Orange
-      text = const Color(0xFFEA580C);
-    } else {
-      bg = const Color(0xFFFEE2E2); // Red
-      text = const Color(0xFFDC2626);
-    }
-
+  // ── Header with total card ───────────────────────────────────────
+  Widget _buildHeader(BuildContext context, MonthlySpentController ctrl) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        26.h,
+      ),
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        status,
-        style: AppTextStyles.h3.copyWith(fontSize: 10, color: text),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(int index, String label) {
-    return Obx(() {
-      final isSelected = controller.selectedFilterIndex.value == index;
-      return GestureDetector(
-        onTap: () => controller.changeFilter(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0F172A) : Colors.white,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isSelected ? Colors.white : const Color(0xFF64748B),
-            ),
-          ),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      );
-    });
-  }
-}
-
-class _TotalSpentHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final MonthlySpentController controller;
-
-  _TotalSpentHeaderDelegate({required this.controller});
-
-  // Dimensions
-  final double expandedHeight = 220.0;
-  final double collapsedHeight = 90.0;
-  final double horizontalMargin = 24.0;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    // Calculate 0.0 -> 1.0 (Expanded -> Collapsed)
-    final double percent = (shrinkOffset / (expandedHeight - collapsedHeight))
-        .clamp(0.0, 1.0);
-    final bool isCollapsed = percent > 0.6; // Switching point
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Background Container
-        Container(
-          margin: EdgeInsets.symmetric(
-            horizontal: horizontalMargin,
-            vertical: 8,
-          ),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Colors.white, Color(0xFFF0F9FF)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            borderRadius: BorderRadius.circular(
-              32 * (1 - percent) + 16 * percent,
-            ), // Animate radius
-            boxShadow: [
-              BoxShadow(
-                color: const Color(
-                  0xFFE0F2FE,
-                ).withOpacity(0.5 + (0.2 * percent)),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.arrow_back_rounded,
+                      color: Colors.white, size: 20.sp),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                'Monthly Spent',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 20.h),
 
-        // Expanded Content (Fades Out)
-        Positioned.fill(
-          child: Opacity(
-            // Use interval to fade out faster before space runs out
-            opacity: (1 - (percent * 1.5)).clamp(0.0, 1.0),
-            child: Transform.translate(
-              offset: Offset(0, -30 * percent),
-              child: OverflowBox(
-                minHeight: expandedHeight,
-                maxHeight: expandedHeight,
-                alignment: Alignment.center,
+          // Month navigation
+          Row(
+            children: [
+              GestureDetector(
+                onTap: ctrl.previousMonth,
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: horizontalMargin + 16,
-                    vertical: 24,
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    shape: BoxShape.circle,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Icon(Icons.chevron_left_rounded,
+                      color: Colors.white, size: 18.sp),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: ctrl.selectMonthYear,
+                  child: Obx(
+                    () => Center(
+                      child: Text(
+                        ctrl.currentMonth.value,
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: ctrl.nextMonth,
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.chevron_right_rounded,
+                      color: Colors.white, size: 18.sp),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 18.h),
+
+          // Total spent
+          Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Spent',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.white70,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  '₹${ctrl.totalSpent.value.toStringAsFixed(2)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 34.sp,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      Icon(Icons.trending_down_rounded,
+                          color: Colors.white, size: 14.sp),
+                      SizedBox(width: 4.w),
                       Text(
-                        AppText.totalSpent,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Obx(
-                        () => Text(
-                          '₹${controller.totalSpent.value.toStringAsFixed(2)}',
-                          style: AppTextStyles.h1.copyWith(fontSize: 40),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.trending_down,
-                              size: 16,
-                              color: Color(0xFF16A34A),
-                            ),
-                            const SizedBox(width: 4),
-                            Obx(
-                              () => Text(
-                                controller.comparisonText.value,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF16A34A),
-                                ),
-                              ),
-                            ),
-                          ],
+                        ctrl.comparisonText.value,
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
-          ),
-        ),
-
-        // Collapsed Content (Fades In)
-        Positioned.fill(
-          child: Opacity(
-            // Fade in late
-            opacity: ((percent - 0.7) * 3.3).clamp(0.0, 1.0),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: horizontalMargin + 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Total Pending",
-                        style: TextStyle(
-                          color: const Color(0xFF64748B),
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        "₹120.00",
-                        style: TextStyle(
-                          color: const Color(0xFFEA580C),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Center / Main Info
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppText.totalSpent,
-                        style: TextStyle(
-                          color: const Color(0xFF64748B),
-                          fontSize: 12,
-                        ),
-                      ),
-                      Obx(
-                        () => Text(
-                          '₹${controller.totalSpent.value.toStringAsFixed(2)}',
-                          style: AppTextStyles.h3.copyWith(fontSize: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Comparison Icon
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.trending_down,
-                      size: 16,
-                      color: Color(0xFF16A34A),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  double get maxExtent => expandedHeight;
-
-  @override
-  double get minExtent => collapsedHeight;
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      true;
-}
-
-class _SearchFilterHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final MonthlySpentController controller;
-
-  _SearchFilterHeaderDelegate({required this.controller});
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: const Color(0xFFF8FAFC), // Match scaffold background
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: CommonSearchBar(
-              controller: controller.searchController,
-              hintText: AppText.searchTransactions,
-              onChanged: controller.searchTransactions,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: [
-                _buildFilterChipWidget(0, AppText.filterAll),
-                const SizedBox(width: 8),
-                _buildFilterChipWidget(1, AppText.filterPaid),
-                const SizedBox(width: 8),
-                _buildFilterChipWidget(2, AppText.filterPending),
-                const SizedBox(width: 8),
-                _buildFilterChipWidget(3, AppText.filterRejected),
               ],
             ),
           ),
@@ -487,37 +278,138 @@ class _SearchFilterHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  // Duplicated helper for access within delegate
-  Widget _buildFilterChipWidget(int index, String label) {
-    return Obx(() {
-      final isSelected = controller.selectedFilterIndex.value == index;
-      return GestureDetector(
-        onTap: () => controller.changeFilter(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0F172A) : Colors.white,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isSelected ? Colors.white : const Color(0xFF64748B),
-            ),
+  Widget _chip(MonthlySpentController ctrl, String label, int index) {
+    final selected = ctrl.selectedFilterIndex.value == index;
+    return GestureDetector(
+      onTap: () => ctrl.changeFilter(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 9.h),
+        decoration: BoxDecoration(
+          color: selected ? _purple : Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: selected ? _purple : const Color(0xFFE2E8F0),
           ),
         ),
-      );
-    });
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : _slate500,
+          ),
+        ),
+      ),
+    );
   }
 
-  @override
-  double get maxExtent => 130.0;
+  Widget _txCard(Map<String, dynamic> tx) {
+    final status = (tx['status'] ?? 'Pending').toString();
+    final title = tx['title']?.toString() ?? '';
+    final date = tx['date']?.toString() ?? '';
+    final amount = tx['amount']?.toString() ?? '';
+    final icon = (tx['icon'] as IconData?) ?? Icons.receipt_long_rounded;
 
-  @override
-  double get minExtent => 130.0;
+    Color statusColor;
+    Color statusBg;
+    switch (status) {
+      case 'Paid':
+        statusColor = _green;
+        statusBg = _greenBg;
+        break;
+      case 'Rejected':
+        statusColor = _red;
+        statusBg = _redBg;
+        break;
+      default:
+        statusColor = _amber;
+        statusBg = _amberBg;
+    }
 
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      false;
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: _purpleLight,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(icon, color: _purple, size: 22.sp),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _slate900,
+                  ),
+                ),
+                SizedBox(height: 3.h),
+                Text(
+                  date,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    color: _slate500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                amount,
+                style: GoogleFonts.inter(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w800,
+                  color: _slate900,
+                ),
+              ),
+              SizedBox(height: 5.h),
+              Container(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(
+                  status.toUpperCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

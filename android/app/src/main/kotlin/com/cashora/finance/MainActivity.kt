@@ -1,4 +1,4 @@
-package com.enterprise.cash.cash
+package com.cashora.finance
 
 import android.app.Activity
 import android.content.Intent

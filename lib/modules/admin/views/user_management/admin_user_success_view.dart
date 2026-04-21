@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
-import '../../../../routes/app_routes.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../../utils/app_colors.dart';
+import '../../../../../utils/app_text.dart';
+import '../../../../../routes/app_routes.dart';
 
 class AdminUserSuccessView extends StatelessWidget {
   const AdminUserSuccessView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _red = AppColors.errorRed;
+  static const _redBg = Color(0xFFFEF2F2);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
-    print('DEBUG: AdminUserSuccessView arguments: ${Get.arguments}');
     final args = Get.arguments as Map<String, dynamic>? ?? {};
-    final type = args['type'] ?? 'create'; // 'create', 'update', 'deactivate'
-
-    // Get user data from arguments or use defaults
+    final type = args['type'] ?? 'create';
     final userData = args['user'] as Map<String, dynamic>? ?? {};
-    final String userName =
-        userData['full_name'] ??
+
+    final String userName = userData['full_name'] ??
         userData['name'] ??
         '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'.trim();
     final String userRole = userData['role'] ?? 'Requestor';
@@ -35,120 +42,90 @@ class AdminUserSuccessView extends StatelessWidget {
     final bool isDeactivate = type == 'deactivate';
     final bool isActivate = type == 'activate';
 
+    final iconColor = isDeactivate ? _red : _green;
+    final iconBg = isDeactivate ? _redBg : _greenBg;
+    final iconData = isDeactivate
+        ? Icons.person_off_rounded
+        : (isUpdate || isActivate
+            ? Icons.verified_user_rounded
+            : Icons.check_rounded);
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: _bg,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.08,
-              ), // Responsive top spacing
-              // Success Icon with Glow
+              SizedBox(height: 24.h),
+
+              // Icon
               Container(
-                width: MediaQuery.of(context).size.width * 0.3,
-                height: MediaQuery.of(context).size.width * 0.3,
-                constraints: const BoxConstraints(
-                  minWidth: 100,
-                  maxWidth: 140,
-                  minHeight: 100,
-                  maxHeight: 140,
-                ),
+                width: 120.w,
+                height: 120.w,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
+                  color: iconBg,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.successGreen.withOpacity(0.1),
-                      blurRadius: 30,
-                      spreadRadius: 10,
+                      color: iconColor.withOpacity(0.2),
+                      blurRadius: 30.r,
+                      spreadRadius: 4.r,
                     ),
                   ],
                 ),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      color: AppColors.successBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      color: AppColors.successGreen,
-                      size: 36,
-                    ),
-                  ),
-                ),
+                child: Icon(iconData, color: iconColor, size: 54.sp),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 28.h),
 
               Text(
                 isDeactivate
                     ? AppText.userDeactivatedSuccess
                     : isActivate
-                    ? AppText.userActivatedSuccess
-                    : isUpdate
-                    ? AppText.userUpdatedSuccessTitle
-                    : AppText.userCreatedSuccessTitle,
-                style: AppTextStyles.h2,
+                        ? AppText.userActivatedSuccess
+                        : isUpdate
+                            ? AppText.userUpdatedSuccessTitle
+                            : AppText.userCreatedSuccessTitle,
+                style: GoogleFonts.inter(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: _slate900,
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 10.h),
 
-              if (isDeactivate)
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    text: userName,
-                    style: AppTextStyles.h3.copyWith(fontSize: 14),
-                    children: [
-                      TextSpan(
-                        text: ' has been deactivated.\n',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSlate,
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            'Their access to the petty cash system has been revoked.',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSlate,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Text(
-                  isActivate
-                      ? 'The user has been successfully activated and can now access the system.'
-                      : isUpdate
-                      ? AppText.userUpdatedSuccessDesc
-                      : AppText.userCreatedSuccessDesc,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSlate,
-                  ),
-                  textAlign: TextAlign.center,
+              Text(
+                isDeactivate
+                    ? '$userName\'s access has been revoked.'
+                    : isActivate
+                        ? 'The user has been activated and can now access the system.'
+                        : isUpdate
+                            ? AppText.userUpdatedSuccessDesc
+                            : AppText.userCreatedSuccessDesc,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: _slate500,
+                  height: 1.5,
                 ),
+                textAlign: TextAlign.center,
+              ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
-              // Only show user summary card if not deactivating
+              // User Summary Card (skip for deactivate)
               if (!isDeactivate)
                 Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(18.w),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 12.r,
+                        offset: Offset(0, 3.h),
                       ),
                     ],
                   ),
@@ -156,41 +133,63 @@ class AdminUserSuccessView extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: AppColors.primaryLight,
-                            backgroundImage: const NetworkImage(
-                              'https://i.pravatar.cc/150?u=sarah',
+                          Container(
+                            width: 48.w,
+                            height: 48.w,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  _purple.withOpacity(0.15),
+                                  _purple.withOpacity(0.05),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                            child: Center(
+                              child: Text(
+                                userName.length >= 2
+                                    ? userName.substring(0, 2).toUpperCase()
+                                    : 'U',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: _purple,
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   userName,
-                                  style: AppTextStyles.h3,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: _slate900,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4.h),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w, vertical: 2.h),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).primaryColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
+                                    color: _purpleLight,
+                                    borderRadius: BorderRadius.circular(6.r),
                                   ),
                                   child: Text(
-                                    userRole,
-                                    style: AppTextStyles.bodyMedium.copyWith(
-                                      fontSize: 10,
-                                      color: AppColors.primaryBlue,
+                                    userRole.toUpperCase(),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: _purple,
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
                                 ),
@@ -199,21 +198,14 @@ class AdminUserSuccessView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const Divider(height: 32),
-                      _buildSummaryRow(
-                        Icons.email,
-                        AppText.emailAddress,
-                        email,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSummaryRow(
-                        Icons.phone,
-                        AppText.phone,
-                        phone.isNotEmpty ? phone : 'Not provided',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSummaryRow(
-                        Icons.calendar_today,
+                      Divider(height: 28.h, color: const Color(0xFFF1F5F9)),
+                      _infoRow(Icons.email_outlined, AppText.emailAddress, email),
+                      SizedBox(height: 14.h),
+                      _infoRow(Icons.phone_outlined, AppText.phone,
+                          phone.isNotEmpty ? phone : 'Not provided'),
+                      SizedBox(height: 14.h),
+                      _infoRow(
+                        Icons.calendar_today_outlined,
                         (isUpdate || isActivate)
                             ? AppText.updatedOn
                             : AppText.createdOn,
@@ -223,56 +215,64 @@ class AdminUserSuccessView extends StatelessWidget {
                   ),
                 ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
-              PrimaryButton(
-                text: AppText.goToManageUsers,
-                onPressed: () => Get.until(
-                  (route) => route.settings.name == AppRoutes.ADMIN_USER_LIST,
-                ),
-                icon: const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white,
-                  size: 20,
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton.icon(
+                  onPressed: () => Get.until(
+                    (route) =>
+                        route.settings.name == AppRoutes.ADMIN_USER_LIST,
+                  ),
+                  icon: Icon(Icons.arrow_forward_rounded, size: 18.sp),
+                  label: Text(
+                    AppText.goToManageUsers,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _purple,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
 
-              if (type ==
-                  'create') // Only show "Add another user" for create flow
+              if (type == 'create') ...[
+                SizedBox(height: 12.h),
                 SizedBox(
                   width: double.infinity,
-                  child: TextButton.icon(
+                  height: 48.h,
+                  child: OutlinedButton.icon(
                     onPressed: () => Get.back(),
-                    style: TextButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.05)
-                          : AppColors.primaryLight.withOpacity(0.1),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        side: BorderSide(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white.withOpacity(0.1)
-                              : AppColors.primaryLight.withOpacity(0.5),
-                        ),
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.person_add,
-                      color: AppColors.primaryBlue,
-                    ),
+                    icon: Icon(Icons.person_add_rounded,
+                        color: _purple, size: 18.sp),
                     label: Text(
                       AppText.addAnotherUser,
-                      style: AppTextStyles.buttonText.copyWith(
-                        color: AppColors.primaryBlue,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _purple,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: _purple.withOpacity(0.3)),
+                      backgroundColor: _purpleLight.withOpacity(0.3),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
                     ),
                   ),
                 ),
+              ],
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
             ],
           ),
         ),
@@ -280,24 +280,36 @@ class AdminUserSuccessView extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(IconData icon, String label, String value) {
+  Widget _infoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: AppColors.textSlate),
-        const SizedBox(width: 12),
+        Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: _purpleLight,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Icon(icon, size: 16.sp, color: _purple),
+        ),
+        SizedBox(width: 12.w),
         Expanded(
           child: Text(
             label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSlate,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: _slate500,
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         Flexible(
           child: Text(
             value,
-            style: AppTextStyles.h3.copyWith(fontSize: 14),
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: _slate900,
+            ),
             textAlign: TextAlign.right,
             overflow: TextOverflow.ellipsis,
           ),
@@ -308,18 +320,14 @@ class AdminUserSuccessView extends StatelessWidget {
 
   String _formatDate(dynamic dateValue) {
     if (dateValue == null) return _getCurrentDate();
-
     try {
       if (dateValue is String) {
-        // Try to parse ISO date string
         final dateTime = DateTime.parse(dateValue);
         return '${_getMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year}';
       }
-    } catch (e) {
-      // If parsing fails, return current date
+    } catch (_) {
       return _getCurrentDate();
     }
-
     return _getCurrentDate();
   }
 
@@ -330,18 +338,8 @@ class AdminUserSuccessView extends StatelessWidget {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return months[month - 1];
   }

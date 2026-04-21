@@ -1,25 +1,41 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/auth_repository.dart';
+import '../../../../data/repositories/department_repository.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../utils/widgets/app_loader.dart';
 
 class AdminUserController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
+  final DepartmentRepository _deptRepository = Get.find<DepartmentRepository>();
 
-  // Remove static mock data
   final rxUsers = <Map<String, dynamic>>[].obs;
   final isLoadingUsers = false.obs;
 
   final rxSelectedUser = <String, dynamic>{}.obs;
   final rxIsActive = true.obs;
 
+  // Departments
+  final departments = <Map<String, dynamic>>[].obs;
+  final selectedDepartmentId = Rxn<int>();
+
   @override
   void onInit() {
     super.onInit();
     fetchUsers();
+    fetchDepartments();
+  }
+
+  Future<void> fetchDepartments() async {
+    try {
+      final result = await _deptRepository.listDepartments();
+      departments.assignAll(result);
+    } catch (_) {
+      // Non-blocking: dropdown will just be empty
+    }
   }
 
   Future<void> fetchUsers() async {
@@ -75,12 +91,12 @@ class AdminUserController extends GetxController {
   }
 
   void addUser() {
-    // Reset form
     firstNameController.clear();
     lastNameController.clear();
     emailController.clear();
     phoneController.clear();
     selectedRole.value = '';
+    selectedDepartmentId.value = null;
     Get.toNamed(AppRoutes.ADMIN_ADD_USER);
   }
 
@@ -109,6 +125,7 @@ class AdminUserController extends GetxController {
         email: emailController.text.trim(),
         phone: phoneController.text.trim(),
         role: selectedRole.value,
+        departmentId: selectedDepartmentId.value,
       );
 
       Get.back(); // Close loader
@@ -119,6 +136,7 @@ class AdminUserController extends GetxController {
       emailController.clear();
       phoneController.clear();
       selectedRole.value = '';
+      selectedDepartmentId.value = null;
 
       // Pass the created user data to success screen
       // If API doesn't return user data, create it from form inputs
@@ -149,7 +167,7 @@ class AdminUserController extends GetxController {
       String errorMessage = 'An error occurred while creating the user.';
       if (e is DioException && e.response != null) {
         final data = e.response!.data;
-        print('DEBUG: API Error Response: $data');
+        if (kDebugMode) debugPrint('DEBUG: API Error Response: $data');
         if (data is Map<String, dynamic> && data.containsKey('message')) {
           errorMessage = data['message'];
         } else if (data is Map<String, dynamic> && data.containsKey('error')) {
@@ -263,6 +281,7 @@ class AdminUserController extends GetxController {
         phone: phoneController.text.trim(),
         role: selectedRole.value,
         isActive: rxIsActive.value,
+        departmentId: selectedDepartmentId.value,
       );
 
       Get.back(); // Close loader
@@ -436,6 +455,9 @@ class AdminUserController extends GetxController {
     emailController.text = user['email'] ?? '';
     phoneController.text = user['phone'] ?? user['phone_number'] ?? '';
     selectedRole.value = user['role'] ?? 'Requestor';
+    // department_id may be int or absent
+    final deptId = user['department_id'];
+    selectedDepartmentId.value = deptId is int ? deptId : (deptId != null ? int.tryParse(deptId.toString()) : null);
 
     // Handle full name split if first/last name missing
     if (firstNameController.text.isEmpty && user.containsKey('full_name')) {

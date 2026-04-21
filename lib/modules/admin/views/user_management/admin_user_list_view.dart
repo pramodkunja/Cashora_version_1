@@ -1,84 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../routes/app_routes.dart';
 import '../../controllers/admin_user_controller.dart';
-import '../widgets/admin_app_bar.dart';
-import '../../../../utils/widgets/app_loader.dart';
 import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 
 class AdminUserListView extends GetView<AdminUserController> {
   const AdminUserListView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AdminAppBar(
-        title: AppText.manageUsers,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.more_vert, color: AppColors.textDark, size: 24.sp),
-          ),
-        ],
-      ),
+      backgroundColor: _bg,
       body: Column(
         children: [
-          // Search & Filter Header
+          _buildHeader(context),
+          // Search
           Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(30.r),
-                      border: Border.all(color: Theme.of(context).dividerColor),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: AppText.searchUsersHint,
-                        hintStyle: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSlate,
-                        ),
-                        border: InputBorder.none,
-                        icon: Icon(
-                          Icons.search,
-                          color: AppColors.textSlate,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ),
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 2.h),
                   ),
+                ],
+              ),
+              child: TextField(
+                style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+                decoration: InputDecoration(
+                  hintText: AppText.searchUsersHint,
+                  hintStyle:
+                      GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+                  prefixIcon:
+                      Icon(Icons.search_rounded, color: _slate500, size: 20.sp),
+                  border: InputBorder.none,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 ),
-                SizedBox(width: 12.w),
-                Container(
-                  padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                  ),
-                  child: Icon(
-                    Icons.tune_rounded,
-                    color: AppColors.textSlate,
-                    size: 24.sp,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
+          SizedBox(height: 16.h),
 
-          // List Header
+          // Count bar
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Obx(
@@ -86,169 +64,210 @@ class AdminUserListView extends GetView<AdminUserController> {
                 children: [
                   Text(
                     'ALL USERS (${controller.rxUsers.length})',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    AppText.exportList,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                      color: _purple,
+                      letterSpacing: 1,
                     ),
                   ),
                 ],
               ),
             ),
           ),
+          SizedBox(height: 12.h),
 
-          SizedBox(height: 16.h),
-
-          // User List
+          // List
           Expanded(
             child: Obx(() {
               if (controller.isLoadingUsers.value) {
                 return const SkeletonListView();
               }
-
               if (controller.rxUsers.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.people_outline,
-                        size: 64.sp,
-                        color: AppColors.textLight,
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'No users found',
-                        style: AppTextStyles.h3.copyWith(
-                          color: AppColors.textLight,
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Users will appear here once added',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSlate,
-                        ),
-                      ),
-                      SizedBox(height: 24.h),
-                      ElevatedButton.icon(
-                        onPressed: controller.fetchUsers,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _buildEmptyState();
               }
-
               return RefreshIndicator(
+                color: _purple,
                 onRefresh: controller.fetchUsers,
                 child: ListView.separated(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 8.h,
-                  ),
+                  padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 100.h),
                   itemCount: controller.rxUsers.length,
-                  separatorBuilder: (c, i) => SizedBox(height: 16.h),
-                  itemBuilder: (context, index) {
-                    final user = controller.rxUsers[index];
-                    return _buildUserCard(context, user);
-                  },
+                  separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                  itemBuilder: (_, i) =>
+                      _buildUserCard(context, controller.rxUsers[i]),
                 ),
               );
             }),
           ),
         ],
       ),
-      floatingActionButton: SizedBox(
-        height: 50.h,
-        width: 150.w,
-        child: FloatingActionButton.extended(
-          onPressed: controller.addUser,
-          backgroundColor: AppColors.primaryBlue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.r),
-          ),
-          icon: Icon(Icons.person_add, color: Colors.white, size: 20.sp),
-          label: Text(
-            'Add User',
-            style: AppTextStyles.buttonText.copyWith(
-              color: Colors.white,
-              fontSize: 14.sp,
-            ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: controller.addUser,
+        backgroundColor: _purple,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+        icon: Icon(Icons.person_add_rounded, color: Colors.white, size: 20.sp),
+        label: Text(
+          'Add User',
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
       ),
     );
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 12.h,
+        20.w,
+        20.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_back_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            AppText.manageUsers,
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+          Obx(
+            () => Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                '${controller.rxUsers.length} users',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildUserCard(BuildContext context, Map<String, dynamic> user) {
-    // Handle different field name variations
     String name =
         user['full_name'] ??
         user['name'] ??
         '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
     if (name.isEmpty) name = 'Unknown User';
 
-    String role = user['role'] ?? 'Requestor';
-    String email = user['email'] ?? 'No email';
+    final role = user['role']?.toString() ?? 'Requestor';
+    final email = user['email']?.toString() ?? 'No email';
+    final isActive = user['isActive'] ?? user['is_active'] ?? true;
 
-    Color badgeBg = const Color(0xFFF1F5F9);
-    Color badgeText = AppColors.textSlate;
+    final dept = user['department'];
+    String? deptName;
+    if (dept is Map && dept['name'] != null) {
+      deptName = dept['name'].toString();
+    }
 
-    // Verify active status based on various key possibilities
-    final bool isActive = user['isActive'] ?? user['is_active'] ?? true;
+    // Role colors
+    Color roleBg;
+    Color roleColor;
+    switch (role.toLowerCase()) {
+      case 'accountant':
+        roleBg = const Color(0xFFEFF6FF);
+        roleColor = const Color(0xFF2563EB);
+        break;
+      case 'admin':
+      case 'super_admin':
+        roleBg = _purpleLight;
+        roleColor = _purple;
+        break;
+      default:
+        roleBg = const Color(0xFFF1F5F9);
+        roleColor = _slate500;
+    }
 
-    // Badge Status Logic
     if (!isActive) {
-      badgeBg = const Color(0xFFFEE2E2); // Light Red
-      badgeText = Colors.red;
-    } else if (role.toLowerCase() == 'accountant') {
-      badgeBg = const Color(0xFFE0F2FE); // Light Cyan
-      badgeText = AppColors.infoBlue;
-    } else if (role.toLowerCase() == 'approver') {
-      badgeBg = const Color(0xFFF3E8FF); // Light Purple
-      badgeText = const Color(0xFF9333EA); // Purple
+      roleBg = const Color(0xFFFEF2F2);
+      roleColor = AppColors.errorRed;
     }
 
     return GestureDetector(
       onTap: () => controller.editUser(user),
       child: Container(
+        padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20.r),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10.r,
-              offset: Offset(0, 4.h),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12.r,
+              offset: Offset(0, 3.h),
             ),
           ],
         ),
-        padding: EdgeInsets.all(16.w),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 28.r,
-              backgroundColor: badgeBg,
-              child: Text(
-                name.isNotEmpty ? name.substring(0, 2).toUpperCase() : 'U',
-                style: AppTextStyles.h3.copyWith(color: badgeText),
+            // Avatar
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    _purple.withOpacity(0.15),
+                    _purple.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14.r),
+              ),
+              child: Center(
+                child: Text(
+                  name.length >= 2
+                      ? name.substring(0, 2).toUpperCase()
+                      : name.toUpperCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: _purple,
+                  ),
+                ),
               ),
             ),
-            SizedBox(width: 16.w),
+            SizedBox(width: 12.w),
+            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,52 +277,101 @@ class AdminUserListView extends GetView<AdminUserController> {
                       Flexible(
                         child: Text(
                           name,
-                          style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: _slate900,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 6.w),
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 2.h,
-                        ),
+                            horizontal: 7.w, vertical: 2.h),
                         decoration: BoxDecoration(
-                          color: badgeBg,
-                          borderRadius: BorderRadius.circular(8.r),
+                          color: roleBg,
+                          borderRadius: BorderRadius.circular(6.r),
                         ),
                         child: Text(
                           !isActive
-                              ? AppText.inactive.toUpperCase()
+                              ? 'INACTIVE'
                               : role.toUpperCase(),
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                            color: badgeText,
+                          style: GoogleFonts.inter(
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w700,
+                            color: roleColor,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 3.h),
                   Text(
                     email,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSlate,
-                      fontSize: 13.sp,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: _slate500,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (deptName != null) ...[
+                    SizedBox(height: 3.h),
+                    Row(
+                      children: [
+                        Icon(Icons.business_rounded,
+                            size: 12.sp, color: _purple),
+                        SizedBox(width: 4.w),
+                        Text(
+                          deptName,
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: _purple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16.sp,
-              color: AppColors.borderLight,
-            ),
+            Icon(Icons.chevron_right_rounded, color: _slate300, size: 22.sp),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline_rounded, size: 56.sp, color: _slate300),
+          SizedBox(height: 16.h),
+          Text(
+            'No users found',
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: _slate500,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Users will appear here once added',
+            style: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+          ),
+          SizedBox(height: 20.h),
+          TextButton.icon(
+            onPressed: controller.fetchUsers,
+            icon: Icon(Icons.refresh_rounded, color: _purple, size: 18.sp),
+            label: Text('Retry',
+                style: GoogleFonts.inter(color: _purple, fontWeight: FontWeight.w600)),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -63,7 +64,7 @@ class PaymentFlowController extends GetxController {
 
     // Parse passed Request Data
     if (Get.arguments != null && Get.arguments is Map) {
-      print("PaymentFlowController Args: ${Get.arguments}");
+      if (kDebugMode) debugPrint("PaymentFlowController Args: ${Get.arguments}");
       if (Get.arguments['request'] != null) {
         final req = Get.arguments['request'];
         try {
@@ -71,9 +72,9 @@ class PaymentFlowController extends GetxController {
           requestedAmount.value = amt;
           finalAmount.value = amt;
           currentRequest.value = req;
-          print("PaymentFlowController initialized with request: ${req['id']}");
+          if (kDebugMode) debugPrint("PaymentFlowController initialized with request: ${req['id']}");
         } catch (e) {
-          print("Error parsing request args: $e");
+          if (kDebugMode) debugPrint("Error parsing request args: $e");
         }
       }
 
@@ -82,13 +83,13 @@ class PaymentFlowController extends GetxController {
       currentTitle.value = Get.arguments['title'] ?? 'Details';
       isQrMode.value = Get.arguments['isQr'] ?? false;
 
-      print("Init QR Mode: ${isQrMode.value}, URL: ${currentImageUrl.value}");
+      if (kDebugMode) debugPrint("Init QR Mode: ${isQrMode.value}, URL: ${currentImageUrl.value}");
 
       if (isQrMode.value && currentImageUrl.isNotEmpty) {
         analyzeQrCode(currentImageUrl.value);
       }
     } else {
-      print("PaymentFlowController initialized with NO ARGUMENTS");
+      if (kDebugMode) debugPrint("PaymentFlowController initialized with NO ARGUMENTS");
     }
   }
 
@@ -128,7 +129,7 @@ class PaymentFlowController extends GetxController {
     required String title,
     bool isQr = false,
   }) {
-    print("Preparing View: URL=$url, Title=$title, IsQR=$isQr");
+    if (kDebugMode) debugPrint("Preparing View: URL=$url, Title=$title, IsQR=$isQr");
     currentImageUrl.value = url;
     currentTitle.value = title;
     isQrMode.value = isQr;
@@ -152,7 +153,7 @@ class PaymentFlowController extends GetxController {
       await Dio().download(url, filePath);
       return File(filePath);
     } catch (e) {
-      print("Error downloading QR: $e");
+      if (kDebugMode) debugPrint("Error downloading QR: $e");
       return null;
     }
   }
@@ -184,7 +185,7 @@ class PaymentFlowController extends GetxController {
         Get.snackbar('Error', 'Could not detect QR code');
       }
     } catch (e) {
-      print("QR Analysis Error: $e");
+      if (kDebugMode) debugPrint("QR Analysis Error: $e");
       Get.snackbar('Error', 'Failed to analyze QR code');
     } finally {
       isScanning.value = false;
@@ -270,7 +271,7 @@ class PaymentFlowController extends GetxController {
 
   /// Stub called by ConfirmPaymentView — no-op until new payment gateway is wired.
   /// The UI keeps the payment form functional; this prevents a compile error.
-  void initiateRazorpayPayout() {
+  void initiatePayment() {
     Get.snackbar(
       'Coming Soon',
       'Payment gateway is currently disabled. Please use manual transfer.',
@@ -286,7 +287,7 @@ class PaymentFlowController extends GetxController {
         selectedPaidMethod.value = methods.first['value'];
       }
     } catch (e) {
-      print("Error loading payment methods: $e");
+      if (kDebugMode) debugPrint("Error loading payment methods: $e");
     }
   }
 
@@ -322,7 +323,7 @@ class PaymentFlowController extends GetxController {
       
       Get.offAllNamed(AppRoutes.ACCOUNTANT_DASHBOARD); // Return to dashboard
     } catch (e) {
-      print("Error marking as paid: $e");
+      if (kDebugMode) debugPrint("Error marking as paid: $e");
       Get.snackbar(
         'Error',
         'Failed to mark as paid',

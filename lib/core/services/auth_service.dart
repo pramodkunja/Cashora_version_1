@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository.dart';
@@ -18,6 +19,16 @@ class AuthService extends GetxService {
   Future<AuthService> init() async {
     isSessionVerified.value = false; // Always false on app start
     String? token = await _storageService.read('auth_token');
+
+    // Migrate away from the legacy "session_<id>" placeholder token that the
+    // old login flow wrote when the backend didn't return a JWT. Those strings
+    // can never authenticate against the API, so drop them before any request
+    // goes out and fires a spurious 401 → force-logout loop.
+    if (token != null && token.startsWith('session_')) {
+      await _storageService.delete('auth_token');
+      token = null;
+    }
+
     if (token != null) {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
@@ -40,22 +51,21 @@ class AuthService extends GetxService {
     final user = result['user'] as User;
     final token = result['token'] as String?;
 
+    if (token == null || token.isEmpty) {
+      // Reject logins without a real token — never fabricate a session identifier.
+      throw Exception('Login failed: server did not return an authentication token.');
+    }
+
     currentUser.value = user;
     verifySession(); // Login explicitly verifies session
-
-    if (token != null) {
-      await _storageService.write('auth_token', token);
-    } else {
-      // Fallback to session token if no token provided
-      await _storageService.write('auth_token', 'session_${user.id}');
-    }
+    await _storageService.write('auth_token', token);
   }
 
   Future<void> logout() async {
     try {
       await _authRepository.logout();
     } catch (e) {
-      print('Logout error: $e'); // Log but continue local cleanup
+      if (kDebugMode) debugPrint('Logout error: $e');
     }
 
     currentUser.value = null;

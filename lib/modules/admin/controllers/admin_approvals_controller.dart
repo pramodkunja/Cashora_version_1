@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart'; // Added for TabController
 import '../../../../routes/app_routes.dart';
@@ -12,13 +13,43 @@ class AdminApprovalsController extends GetxController {
   final approvedRequests = <Map<String, dynamic>>[].obs;
   final unpaidRequests = <Map<String, dynamic>>[].obs;
   final clarificationRequests = <Map<String, dynamic>>[].obs;
+  final rejectedRequests = <Map<String, dynamic>>[].obs;
 
   final isLoading = true.obs;
+
+  // One scroll controller per tab
+  final pendingScroll = ScrollController();
+  final approvedScroll = ScrollController();
+  final unpaidScroll = ScrollController();
+  final clarificationScroll = ScrollController();
+  final rejectedScroll = ScrollController();
 
   @override
   void onInit() {
     super.onInit();
     _adminRepository = AdminRepository(Get.find<NetworkService>());
+  }
+
+  @override
+  void onClose() {
+    pendingScroll.dispose();
+    approvedScroll.dispose();
+    unpaidScroll.dispose();
+    clarificationScroll.dispose();
+    rejectedScroll.dispose();
+    super.onClose();
+  }
+
+  void _resetAllScroll() {
+    for (final c in [
+      pendingScroll,
+      approvedScroll,
+      unpaidScroll,
+      clarificationScroll,
+      rejectedScroll,
+    ]) {
+      if (c.hasClients) c.jumpTo(0);
+    }
   }
 
   void resetTab() {
@@ -47,32 +78,26 @@ class AdminApprovalsController extends GetxController {
       final results = await Future.wait([
         _adminRepository.getOrgExpenses(status: 'approved'),
         _adminRepository.getOrgExpenses(paymentStatus: 'pending'),
-        _adminRepository.getOrgExpenses(status: 'clarification_required'),
-        _adminRepository.getOrgExpenses(status: 'clarification_responded'),
+        _adminRepository.getOrgExpenses(status: 'clarification'),
+        _adminRepository.getOrgExpenses(status: 'rejected'),
       ]);
 
       approvedRequests.assignAll(results[0]);
       unpaidRequests.assignAll(results[1]);
 
-      // Combine clarification required and responded
-      final combinedClarification = <Map<String, dynamic>>[];
-      combinedClarification.addAll(results[2]);
-      combinedClarification.addAll(results[3]);
+      // Assign Clarification requests directly
+      clarificationRequests.assignAll(results[2]);
       
-      // Sort by date descending
-      combinedClarification.sort((a, b) {
-         final dateA = a['created_at'] ?? a['date'] ?? '';
-         final dateB = b['created_at'] ?? b['date'] ?? '';
-         return dateB.compareTo(dateA);
-      });
-      
-      clarificationRequests.assignAll(combinedClarification);
+      // Assign Rejected requests
+      rejectedRequests.assignAll(results[3]);
 
-      print("Debugging Data Fetch:");
-      print("Pending: ${pendingData.length}");
-      print("Clarification Response Count: ${results[4].length}");
-      if (results[4].isNotEmpty) {
-        print("Sample Clarification Response: ${results[4].first}");
+      if (kDebugMode) {
+        debugPrint("Debugging Data Fetch:");
+        debugPrint("Pending: ${pendingData.length}");
+        debugPrint("Clarification Count: ${results[2].length}");
+        if (results[2].isNotEmpty) {
+          debugPrint("Sample Clarification: ${results[2].first}");
+        }
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch requests: $e');
@@ -81,15 +106,16 @@ class AdminApprovalsController extends GetxController {
     }
   }
 
-  void navigateToDetails(Map<String, dynamic> request) {
-    // If status implies clarification, go to clarification view
-    String status = request['status'] ?? '';
-    if (status == 'clarification_required' ||
-        status == 'clarification_responded') {
-      Get.toNamed(AppRoutes.ADMIN_CLARIFICATION_STATUS, arguments: request);
+  Future<void> navigateToDetails(Map<String, dynamic> request) async {
+    final status = (request['status'] ?? '').toString().toLowerCase();
+    if (status.contains('clarification')) {
+      await Get.toNamed(AppRoutes.ADMIN_CLARIFICATION_STATUS, arguments: request);
     } else {
-      Get.toNamed(AppRoutes.ADMIN_REQUEST_DETAILS, arguments: request);
+      await Get.toNamed(AppRoutes.ADMIN_REQUEST_DETAILS, arguments: request);
     }
+    // Reset scroll + refresh on return
+    _resetAllScroll();
+    await fetchAllRequests();
   }
 
   String getInitials(String name) {

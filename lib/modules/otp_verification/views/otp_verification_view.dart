@@ -4,187 +4,244 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/widgets/app_loader.dart';
 import '../controllers/otp_verification_controller.dart';
 
 class OtpVerificationView extends GetView<OtpVerificationController> {
   const OtpVerificationView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppTextStyles.h3.color,
-            size: 20.sp,
-          ),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.0.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Icon Badge
-              Container(
-                width: 80.w,
-                height: 80.w,
-                decoration: BoxDecoration(
-                  color: AppColors.infoBg,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.lock_open_rounded, // or security
-                  size: 40.sp,
-                  color: AppColors.primary,
-                ),
-              ),
-              SizedBox(height: 32.h),
-
-              // Headings
-              Text(
-                AppText.otpVerification, // "OTP Verification"
-                style: AppTextStyles.h2.copyWith(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 12.h),
-
-              Text(
-                AppText.otpSentTo(controller.email), // Dynamic message
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSlate,
-                  height: 1.5,
-                  fontSize: 14.sp,
-                ),
-              ),
-              SizedBox(height: 48.h),
-
-              // OTP Inputs
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(
-                  6,
-                  (index) => _buildOtpInput(context, index),
-                ),
-              ),
-              SizedBox(height: 40.h),
-
-              // Resend Timer
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 32.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    AppText.didntReceiveCode,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSlate,
-                      fontSize: 14.sp,
+                  // Icon
+                  Center(
+                    child: Container(
+                      width: 96.w,
+                      height: 96.w,
+                      decoration: BoxDecoration(
+                        color: _purpleLight,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.mail_lock_rounded,
+                          color: _purple, size: 44.sp),
                     ),
                   ),
-                  Obx(() {
-                    if (controller.canResend.value) {
-                      return GestureDetector(
-                        onTap: controller.resendCode,
-                        child: Text(
-                          AppText.resend,
+                  SizedBox(height: 24.h),
+                  Text(
+                    AppText.otpVerification,
+                    style: GoogleFonts.inter(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w800,
+                      color: _slate900,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    AppText.otpSentTo(controller.email),
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: _slate500,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 36.h),
+
+                  // OTP card
+                  Container(
+                    padding: EdgeInsets.all(20.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 12.r,
+                          offset: Offset(0, 3.h),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Enter 6-digit code',
                           style: GoogleFonts.inter(
-                            color: AppColors.primary,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
+                            color: _slate500,
                           ),
                         ),
-                      );
-                    } else {
-                      return Text(
-                        AppText.resend,
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFFCBD5E1),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
+                        SizedBox(height: 16.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(
+                            6,
+                            (index) => _buildOtpInput(index),
+                          ),
                         ),
-                      );
-                    }
-                  }),
-                ],
-              ),
-              SizedBox(height: 8.h),
-              Obx(
-                () => Text(
-                  '${AppText.resendCodeIn} ${controller.formattedTime}',
-                  style: GoogleFonts.inter(
-                    color: AppTextStyles.bodyMedium.color,
-                    fontSize: 14.sp,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 40.h),
-
-              // Verify Button
-              Obx(
-                () => SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading
-                        ? null
-                        : controller.verifyOtp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      elevation: 0,
+                      ],
                     ),
-                    child: controller.isLoading
-                        ? const AppSpinner(size: 30)
-                        : Text(
-                            AppText.verify,
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  // Resend
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppText.didntReceiveCode,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          color: _slate500,
+                        ),
+                      ),
+                      Obx(() {
+                        final canResend = controller.canResend.value;
+                        return GestureDetector(
+                          onTap: canResend ? controller.resendCode : null,
+                          child: Text(
+                            AppText.resend,
                             style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
+                              color: canResend ? _purple : _slate300,
                             ),
                           ),
+                        );
+                      }),
+                    ],
                   ),
-                ),
+                  SizedBox(height: 6.h),
+                  Obx(
+                    () => Text(
+                      '${AppText.resendCodeIn} ${controller.formattedTime}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: _slate500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  SizedBox(height: 32.h),
+
+                  // Verify
+                  Obx(
+                    () => SizedBox(
+                      width: double.infinity,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed: controller.isLoading
+                            ? null
+                            : controller.verifyOtp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _purple,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: _purple.withOpacity(0.5),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                        ),
+                        child: controller.isLoading
+                            ? SizedBox(
+                                width: 22.w,
+                                height: 22.w,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                AppText.verify,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildOtpInput(BuildContext context, int index) {
+  Widget _buildHeader(BuildContext context) {
     return Container(
-      width: 48.w,
-      height: 56.h,
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 12.h,
+        20.w,
+        20.h,
+      ),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Theme.of(context).dividerColor),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.1),
-            blurRadius: 4.r,
-            offset: Offset(0, 2.h),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_back_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            AppText.otpVerification,
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOtpInput(int index) {
+    return Container(
+      width: 44.w,
+      height: 52.h,
+      decoration: BoxDecoration(
+        color: _bg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Center(
         child: TextField(
@@ -195,8 +252,8 @@ class OtpVerificationView extends GetView<OtpVerificationController> {
           maxLength: 1,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: AppTextStyles.h3.color,
+            fontWeight: FontWeight.w700,
+            color: _slate900,
           ),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: const InputDecoration(

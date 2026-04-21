@@ -1,73 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
 import '../../../../routes/app_routes.dart';
-import '../controllers/admin_approvals_controller.dart'; // Reuse for navigation or separate
 import '../controllers/admin_dashboard_controller.dart';
 
 class AdminSuccessView extends StatelessWidget {
   const AdminSuccessView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            // Checkmark Icon
-            Container(
-              width: 120,
-              height: 120,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryBlue,
-                shape: BoxShape.circle,
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            children: [
+              const Spacer(),
+              Container(
+                width: 120.w,
+                height: 120.w,
+                decoration: BoxDecoration(
+                  color: _greenBg,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: _green.withOpacity(0.2),
+                      blurRadius: 30.r,
+                      spreadRadius: 4.r,
+                    ),
+                  ],
+                ),
+                child: Icon(Icons.check_rounded, color: _green, size: 64.sp),
               ),
-              child: const Icon(
-                Icons.check_rounded,
-                color: Colors.white,
-                size: 64,
+              SizedBox(height: 32.h),
+              Text(
+                AppText.approvedSuccessTitle,
+                style: GoogleFonts.inter(
+                  fontSize: 26.sp,
+                  fontWeight: FontWeight.w800,
+                  color: _slate900,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 32),
-
-            Text(
-              AppText.approvedSuccessTitle,
-              style: AppTextStyles.h1.copyWith(fontSize: 28),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppText.approvedSuccessDesc,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSlate,
-                height: 1.5,
+              SizedBox(height: 12.h),
+              Text(
+                AppText.approvedSuccessDesc,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: _slate500,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const Spacer(),
-
-            PrimaryButton(
-              text: AppText.backToApprovals,
-              onPressed: () {
-                Get.offNamedUntil(AppRoutes.ADMIN_DASHBOARD, (route) => false);
-                // Delay to ensure controller is ready or reuse existing if not disposed
-                Future.delayed(const Duration(milliseconds: 100), () {
-                  try {
-                    final ctrl = Get.find<AdminDashboardController>();
-                    ctrl.changeTab(1);
-                  } catch (_) {}
-                });
-              },
-            ),
-            const SizedBox(height: 24),
-          ],
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.offNamedUntil(
+                        AppRoutes.ADMIN_DASHBOARD, (route) => false);
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      try {
+                        Get.find<AdminDashboardController>().changeTab(1);
+                      } catch (_) {}
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _purple,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
+                  child: Text(
+                    AppText.backToApprovals,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+            ],
+          ),
         ),
       ),
     );

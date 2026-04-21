@@ -125,17 +125,21 @@ class AuthRepository {
     required String email,
     required String phone,
     required String role,
+    int? departmentId,
   }) async {
     try {
+      final data = <String, dynamic>{
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'phone_number': phone,
+        'role': role,
+      };
+      if (departmentId != null) data['department_id'] = departmentId;
+
       final response = await _networkService.post(
         '/auth/add-staff',
-        data: {
-          'first_name': firstName,
-          'last_name': lastName,
-          'email': email,
-          'phone_number': phone,
-          'role': role,
-        },
+        data: data,
       );
 
       return response.data as Map<String, dynamic>;
@@ -152,18 +156,22 @@ class AuthRepository {
     required String phone,
     required String role,
     required bool isActive,
+    int? departmentId,
   }) async {
     try {
+      final data = <String, dynamic>{
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'phone_number': phone,
+        'role': role,
+        'is_active': isActive,
+      };
+      if (departmentId != null) data['department_id'] = departmentId;
+
       final response = await _networkService.patch(
         '/users/update/$userId',
-        data: {
-          'first_name': firstName,
-          'last_name': lastName,
-          'email': email,
-          'phone_number': phone,
-          'role': role,
-          'is_active': isActive,
-        },
+        data: data,
       );
 
       return response.data as Map<String, dynamic>;

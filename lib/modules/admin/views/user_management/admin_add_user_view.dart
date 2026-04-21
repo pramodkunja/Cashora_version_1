@@ -129,6 +129,60 @@ class AdminAddUserView extends GetView<AdminUserController> {
                 ),
               ),
 
+              SizedBox(height: 16.h),
+
+              // Department
+              _buildLabel('Department'),
+              Obx(
+                () => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(30.r),
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int?>(
+                      dropdownColor: Theme.of(context).cardColor,
+                      value: controller.selectedDepartmentId.value,
+                      hint: Text(
+                        'Select Department (optional)',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textLight,
+                        ),
+                      ),
+                      isExpanded: true,
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: AppColors.textSlate,
+                      ),
+                      items: [
+                        const DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('Unassigned'),
+                        ),
+                        ...controller.departments
+                            .where((d) => d['is_active'] == true)
+                            .map((d) {
+                          final id = d['id'] is int
+                              ? d['id'] as int
+                              : int.tryParse(d['id'].toString());
+                          final name = d['name']?.toString() ?? '';
+                          final code = d['code']?.toString() ?? '';
+                          return DropdownMenuItem<int?>(
+                            value: id,
+                            child: Text(
+                              code.isNotEmpty ? '$name ($code)' : name,
+                            ),
+                          );
+                        }),
+                      ],
+                      onChanged: (v) => controller.selectedDepartmentId.value = v,
+                    ),
+                  ),
+                ),
+              ),
+
               SizedBox(height: 48.h),
               PrimaryButton(
                 text: AppText.createUser,

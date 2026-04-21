@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -269,8 +270,10 @@ class AdminClarificationStatusView
         ),
       );
     } catch (e, stack) {
-      print("ERROR rendering Admin Status Body: $e");
-      print(stack);
+      if (kDebugMode) {
+        debugPrint("ERROR rendering Admin Status Body: $e");
+        debugPrint(stack.toString());
+      }
       return Center(
         child: Padding(
           padding: EdgeInsets.all(24.0.r),
@@ -454,32 +457,45 @@ class AdminClarificationStatusView
   }
 
   Widget _buildConversationHistory(BuildContext context) {
-    // Parse clarifications list
-    final clarifications = controller.request['clarifications'] as List? ?? [];
+    // Safely extract clarifications — handle all possible runtime types
+    final raw = controller.request['clarifications'];
+    final List<Map<String, dynamic>> clarifications = [];
+    if (raw is List) {
+      for (final item in raw) {
+        if (item is Map) {
+          clarifications.add(Map<String, dynamic>.from(item));
+        }
+      }
+    }
 
-    if (clarifications.isEmpty) return const SizedBox.shrink();
+    if (clarifications.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 16.h),
+        child: Text(
+          'No clarification history available',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSlate),
+        ),
+      );
+    }
+
+    final String requestorName = _getUserName(controller.request);
+    String initials = "U";
+    if (requestorName.isNotEmpty) {
+      final parts = requestorName.trim().split(" ");
+      if (parts.length > 1 && parts[1].isNotEmpty) {
+        initials = "${parts[0][0]}${parts[1][0]}".toUpperCase();
+      } else {
+        initials = requestorName[0].toUpperCase();
+      }
+    }
 
     return Column(
-      children: List.generate(clarifications.length, (index) {
-        final item = clarifications[index];
-        final String question = item['question'] ?? '';
-        final String response = item['response'] ?? '';
+      children: clarifications.map((item) {
+        final String question = item['question']?.toString() ?? '';
+        final String response = item['response']?.toString() ?? '';
         final String askedAt = _formatDate(item['asked_at']?.toString() ?? '');
-        final String respondedAt = _formatDate(
-          item['responded_at']?.toString() ?? '',
-        );
-
-        final String requestorName = _getUserName(controller.request);
-        // Get initials
-        String initials = "U";
-        if (requestorName.isNotEmpty) {
-          final parts = requestorName.trim().split(" ");
-          if (parts.length > 1 && parts[1].isNotEmpty) {
-            initials = "${parts[0][0]}${parts[1][0]}".toUpperCase();
-          } else {
-            initials = requestorName[0].toUpperCase();
-          }
-        }
+        final String respondedAt =
+            _formatDate(item['responded_at']?.toString() ?? '');
 
         return _buildTimelineItem(
           context,
@@ -490,7 +506,7 @@ class AdminClarificationStatusView
           requestorName: requestorName,
           initials: initials,
         );
-      }),
+      }).toList(),
     );
   }
 

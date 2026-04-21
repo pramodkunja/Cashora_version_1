@@ -52,8 +52,5 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="upi" />
         </intent>
-        <package android:name="com.google.android.apps.nbu.paisa.user" /> <!-- GPay -->
-        <package android:name="com.phonepe.app" /> <!-- PhonePe -->
-        <package android:name="net.one97.paytm" /> <!-- Paytm -->
     </queries>
 </manifest>

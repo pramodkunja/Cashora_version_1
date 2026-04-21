@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/repositories/payment_repository.dart';
 import '../../utils/payment_constants.dart';
@@ -29,7 +30,7 @@ class PaymentStatusService extends GetxService {
     // Stop existing poll if any
     stopPolling(expenseId);
     
-    print('🔄 Starting payment status polling for expense $expenseId');
+    if (kDebugMode) debugPrint('Starting payment status polling for expense $expenseId');
     
     int pollCount = 0;
     
@@ -57,7 +58,7 @@ class PaymentStatusService extends GetxService {
           // Check if status is terminal
           if (currentStatus != null &&
               PaymentConstants.isTerminalStatus(currentStatus)) {
-            print('✅ Payment status polling completed: $currentStatus');
+            if (kDebugMode) debugPrint('Payment status polling completed: $currentStatus');
             
             // Stop polling
             stopPolling(expenseId);
@@ -70,7 +71,7 @@ class PaymentStatusService extends GetxService {
           
           // Check if max polls reached
           if (pollCount >= PaymentConstants.maxPollAttempts) {
-            print('⚠️ Max polling attempts reached for expense $expenseId');
+            if (kDebugMode) debugPrint('Max polling attempts reached for expense $expenseId');
             
             // Stop polling
             stopPolling(expenseId);
@@ -83,10 +84,10 @@ class PaymentStatusService extends GetxService {
             return;
           }
           
-          print('🔄 Poll #$pollCount - Status: $currentStatus');
+          if (kDebugMode) debugPrint('Poll #$pollCount - Status: $currentStatus');
           
         } catch (e) {
-          print('❌ Error polling payment status: $e');
+          if (kDebugMode) debugPrint('Error polling payment status: $e');
           
           // Don't stop polling on error, just notify
           onError?.call('Failed to fetch payment status');
@@ -103,7 +104,7 @@ class PaymentStatusService extends GetxService {
       _statusCallbacks.remove(expenseId);
       _errorCallbacks.remove(expenseId);
       
-      print('🛑 Stopped payment status polling for expense $expenseId');
+      if (kDebugMode) debugPrint('Stopped payment status polling for expense $expenseId');
     }
   }
   
@@ -112,7 +113,7 @@ class PaymentStatusService extends GetxService {
     for (final expenseId in _activePolls.keys.toList()) {
       stopPolling(expenseId);
     }
-    print('🛑 Stopped all payment status polling');
+    if (kDebugMode) debugPrint('Stopped all payment status polling');
   }
   
   /// Check if polling is active for an expense

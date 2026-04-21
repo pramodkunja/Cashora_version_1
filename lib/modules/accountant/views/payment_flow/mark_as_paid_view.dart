@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_text_styles.dart';
+import '../../../../utils/widgets/app_loader.dart';
 import '../../controllers/payment_flow_controller.dart';
 
 class MarkAsPaidView extends GetView<PaymentFlowController> {
   const MarkAsPaidView({super.key});
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
-    // Refresh methods on entry if empty
     if (controller.paymentMethods.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.fetchPaymentMethods();
@@ -18,179 +25,324 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Mark as Paid'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Info
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.primaryBlue.withOpacity(0.1)),
-              ),
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Request Info",
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryBlue,
+                  // Amount card
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(22.w),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6B55CE), Color(0xFF8B74E8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _purple.withOpacity(0.22),
+                          blurRadius: 20.r,
+                          offset: Offset(0, 8.h),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'REQUEST AMOUNT',
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withOpacity(0.85),
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Obx(
+                          () => Text(
+                            '₹${controller.currentRequest['amount'] ?? '0'}',
+                            style: GoogleFonts.inter(
+                              fontSize: 32.sp,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Obx(
+                          () => Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Text(
+                              'ID: ${controller.currentRequest['id'] ?? 'N/A'}',
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 8.h),
-                  Obx(() => Text(
-                        "Amount: ₹${controller.currentRequest['amount'] ?? '0'}",
-                        style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.w600),
-                      )),
-                  SizedBox(height: 4.h),
-                  Obx(() => Text(
-                        "Expense ID: ${controller.currentRequest['id'] ?? 'N/A'}",
-                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
-                      )),
+
+                  SizedBox(height: 16.h),
+
+                  // Payment Method Card
+                  _buildCard(
+                    icon: Icons.payment_rounded,
+                    title: 'Payment Method',
+                    child: Obx(() {
+                      if (controller.paymentMethods.isEmpty) {
+                        return const AppLoader();
+                      }
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        decoration: BoxDecoration(
+                          color: _bg,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: controller.selectedPaidMethod.value,
+                            icon: Icon(Icons.keyboard_arrow_down_rounded,
+                                color: _slate500, size: 22.sp),
+                            style: GoogleFonts.inter(
+                                fontSize: 14.sp, color: _slate900),
+                            dropdownColor: Colors.white,
+                            items: controller.paymentMethods.map((m) {
+                              return DropdownMenuItem<String>(
+                                value: m['value'],
+                                child: Text(m['label'] ?? m['value']),
+                              );
+                            }).toList(),
+                            onChanged: (v) {
+                              if (v != null) controller.selectedPaidMethod.value = v;
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+
+                  SizedBox(height: 14.h),
+
+                  // Transaction Reference
+                  _buildCard(
+                    icon: Icons.tag_rounded,
+                    title: 'Transaction Reference (Optional)',
+                    child: _textField(
+                      controller: controller.transactionRefController,
+                      hint: 'Enter UTR, Txn ID, etc.',
+                    ),
+                  ),
+
+                  SizedBox(height: 14.h),
+
+                  // Payment Note
+                  _buildCard(
+                    icon: Icons.edit_note_rounded,
+                    title: 'Payment Note (Optional)',
+                    child: _textField(
+                      controller: controller.paymentNoteController,
+                      hint: 'E.g., Paid via GPay...',
+                      maxLines: 3,
+                    ),
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 32.h),
+          ),
+          _buildBottomBar(),
+        ],
+      ),
+    );
+  }
 
-            // Payment Method Dropdown
-            Text(
-              "Payment Method",
-              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 8.h),
-            Obx(() {
-              if (controller.paymentMethods.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: controller.selectedPaidMethod.value,
-                    icon: Icon(Icons.arrow_drop_down, color: AppColors.textSlate),
-                    items: controller.paymentMethods.map((method) {
-                      return DropdownMenuItem<String>(
-                        value: method['value'],
-                        child: Text(
-                          method['label'] ?? method['value'],
-                          style: AppTextStyles.bodyMedium,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        controller.selectedPaidMethod.value = newValue;
-                      }
-                    },
-                  ),
-                ),
-              );
-            }),
-            SizedBox(height: 24.h),
-
-            // Transaction Reference
-            Text(
-              "Transaction Reference (Optional)",
-              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 8.h),
-            TextField(
-              controller: controller.transactionRefController,
-              decoration: InputDecoration(
-                hintText: "Enter UTR, Txn ID, etc.",
-                hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textLight),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: const BorderSide(color: AppColors.primaryBlue),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
               ),
+              child: Icon(Icons.arrow_back_rounded,
+                  color: Colors.white, size: 20.sp),
             ),
-            SizedBox(height: 24.h),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            'Mark as Paid',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Payment Note
-            Text(
-              "Payment Note (Optional)",
-              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 8.h),
-            TextField(
-              controller: controller.paymentNoteController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "E.g., Paid via GPay...",
-                hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textLight),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: const BorderSide(color: AppColors.primaryBlue),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              ),
-            ),
-            SizedBox(height: 48.h),
-
-            // Submit Button
-            Obx(() => SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading.value
-                        ? null
-                        : () => controller.markAsPaid(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+  Widget _buildBottomBar() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10.r,
+            offset: Offset(0, -4.h),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Obx(
+          () => SizedBox(
+            width: double.infinity,
+            height: 52.h,
+            child: ElevatedButton.icon(
+              onPressed: controller.isLoading.value
+                  ? null
+                  : () => controller.markAsPaid(),
+              icon: controller.isLoading.value
+                  ? SizedBox(
+                      width: 18.w,
+                      height: 18.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
                       ),
-                      elevation: 0,
-                    ),
-                    child: controller.isLoading.value
-                        ? SizedBox(
-                            width: 24.w,
-                            height: 24.w,
-                            child: const CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
-                        : Text(
-                            "Confirm Payment",
-                            style: AppTextStyles.buttonText.copyWith(color: Colors.white),
-                          ),
-                  ),
-                )),
-          ],
+                    )
+                  : Icon(Icons.check_circle_rounded, size: 18.sp),
+              label: Text(
+                'Confirm Payment',
+                style: GoogleFonts.inter(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _purple,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: _purple.withOpacity(0.5),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required IconData icon,
+    required String title,
+    required Widget child,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: _purpleLight,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, color: _purple, size: 16.sp),
+              ),
+              SizedBox(width: 10.w),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: _slate900,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _textField({
+    required TextEditingController controller,
+    required String hint,
+    int maxLines = 1,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _bg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+          border: InputBorder.none,
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         ),
       ),
     );

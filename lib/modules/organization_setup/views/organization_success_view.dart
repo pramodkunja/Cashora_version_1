@@ -1,165 +1,187 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
 
 class OrganizationSuccessView extends StatelessWidget {
   const OrganizationSuccessView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Success Icon / Illustration area
-                Center(
-                  child: Container(
-                    width: 120,
-                    height: 120,
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(24.w),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 420.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 20.h),
+                  Center(
+                    child: Container(
+                      width: 120.w,
+                      height: 120.w,
+                      decoration: BoxDecoration(
+                        color: _greenBg,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _green.withOpacity(0.2),
+                            blurRadius: 30.r,
+                            spreadRadius: 4.r,
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.check_rounded,
+                          color: _green, size: 64.sp),
+                    ),
+                  ),
+                  SizedBox(height: 32.h),
+                  Text(
+                    AppText.organizationCreatedSuccess,
+                    style: GoogleFonts.inter(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w800,
+                      color: _slate900,
+                      height: 1.3,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 12.h),
+                  Text(
+                    AppText.secureWorkspaceReady,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: _slate500,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 32.h),
+
+                  // Email Info Card
+                  Container(
+                    padding: EdgeInsets.all(18.w),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFFDCFCE7),
-                        width: 8,
-                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 12.r,
+                          offset: Offset(0, 3.h),
+                        ),
+                      ],
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.check_rounded,
-                        color: Color(0xFF16A34A), // Green
-                        size: 64,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Title
-                Text(
-                  AppText.organizationCreatedSuccess,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.h2.copyWith(fontSize: 24, height: 1.3),
-                ),
-                const SizedBox(height: 16),
-
-                // Subtitle
-                Text(
-                  AppText.secureWorkspaceReady,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppTextStyles.bodyMedium.color,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // Email Info Box
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          shape: BoxShape.circle,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10.w),
+                          decoration: BoxDecoration(
+                            color: _purpleLight,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Icon(Icons.mail_outline_rounded,
+                              color: _purple, size: 20.sp),
                         ),
-                        child: const Icon(
-                          Icons.mail_outline_rounded,
-                          color: AppColors.primaryBlue,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppText.checkInbox,
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppTextStyles.h3.color,
+                        SizedBox(width: 14.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppText.checkInbox,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: _slate900,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              AppText.checkInboxDesc,
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppTextStyles.bodyMedium.color,
-                                fontSize: 13,
-                                height: 1.4,
+                              SizedBox(height: 4.h),
+                              Text(
+                                AppText.checkInboxDesc,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  color: _slate500,
+                                  height: 1.4,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // Go to Login Button
-                PrimaryButton(
-                  text: AppText
-                      .goToLogin, // TODO: Add to AppText if not present (already checked)
-                  onPressed: () => Get.offAllNamed(AppRoutes.LOGIN),
-                  icon: const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Footer Links
-                Center(
-                  child: Wrap(
-                    spacing: 4,
-                    children: [
-                      Text(
-                        AppText.didntReceiveEmail,
-                        style: GoogleFonts.inter(
-                          color: AppTextStyles.bodySmall.color,
-                          fontSize: 13,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Text(
-                          AppText.contactSupport,
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFF0EA5E9),
-                            fontSize: 13,
-                            decoration: TextDecoration.underline,
-                            decorationColor: const Color(0xFF0EA5E9),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  SizedBox(height: 32.h),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52.h,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Get.offAllNamed(AppRoutes.LOGIN),
+                      icon: Icon(Icons.arrow_forward_rounded, size: 18.sp),
+                      label: Text(
+                        AppText.goToLogin,
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _purple,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  Center(
+                    child: Wrap(
+                      spacing: 4.w,
+                      children: [
+                        Text(
+                          AppText.didntReceiveEmail,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: _slate500,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Text(
+                            AppText.contactSupport,
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _purple,
+                              decoration: TextDecoration.underline,
+                              decorationColor: _purple,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

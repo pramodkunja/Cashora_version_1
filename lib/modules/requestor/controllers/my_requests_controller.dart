@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/request_repository.dart';
 import '../../../../utils/app_colors.dart';
@@ -9,11 +10,13 @@ class MyRequestsController extends GetxController {
   final RequestRepository _repository =
       Get.find<RequestRepository>(); // Ensure ID is injected
 
-  final currentTab = 0
-      .obs; // 0: All, 1: Pending, 2: Approved, 3: Rejected, 4: Unpaid, 5: Clarification
+  final currentTab = 0.obs;
   final isLoading = false.obs;
   final requestList = <Map<String, dynamic>>[].obs;
   final searchQuery = ''.obs;
+
+  // Scroll controller for list — used to reset scroll on return
+  final scrollController = ScrollController();
 
   @override
   void onInit() {
@@ -21,56 +24,74 @@ class MyRequestsController extends GetxController {
     if (Get.arguments != null && Get.arguments['filter'] == 'Pending') {
       currentTab.value = 1;
     }
-    // Listen to tab changes to refetch
-    ever(currentTab, (_) => fetchRequests());
+    ever(currentTab, (_) {
+      fetchRequests();
+      _scrollToTop();
+    });
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void _scrollToTop() {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(0);
+    }
   }
 
   Future<void> fetchRequests() async {
     isLoading.value = true;
     try {
+      // Backend /requestor/requests status filter labels:
+      // All | Pending | Clarification | Approved | Rejected | Unpaid
       String? status;
-      String? paymentStatus;
-
       switch (currentTab.value) {
-        case 1: // Pending
-          status = 'pending';
+        case 1:
+          status = 'Pending';
           break;
-        case 2: // Approved (Includes auto_approved)
-          status = 'approved';
+        case 2:
+          status = 'Approved';
           break;
-        case 3: // Rejected
-          status = 'rejected';
+        case 3:
+          status = 'Rejected';
           break;
-        case 4: // Unpaid
-          paymentStatus = 'pending';
+        case 4:
+          status = 'Unpaid';
           break;
-        case 5: // Clarification
-          status = 'clarification_required';
+        case 5:
+          status = 'Clarification';
           break;
-        default: // All
-          break;
+        default:
+          status = 'All';
       }
 
       final rawRequests = await _repository.getMyRequests(
         status: status,
-        paymentStatus: paymentStatus,
+        search: searchQuery.value.isEmpty ? null : searchQuery.value,
       );
 
       // Enhance with UI helpers (Icon, Color)
       requestList.value = rawRequests.map((req) {
         final category = req['category'] as String? ?? 'General';
         req['icon'] = _getCategoryIcon(category);
-        req['iconColor'] = AppColors.primaryBlue; // Unified blue for now or map
+        req['iconColor'] = AppColors.primaryBlue;
         req['iconBg'] = AppColors.primaryBlue.withOpacity(0.1);
-        req['date'] = DateHelper.formatDate(req['created_at']);
+        // Backend shape: { date: ISO string }. Fallback to created_at for legacy.
+        req['date'] = DateHelper.formatDate(req['date'] ?? req['created_at']);
         req['title'] = req['purpose'] ?? req['title'] ?? 'Request';
 
         // Map receipt_url to attachments list for details view
+        req['attachments'] = [];
         if (req['receipt_url'] != null &&
             req['receipt_url'].toString().isNotEmpty) {
-          req['attachments'] = [
-            {'file': req['receipt_url'], 'name': 'Receipt', 'size': 'Unknown'},
-          ];
+          req['attachments'].add({'file': req['receipt_url'], 'name': 'Receipt', 'size': 'Unknown'});
+        }
+        if (req['payment_qr_url'] != null &&
+            req['payment_qr_url'].toString().isNotEmpty) {
+          req['attachments'].add({'file': req['payment_qr_url'], 'name': 'QR Code', 'size': 'Unknown'});
         }
 
         return req;
@@ -78,7 +99,7 @@ class MyRequestsController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Failed to fetch requests: $e',
+        _extractErrorMessage(e, fallback: 'Failed to fetch requests'),
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -86,24 +107,25 @@ class MyRequestsController extends GetxController {
     }
   }
 
-  List<Map<String, dynamic>> get filteredRequests {
-    if (searchQuery.value.isEmpty) {
-      return requestList;
-    }
-    final lowerQuery = searchQuery.value.toLowerCase();
-    return requestList
-        .where(
-          (r) =>
-              (r['title']?.toString().toLowerCase().contains(lowerQuery) ??
-                  false) ||
-              (r['request_id']?.toString().toLowerCase().contains(lowerQuery) ??
-                  false),
-        )
-        .toList();
-  }
+  // Search is handled server-side via the `search` query param.
+  List<Map<String, dynamic>> get filteredRequests => requestList;
 
   void searchRequests(String query) {
     searchQuery.value = query;
+    fetchRequests();
+  }
+
+  static String _extractErrorMessage(Object e, {required String fallback}) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map && data['detail'] != null) return data['detail'].toString();
+      if (data is Map && data['message'] != null) return data['message'].toString();
+      final code = e.response?.statusCode;
+      if (code == 401) return 'Session expired. Please log in again.';
+      if (code == 403) return 'You do not have access to this resource.';
+      if (code == 400) return 'Invalid filter values.';
+    }
+    return fallback;
   }
 
   void changeTab(int index) {
@@ -112,12 +134,15 @@ class MyRequestsController extends GetxController {
     }
   }
 
-  void viewDetails(Map<String, dynamic> request) {
-    if (request['status'] == 'clarification_required') {
-      Get.toNamed(AppRoutes.REQUESTOR_CLARIFICATION, arguments: request);
+  Future<void> viewDetails(Map<String, dynamic> request) async {
+    if (request['status'] == 'clarification') {
+      await Get.toNamed(AppRoutes.REQUESTOR_CLARIFICATION, arguments: request);
     } else {
-      Get.toNamed(AppRoutes.REQUEST_DETAILS_READ, arguments: request);
+      await Get.toNamed(AppRoutes.REQUEST_DETAILS_READ, arguments: request);
     }
+    // Reset scroll + refresh list when returning
+    _scrollToTop();
+    fetchRequests();
   }
 
   IconData _getCategoryIcon(String category) {

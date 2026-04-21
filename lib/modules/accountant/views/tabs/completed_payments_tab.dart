@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/custom_search_bar.dart';
 import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../controllers/accountant_payments_controller.dart';
 
 class CompletedPaymentsTab extends StatelessWidget {
   const CompletedPaymentsTab({Key? key}) : super(key: key);
+
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +28,10 @@ class CompletedPaymentsTab extends StatelessWidget {
       if (controller.isLoading.value) {
         return const SkeletonListView();
       }
-
       final expenses = controller.completedExpenses;
-
-      // Calculate Total Disbursed
-      double totalDisbursed = 0;
-      for (var item in expenses) {
-        // API uses 'amount_paid' for completed payments
-        totalDisbursed +=
-            double.tryParse(
+      double total = 0;
+      for (final item in expenses) {
+        total += double.tryParse(
               item['amount_paid']?.toString() ??
                   item['amount']?.toString() ??
                   '0',
@@ -37,105 +40,147 @@ class CompletedPaymentsTab extends StatelessWidget {
       }
 
       return SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+        controller: controller.completedScroll,
+        padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 24.h),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search Bar
-            const CustomSearchBar(hintText: AppText.searchByIdOrName),
-            SizedBox(height: 24.h),
-
-            // Total Disbursed Card
+            // Search
             Container(
-              padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(24.r),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 2.h),
+                  ),
+                ],
+              ),
+              child: TextField(
+                style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+                decoration: InputDecoration(
+                  hintText: AppText.searchByIdOrName,
+                  hintStyle:
+                      GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      color: _slate500, size: 20.sp),
+                  border: InputBorder.none,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 16.h),
+
+            // Total Disbursed card
+            Container(
+              padding: EdgeInsets.all(20.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 12.r,
+                    offset: Offset(0, 3.h),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
+                  Container(
+                    padding: EdgeInsets.all(14.w),
+                    decoration: BoxDecoration(
+                      color: _greenBg,
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    child: Icon(Icons.payments_rounded,
+                        color: _green, size: 24.sp),
+                  ),
+                  SizedBox(width: 14.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           AppText.totalDisbursed,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSlate,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: _slate500,
                           ),
                         ),
-                        SizedBox(height: 8.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: FittedBox(
-                                alignment: Alignment.centerLeft,
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  '₹${totalDisbursed.toStringAsFixed(2)}',
-                                  style: AppTextStyles.h1,
-                                ),
-                              ),
+                        SizedBox(height: 4.h),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '₹${total.toStringAsFixed(2)}',
+                            style: GoogleFonts.inter(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.w800,
+                              color: _slate900,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    width: 60.w,
-                    height: 60.w,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9), // Slate 100
-                      borderRadius: BorderRadius.circular(30.r),
-                    ),
-                    child: Icon(
-                      Icons.attach_money_rounded,
-                      size: 32.sp,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
                 ],
               ),
             ),
-            SizedBox(height: 20.h),
 
-            // Filters Row (Keep static or make functional later if needed, user asked strictly for Tabs)
+            SizedBox(height: 16.h),
+
+            // Filter chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  // Removed filters as per revert instructions/simplicity but kept method if needed.
-                  // Actually user asked to revert filters for "rejected/cancelled".
-                  // This is "Completed" tab, so filters are harmless, but let's keep them.
-                  _buildFilterChip(context, 'Date Range'),
+                  _filterChip('Date Range'),
                   SizedBox(width: 8.w),
-                  _buildFilterChip(context, 'Category'),
+                  _filterChip('Category'),
                 ],
               ),
             ),
-            SizedBox(height: 24.h),
 
-            Align(
-              alignment: Alignment.centerLeft,
+            SizedBox(height: 18.h),
+
+            Padding(
+              padding: EdgeInsets.only(left: 4.w),
               child: Text(
-                'Recent Completed',
-                style: AppTextStyles.bodySmall.copyWith(
+                'RECENT COMPLETED',
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                  color: AppColors.textLight,
+                  color: _slate500,
+                  letterSpacing: 1.2,
                 ),
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 10.h),
 
-            // List Items
             if (expenses.isEmpty)
-              Padding(
-                padding: EdgeInsets.only(top: 20.h),
-                child: Text(
-                  "No completed payments",
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSlate,
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 28.h),
+                  child: Column(
+                    children: [
+                      Icon(Icons.inbox_rounded,
+                          size: 56.sp, color: _slate300),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'No completed payments',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _slate500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )
@@ -144,86 +189,8 @@ class CompletedPaymentsTab extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: expenses.length,
-                separatorBuilder: (context, index) => SizedBox(height: 16.h),
-                itemBuilder: (context, index) {
-                  final item = expenses[index];
-
-                  // Extract Amount
-                  final amountVal =
-                      double.tryParse(
-                        item['amount_paid']?.toString() ??
-                            item['amount']?.toString() ??
-                            '0',
-                      ) ??
-                      0.0;
-
-                  // Extract Date
-                  final dateStr =
-                      item['processed_at'] ??
-                      item['created_at'] ??
-                      item['updated_at'];
-                  String formattedDate = '';
-                  if (dateStr != null) {
-                    try {
-                      final dt = DateTime.parse(dateStr);
-                      const months = [
-                        'Jan',
-                        'Feb',
-                        'Mar',
-                        'Apr',
-                        'May',
-                        'Jun',
-                        'Jul',
-                        'Aug',
-                        'Sep',
-                        'Oct',
-                        'Nov',
-                        'Dec',
-                      ];
-                      formattedDate =
-                          '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-                    } catch (_) {
-                      formattedDate = dateStr.toString().split('T')[0];
-                    }
-                  }
-
-                  // Extract Name / Title
-                  // 'payments' list items often lack requestor/payee details directly.
-                  // So we use request_id or payment_id as the main identifier if name is missing.
-                  String title = 'Unknown User';
-                  if (item['requestor'] != null && item['requestor'] is Map) {
-                    final req = item['requestor'];
-                    title =
-                        "${req['first_name'] ?? ''} ${req['last_name'] ?? ''}"
-                            .trim();
-                    if (title.isEmpty) title = req['email'] ?? 'Unknown User';
-                  } else if (item['payee_name'] != null) {
-                    title = item['payee_name'];
-                  } else {
-                    // Fallback: Use Request ID as title
-                    title = item['request_id'] ?? 'Payment #${item['id']}';
-                  }
-
-                  // Extract Subtitle / Details
-                  String subtitle =
-                      item['payment_source'] ?? item['category'] ?? '';
-                  if (subtitle.isEmpty) {
-                    // If no category, show the Payment ID
-                    subtitle = item['payment_id'] ?? 'ID: ${item['id']}';
-                  }
-
-                  return _buildCompletedItem(
-                    context,
-                    payment: item,
-                    id: (item['request_id'] ?? item['payment_id'] ?? item['id']?.toString() ?? '')
-                        .toString()
-                        .toUpperCase(),
-                    date: formattedDate,
-                    name: title,
-                    details: subtitle,
-                    amount: '₹${amountVal.toStringAsFixed(2)}',
-                  );
-                },
+                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                itemBuilder: (_, i) => _buildItem(expenses[i]),
               ),
           ],
         ),
@@ -231,94 +198,136 @@ class CompletedPaymentsTab extends StatelessWidget {
     });
   }
 
-  Widget _buildFilterChip(BuildContext context, String label) {
+  Widget _filterChip(String label) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSlate),
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: _slate500,
+            ),
           ),
           SizedBox(width: 4.w),
-          Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16.sp,
-            color: AppColors.textSlate,
-          ),
+          Icon(Icons.keyboard_arrow_down_rounded,
+              color: _slate500, size: 16.sp),
         ],
       ),
     );
   }
 
-  Widget _buildCompletedItem(
-    BuildContext context, {
-    required Map<String, dynamic> payment,
-    required String id,
-    required String date,
-    required String name,
-    required String details,
-    required String amount,
-  }) {
+  Widget _buildItem(Map<String, dynamic> item) {
+    final amount = double.tryParse(
+          item['amount_paid']?.toString() ??
+              item['amount']?.toString() ??
+              '0',
+        ) ??
+        0.0;
+
+    final dateStr = item['processed_at'] ??
+        item['created_at'] ??
+        item['updated_at'];
+    String formattedDate = '';
+    if (dateStr != null) {
+      try {
+        final dt = DateTime.parse(dateStr);
+        const months = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        ];
+        formattedDate = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+      } catch (_) {
+        formattedDate = dateStr.toString().split('T')[0];
+      }
+    }
+
+    String title = 'Unknown User';
+    if (item['requestor'] is Map) {
+      final r = item['requestor'];
+      title = '${r['first_name'] ?? ''} ${r['last_name'] ?? ''}'.trim();
+      if (title.isEmpty) title = r['email']?.toString() ?? 'Unknown';
+    } else if (item['payee_name'] != null) {
+      title = item['payee_name'].toString();
+    } else {
+      title = item['request_id']?.toString() ?? 'Payment #${item['id']}';
+    }
+
+    final subtitle = (item['payment_source'] ?? item['category'] ?? '').toString();
+    final id = (item['request_id'] ?? item['payment_id'] ?? item['id'] ?? '')
+        .toString()
+        .toUpperCase();
+
     return GestureDetector(
-      onTap: () {
-        Get.toNamed(
+      onTap: () async {
+        await Get.toNamed(
           AppRoutes.ACCOUNTANT_PAYMENT_COMPLETED_DETAILS,
-          arguments: payment,
+          arguments: item,
         );
+        final ctrl = Get.find<AccountantPaymentsController>();
+        ctrl.resetScroll();
+        await ctrl.fetchCompletedPayments();
       },
       child: Container(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24.r),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12.r,
+              offset: Offset(0, 3.h),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
-                  // Allow ID to shrink/truncate
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
+                        horizontal: 8.w, vertical: 3.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: _bg,
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
                       id,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSlate,
-                        fontWeight: FontWeight.w600,
+                      style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: _slate500,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 6.w),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0F2FE),
+                    color: _greenBg,
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
                     AppText.completedSC,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primaryBlue,
+                    style: GoogleFonts.inter(
+                      fontSize: 9.sp,
                       fontWeight: FontWeight.w700,
-                      fontSize: 10.sp,
+                      color: _green,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -326,22 +335,45 @@ class CompletedPaymentsTab extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Container(
+                  width: 38.w,
+                  height: 38.w,
+                  decoration: BoxDecoration(
+                    color: _purpleLight,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _initials(title),
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                        color: _purple,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
-                        style: AppTextStyles.bodyLarge,
+                        title,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: _slate900,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 2.h),
                       Text(
-                        details,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSlate,
+                        subtitle,
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          color: _slate500,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -350,50 +382,48 @@ class CompletedPaymentsTab extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  amount,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.primaryBlue,
+                  '₹${amount.toStringAsFixed(0)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                    color: _purple,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
-            Divider(color: Theme.of(context).dividerColor),
             SizedBox(height: 12.h),
+            Divider(height: 1.h, color: const Color(0xFFF1F5F9)),
+            SizedBox(height: 10.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_rounded,
-                        size: 14.sp,
-                        color: AppColors.textLight,
-                      ),
-                      SizedBox(width: 6.w),
-                      Flexible(
-                        child: Text(
-                          date,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textLight,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                Icon(Icons.calendar_today_rounded,
+                    size: 12.sp, color: _slate500),
+                SizedBox(width: 4.w),
+                Expanded(
+                  child: Text(
+                    formattedDate,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.sp,
+                      color: _slate500,
+                    ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20.sp,
-                  color: AppColors.textDark,
-                ),
+                Icon(Icons.chevron_right_rounded,
+                    color: _slate300, size: 18.sp),
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length > 1 && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
   }
 }

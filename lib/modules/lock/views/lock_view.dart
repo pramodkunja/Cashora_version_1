@@ -38,15 +38,15 @@ class _LockViewState extends State<LockView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         backgroundColor: Colors.black.withOpacity(0.85), // Dark overlay
         body: BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: 10,
             sigmaY: 10,
-          ), // Blur effect like PhonePe/GPay
+          ), // Blur effect
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

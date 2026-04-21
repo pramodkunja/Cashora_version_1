@@ -566,9 +566,6 @@ class AppText {
   static const String transactionDetails = 'TRANSACTION DETAILS';
   static const String payingTo = 'Paying to';
   static const String payViaInstalledApp = 'Pay via installed app';
-  static const String gpay = 'GPay';
-  static const String phonePe = 'PhonePe';
-  static const String paytm = 'Paytm';
   static const String other = 'Other';
   static const String payViaUpiApp = 'Pay via UPI App';
   static const String securelyRedirects =

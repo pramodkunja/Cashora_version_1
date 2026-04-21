@@ -1,265 +1,252 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../controllers/my_requests_controller.dart';
-import '../../../../core/widgets/common_search_bar.dart';
-import 'widgets/requestor_bottom_bar.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../utils/widgets/app_loader.dart';
 import '../../../utils/widgets/skeletons/skeleton_loader.dart';
 
 class MyRequestsView extends GetView<MyRequestsController> {
   const MyRequestsView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _red = AppColors.errorRed;
+  static const _redBg = Color(0xFFFEF2F2);
+  static const _amber = AppColors.warningOrange;
+  static const _amberBg = Color(0xFFFFFBEB);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          AppText.myRequests,
-          style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).cardColor, // White/Dark Card Color
-        surfaceTintColor: Colors.transparent, // Remove material 3 tint
-        elevation: 0,
-        actions: const [],
-        automaticallyImplyLeading: false,
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          _buildSearch(),
+          SizedBox(height: 12.h),
+          _buildFilterChips(),
+          SizedBox(height: 14.h),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const SkeletonListView();
+              }
+              if (controller.filteredRequests.isEmpty) {
+                return _buildEmptyState();
+              }
+              return ListView.separated(
+                controller: controller.scrollController,
+                padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 100.h),
+                itemCount: controller.filteredRequests.length,
+                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                itemBuilder: (_, i) {
+                  final req = controller.filteredRequests[i];
+                  return _buildRequestCard(req);
+                },
+              );
+            }),
+          ),
+        ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header Section (Search + Tabs)
-            // Header Section (Search + Tabs)
-            Container(
-              clipBehavior: Clip
-                  .hardEdge, // Prevent tabs from overlapping rounded corners
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.toNamed(AppRoutes.CREATE_REQUEST_TYPE),
+        backgroundColor: _purple,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        icon: Icon(Icons.add_rounded, color: Colors.white, size: 20.sp),
+        label: Text(
+          'New Request',
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // HEADER
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          Text(
+            AppText.myRequests,
+            style: GoogleFonts.inter(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+          Obx(
+            () => Container(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(30.r),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 20.r,
-                    offset: Offset(0, 8.h),
-                  ),
-                ],
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(20.r),
               ),
-              child: Column(
-                children: [
-                  SizedBox(height: 8.h),
-                  // Search Bar
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.w,
-                      vertical: 8.h,
-                    ),
-                    child: CommonSearchBar(
-                      hintText: AppText.searchRequests,
-                      onChanged: controller.searchRequests,
-                    ),
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  // Scrollable Tab Pills
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
-                    child: Obx(
-                      () => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildTab(context, AppText.filterAll, 0),
-                          SizedBox(width: 12.w),
-                          _buildTab(context, AppText.filterPending, 1),
-                          SizedBox(width: 12.w),
-                          _buildTab(context, AppText.filterClarification, 5),
-                          SizedBox(width: 12.w),
-                          _buildTab(context, AppText.filterApproved, 2),
-                          SizedBox(width: 12.w),
-                          _buildTab(context, AppText.filterRejected, 3),
-                          SizedBox(width: 12.w),
-                          _buildTab(context, 'Unpaid', 4),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                '${controller.filteredRequests.length} items',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // List
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const SkeletonListView();
-                }
-
-                if (controller.filteredRequests.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No requests found',
-                      style: TextStyle(color: AppColors.textSlate),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: EdgeInsets.fromLTRB(
-                    16.w,
-                    16.w,
-                    16.w,
-                    100.h,
-                  ), // Extra bottom padding for FAB
-                  itemCount: controller.filteredRequests.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 12.h),
-                  itemBuilder: (context, index) {
-                    final req = controller.filteredRequests[index];
-                    return _buildRequestCard(context, req);
-                  },
-                );
-              }),
+  // ════════════════════════════════════════════════════════════════════════
+  // SEARCH BAR
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildSearch() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppRoutes.CREATE_REQUEST_TYPE),
-        backgroundColor: AppColors.primary,
-        child: Icon(Icons.add, color: Colors.white, size: 24.sp),
+        child: TextField(
+          onChanged: controller.searchRequests,
+          style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+          decoration: InputDecoration(
+            hintText: AppText.searchRequests,
+            hintStyle: GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+            prefixIcon:
+                Icon(Icons.search_rounded, color: _slate500, size: 20.sp),
+            border: InputBorder.none,
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildTab(BuildContext context, String title, int index) {
-    bool isSelected = controller.currentTab.value == index;
+  // ════════════════════════════════════════════════════════════════════════
+  // FILTER CHIPS
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildFilterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Obx(
+        () => Row(
+          children: [
+            _chip(AppText.filterAll, 0),
+            SizedBox(width: 8.w),
+            _chip(AppText.filterPending, 1),
+            SizedBox(width: 8.w),
+            _chip(AppText.filterClarification, 5),
+            SizedBox(width: 8.w),
+            _chip(AppText.filterApproved, 2),
+            SizedBox(width: 8.w),
+            _chip(AppText.filterRejected, 3),
+            SizedBox(width: 8.w),
+            _chip('Unpaid', 4),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _chip(String label, int index) {
+    final selected = controller.currentTab.value == index;
     return GestureDetector(
       onTap: () => controller.changeTab(index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 9.h),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue : Colors.transparent,
-          borderRadius: BorderRadius.circular(30.r),
+          color: selected ? _purple : Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primaryBlue
-                : AppColors.textSlate.withOpacity(0.2),
-            width: 1.5,
+            color: selected ? _purple : const Color(0xFFE2E8F0),
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryBlue.withOpacity(0.3),
-                    blurRadius: 8.r,
-                    offset: Offset(0, 4.h),
-                  ),
-                ]
-              : [],
         ),
-        alignment: Alignment.center,
         child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.textSlate,
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : _slate500,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildRequestCard(BuildContext context, Map<String, dynamic> req) {
-    Color statusColor;
-    Color statusBg;
+  // ════════════════════════════════════════════════════════════════════════
+  // REQUEST CARD
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildRequestCard(Map<String, dynamic> req) {
+    final status = (req['status'] ?? 'pending').toString().toLowerCase();
+    final purpose =
+        (req['purpose'] ?? req['title'] ?? 'Request').toString();
+    final date = (req['date'] ?? 'No Date').toString();
+    final category =
+        (req['category'] ?? _inferCategory(purpose)).toString();
+    final amount = (req['amount'] as num?)?.toDouble() ?? 0.0;
 
-    final status = req['status']?.toString().toLowerCase() ?? 'pending';
-
-    if (status == 'approved' || status == 'auto_approved') {
-      statusColor = const Color(0xFF047857); // Emerald 700
-      statusBg = const Color(0xFFD1FAE5); // Emerald 100
-    } else if (status == 'pending') {
-      statusColor = const Color(0xFFB45309); // Amber 700
-      statusBg = const Color(0xFFFEF3C7); // Amber 100
-    } else if (status == 'rejected') {
-      statusColor = const Color(0xFFB91C1C); // Red 700
-      statusBg = const Color(0xFFFEE2E2); // Red 100
-    } else {
-      statusColor = AppColors.textSlate;
-      statusBg = AppColors.textSlate.withOpacity(0.1);
-    }
-
-    // Determine Status Text
-    String statusText = status.toUpperCase();
-    if (status == 'auto_approved') statusText = 'APPROVED';
-    if (status == 'clarification_required') statusText = 'CLARIFICATION';
-
-    // Icon + Color Logic
-    IconData iconData = Icons.receipt_long_rounded;
-    Color iconColor = AppColors.primaryBlue;
-    Color iconBg = const Color(0xFFE0F2FE); // Blue 100
-
-    final titleLower = (req['purpose'] ?? req['title'] ?? '')
-        .toString()
-        .toLowerCase();
-
-    if (titleLower.contains('food') ||
-        titleLower.contains('lunch') ||
-        titleLower.contains('dinner')) {
-      iconData = Icons.restaurant;
-      iconColor = const Color(0xFF059669); // Emerald 600
-      iconBg = const Color(0xFFECFDF5); // Emerald 50
-    } else if (titleLower.contains('taxi') ||
-        titleLower.contains('transport') ||
-        titleLower.contains('uber')) {
-      iconData = Icons.directions_car;
-      iconColor = const Color(0xFFDC2626); // Red 600
-      iconBg = const Color(0xFFFEF2F2); // Red 50
-    } else if (titleLower.contains('flight') ||
-        titleLower.contains('trip') ||
-        titleLower.contains('travel')) {
-      iconData = Icons.flight;
-      iconColor = const Color(0xFF4F46E5); // Indigo 600
-      iconBg = const Color(0xFFEEF2FF); // Indigo 50
-    } else if (titleLower.contains('supplies') ||
-        titleLower.contains('inventory')) {
-      iconData = Icons.shopping_cart;
-      iconColor = const Color(0xFFD97706); // Amber 600
-      iconBg = const Color(0xFFFFFBEB); // Amber 50
-    }
-
-    // Date & Category
-    final String date = req['date'] ?? 'No Date';
-    final String category =
-        req['category'] ??
-        (titleLower.contains('food')
-            ? 'Food'
-            : titleLower.contains('travel')
-            ? 'Travel'
-            : titleLower.contains('supplies')
-            ? 'Inventory'
-            : 'General');
+    final statusColor = _colorForStatus(status);
+    final statusBg = _bgForStatus(status);
+    final statusText = _statusLabel(status);
+    final iconData = _iconForCategory(purpose);
 
     return GestureDetector(
       onTap: () => controller.viewDetails(req),
       child: Container(
-        padding: EdgeInsets.all(20.r),
+        padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24.r),
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 16.r,
-              offset: Offset(0, 4.h),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12.r,
+              offset: Offset(0, 3.h),
             ),
           ],
         ),
@@ -268,65 +255,79 @@ class MyRequestsView extends GetView<MyRequestsController> {
           children: [
             Row(
               children: [
+                // Category icon
                 Container(
-                  width: 50.w,
-                  height: 50.w,
+                  width: 44.w,
+                  height: 44.w,
                   decoration: BoxDecoration(
-                    color: iconBg,
-                    shape: BoxShape.circle,
+                    color: _purpleLight,
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  child: Icon(iconData, color: iconColor, size: 24.sp),
+                  child: Icon(iconData, color: _purple, size: 22.sp),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 12.w),
+                // Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        req['purpose'] ?? req['title'] ?? 'Request',
-                        style: AppTextStyles.h3.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
+                        purpose,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _slate900,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        "$date • $category",
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSlate,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      SizedBox(height: 3.h),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded,
+                              size: 11.sp, color: _slate500),
+                          SizedBox(width: 4.w),
+                          Flexible(
+                            child: Text(
+                              '$date • $category',
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                color: _slate500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
+                SizedBox(width: 8.w),
+                // Amount + status
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '₹${(req['amount'] as num?)?.toStringAsFixed(2) ?? "0.00"}',
-                      style: TextStyle(
-                        fontSize: 18.sp,
+                      '₹${amount.toStringAsFixed(0)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF0F172A),
+                        color: _slate900,
                       ),
                     ),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 5.h),
                     Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 4.h,
-                      ),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                       decoration: BoxDecoration(
                         color: statusBg,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(6.r),
                       ),
                       child: Text(
                         statusText,
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.inter(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w700,
                           color: statusColor,
                           letterSpacing: 0.5,
                         ),
@@ -337,25 +338,35 @@ class MyRequestsView extends GetView<MyRequestsController> {
               ],
             ),
 
-            // Rejection Note
+            // Rejection reason pill
             if (status == 'rejected') ...[
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                padding:
+                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2), // Red 50
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: _redBg,
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Text(
-                  req['rejection_reason'] ??
-                      "Missing information or receipt attachment",
-                  style: TextStyle(
-                    color: const Color(0xFFEF4444),
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline_rounded,
+                        color: _red, size: 14.sp),
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: Text(
+                        (req['rejection_reason'] ??
+                                'Missing information or receipt attachment')
+                            .toString(),
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: _red,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -363,5 +374,100 @@ class MyRequestsView extends GetView<MyRequestsController> {
         ),
       ),
     );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // EMPTY STATE
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_rounded, size: 56.sp, color: _slate300),
+          SizedBox(height: 14.h),
+          Text(
+            'No requests found',
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: _slate500,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Tap the + button to create one',
+            style: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // HELPERS
+  // ════════════════════════════════════════════════════════════════════════
+  IconData _iconForCategory(String purpose) {
+    final p = purpose.toLowerCase();
+    if (p.contains('food') || p.contains('lunch') || p.contains('dinner'))
+      return Icons.restaurant_rounded;
+    if (p.contains('taxi') || p.contains('transport') || p.contains('uber'))
+      return Icons.directions_car_rounded;
+    if (p.contains('flight') ||
+        p.contains('trip') ||
+        p.contains('travel'))
+      return Icons.flight_rounded;
+    if (p.contains('supplies') || p.contains('inventory'))
+      return Icons.shopping_bag_rounded;
+    return Icons.receipt_long_rounded;
+  }
+
+  String _inferCategory(String purpose) {
+    final p = purpose.toLowerCase();
+    if (p.contains('food')) return 'Food';
+    if (p.contains('travel') || p.contains('flight')) return 'Travel';
+    if (p.contains('supplies')) return 'Inventory';
+    return 'General';
+  }
+
+  Color _colorForStatus(String status) {
+    switch (status) {
+      case 'approved':
+      case 'auto_approved':
+      case 'paid':
+        return _green;
+      case 'rejected':
+        return _red;
+      case 'clarification':
+        return _purple;
+      default:
+        return _amber;
+    }
+  }
+
+  Color _bgForStatus(String status) {
+    switch (status) {
+      case 'approved':
+      case 'auto_approved':
+      case 'paid':
+        return _greenBg;
+      case 'rejected':
+        return _redBg;
+      case 'clarification':
+        return _purpleLight;
+      default:
+        return _amberBg;
+    }
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'auto_approved':
+        return 'APPROVED';
+      case 'clarification':
+        return 'CLARIFICATION';
+      default:
+        return status.toUpperCase();
+    }
   }
 }

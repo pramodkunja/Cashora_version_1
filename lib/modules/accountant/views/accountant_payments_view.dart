@@ -1,102 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../controllers/accountant_dashboard_controller.dart';
 import '../controllers/accountant_payments_controller.dart';
 import 'tabs/completed_payments_tab.dart';
 import 'tabs/pending_payments_tab.dart';
-import 'tabs/generic_payment_list_tab.dart'; // Restoring removed import
-import 'widgets/accountant_bottom_bar.dart'; // Added
-import 'widgets/accountant_bottom_bar.dart';
-
-// Revert imports
-import 'tabs/completed_payments_tab.dart';
-import 'tabs/pending_payments_tab.dart';
-import 'widgets/accountant_bottom_bar.dart';
 
 class AccountantPaymentsView extends GetView<AccountantPaymentsController> {
   const AccountantPaymentsView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      resizeToAvoidBottomInset: false, // Prevent layout shift on keyboard
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Remove back button
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: _bg,
+        body: Column(
           children: [
-            Text('Payment Requests', style: AppTextStyles.h2),
-            SizedBox(height: 4.h),
-            Text('Accountant View', style: AppTextStyles.bodySmall),
+            _buildHeader(context),
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
+                children: const [
+                  PendingPaymentsTab(),
+                  CompletedPaymentsTab(),
+                ],
+              ),
+            ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_list_rounded,
-              color: Theme.of(context).iconTheme.color,
-              size: 24.sp,
-            ),
-            onPressed: () {},
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(70.h), // Increased height for spacing
-          child: Container(
-            margin: EdgeInsets.fromLTRB(
-              20.w,
-              12.h,
-              20.w,
-              10.h,
-            ), // Added top margin for space after Accountant View
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.1)
-                  : const Color(0xFFE2E8F0),
-              borderRadius: BorderRadius.circular(30.r),
-            ),
-            clipBehavior:
-                Clip.antiAlias, // Ensure child (indicator) clips perfectly
-            child: TabBar(
-              controller: controller.tabController,
-              indicatorSize: TabBarIndicatorSize.tab, // Fill the entire tab
-              indicator: BoxDecoration(
-                color: AppColors.primaryBlue, // Blue to fill as requested
-                borderRadius: BorderRadius.circular(30.r),
-                // Remove Shadow if it looks like a "line"
-              ),
-              labelColor: Colors.white,
-              unselectedLabelColor: AppColors.textSlate,
-              labelStyle: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 14.sp,
-              ),
-              unselectedLabelStyle: AppTextStyles.bodyMedium.copyWith(
-                fontSize: 14.sp,
-              ),
-              dividerColor: Colors.transparent, // Remove any bottom line
-              indicatorPadding: EdgeInsets.zero, // Ensure no padding
-              labelPadding: EdgeInsets
-                  .zero, // Ensure full width tap target (optional, but good for fill)
+      ),
+    );
+  }
 
-              tabs: const [
-                Tab(text: 'Pending'),
-                Tab(text: 'Completed'),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Payment Requests',
+                  style: GoogleFonts.inter(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'Accountant View',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.white70,
+                  ),
+                ),
               ],
             ),
           ),
-        ),
+          GestureDetector(
+            onTap: () {},
+            child: Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.filter_list_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+        ],
       ),
-      body: TabBarView(
-        controller: controller.tabController,
-        children: const [PendingPaymentsTab(), CompletedPaymentsTab()],
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 8.h),
+      child: Container(
+        height: 44.h,
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: TabBar(
+          onTap: (index) {
+            controller.resetScroll();
+            if (index == 0) {
+              controller.fetchPendingPayments();
+            } else {
+              controller.fetchCompletedPayments();
+            }
+          },
+          indicator: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(9.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 6.r,
+                offset: Offset(0, 1.h),
+              ),
+            ],
+          ),
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelColor: _purple,
+          unselectedLabelColor: _slate500,
+          labelStyle: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelStyle: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          dividerColor: Colors.transparent,
+          overlayColor:
+              WidgetStateProperty.all(Colors.transparent),
+          tabs: const [
+            Tab(text: 'Pending'),
+            Tab(text: 'Completed'),
+          ],
+        ),
       ),
     );
   }

@@ -74,7 +74,7 @@ class PaymentConstants {
   static const String errorUnauthorized = 'UNAUTHORIZED';
   static const String errorInvalidRole = 'INVALID_ROLE';
   static const String errorInvalidVpa = 'INVALID_VPA';
-  static const String errorPhonePeError = 'PHONEPE_ERROR';
+  static const String errorGatewayError = 'GATEWAY_ERROR';
   static const String errorPaymentDeclined = 'PAYMENT_DECLINED';
 
   // Error Messages
@@ -84,12 +84,12 @@ class PaymentConstants {
     errorNoPaymentDetails: 'Could not extract payment details from QR code.',
     errorPaymentDetailsNotFound: 'Payment details not found for this expense.',
     errorExpenseNotApproved: 'Only approved expenses can be paid.',
-    errorInsufficientBalance: 'Insufficient balance in PhonePe merchant account.',
+    errorInsufficientBalance: 'Insufficient balance in merchant account.',
     errorInvalidBeneficiary: 'Invalid beneficiary details.',
     errorUnauthorized: 'You do not have permission to perform this action.',
     errorInvalidRole: 'Only accountants can initiate payouts.',
     errorInvalidVpa: 'Invalid UPI ID. Please verify and try again.',
-    errorPhonePeError: 'PhonePe service error. Please try again later.',
+    errorGatewayError: 'Payment gateway service error. Please try again later.',
     errorPaymentDeclined: 'Payment declined by bank or UPI provider.',
   };
 
@@ -152,7 +152,7 @@ class PaymentStatusConfig {
           icon: '🔄',
           color: 'blue',
           text: 'Processing',
-          description: 'Payment is being processed by PhonePe',
+          description: 'Payment is being processed',
           showSpinner: true,
         );
       case PaymentConstants.statusSuccess:

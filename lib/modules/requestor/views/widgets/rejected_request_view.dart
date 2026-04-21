@@ -24,26 +24,9 @@ class RejectedRequestView extends StatelessWidget {
         DateTime.now().toString();
     final String rejectionDate = _formatDate(dateStr);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          'Request Details',
-          style: AppTextStyles.h3.copyWith(color: AppColors.textDark),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: AppColors.textDark,
-          ),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: SingleChildScrollView(
+    return Container(
+      color: const Color(0xFFF8FAFC),
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [

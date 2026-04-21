@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../controllers/admin_notifications_controller.dart';
 import '../data/notification_model.dart';
 
 class AdminNotificationView extends GetView<AdminNotificationsController> {
   const AdminNotificationView({Key? key}) : super(key: key);
+
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
@@ -15,229 +23,224 @@ class AdminNotificationView extends GetView<AdminNotificationsController> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: AppTextStyles.h1.color),
-            onPressed: () => Get.back(),
-          ),
-          title: Text('Notifications', style: AppTextStyles.h2),
-          centerTitle: false,
-          actions: [
-            TextButton(
-              onPressed: controller.markAllRead,
-              child: Text(
-                'Mark as read',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
+        backgroundColor: _bg,
+        body: Column(
+          children: [
+            _buildHeader(context),
+            _buildTabBar(),
+            Expanded(
+              child: Obx(
+                () => TabBarView(
+                  children: [
+                    _buildList(controller.allNotifications),
+                    _buildList(controller.newRequests),
+                    _buildList(controller.clarifications),
+                  ],
                 ),
               ),
             ),
           ],
-          bottom: TabBar(
-            tabAlignment: TabAlignment.start,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            isScrollable: true,
-            labelColor: Colors.white,
-            unselectedLabelColor: AppTextStyles.bodyMedium.color,
-            indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: AppColors.primary,
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            labelStyle: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            tabs: const [
-              Tab(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text('All'),
-                ),
-              ),
-              Tab(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('New Requests ❹'),
-                ),
-              ),
-              Tab(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('Clarifications'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: Obx(
-          () => TabBarView(
-            children: [
-              _buildList(context, controller.allNotifications),
-              _buildList(context, controller.newRequests),
-              _buildList(context, controller.clarifications),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildList(BuildContext context, List<NotificationItem> items) {
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_back_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            'Notifications',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: controller.markAllRead,
+            child: Container(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                'Mark all read',
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 10.h),
+      height: 38.h,
+      child: TabBar(
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        padding: EdgeInsets.zero,
+        indicatorSize: TabBarIndicatorSize.label,
+        indicator: BoxDecoration(
+          color: _purple,
+          borderRadius: BorderRadius.circular(100.r),
+        ),
+        indicatorPadding:
+            EdgeInsets.symmetric(horizontal: -14.w, vertical: 4.h),
+        dividerColor: Colors.transparent,
+        labelColor: Colors.white,
+        unselectedLabelColor: _slate500,
+        labelStyle:
+            GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.w600),
+        unselectedLabelStyle:
+            GoogleFonts.inter(fontSize: 13.sp, fontWeight: FontWeight.w500),
+        labelPadding: EdgeInsets.symmetric(horizontal: 18.w),
+        overlayColor:
+            WidgetStateProperty.all(_purple.withOpacity(0.06)),
+        tabs: const [
+          Tab(text: 'All'),
+          Tab(text: 'New Requests'),
+          Tab(text: 'Clarifications'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildList(List<NotificationItem> items) {
     if (items.isEmpty) {
       return Center(
-        child: Text(
-          'No notifications',
-          style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.notifications_none_rounded,
+                size: 56.sp, color: _slate300),
+            SizedBox(height: 12.h),
+            Text(
+              'No notifications',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: _slate500,
+              ),
+            ),
+          ],
         ),
       );
     }
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(20.w, 6.h, 20.w, 24.h),
       itemCount: items.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) =>
-          _buildUserRequestItem(context, items[index]),
+      separatorBuilder: (_, __) => SizedBox(height: 10.h),
+      itemBuilder: (_, i) => _item(items[i]),
     );
   }
 
-  Widget _buildUserRequestItem(BuildContext context, NotificationItem item) {
+  Widget _item(NotificationItem item) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundImage: item.image != null
-                    ? NetworkImage(item.image!)
-                    : null,
-                backgroundColor: Colors.grey[300],
-                child: item.image == null
-                    ? const Icon(Icons.person, color: Colors.white)
-                    : null,
-              ),
-              if (item.isUnread)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-            ],
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: _purpleLight,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(
+              item.icon ?? Icons.notifications_rounded,
+              color: _purple,
+              size: 18.sp,
+            ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              item.body ?? '',
-                              style: AppTextStyles.h3.copyWith(fontSize: 16),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (item.isUrgent)
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'URGENT',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFFD97706),
-                                ),
-                              ),
-                            ),
-                          if (item.badgeText != null)
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: item.badgeBg,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                item.badgeText!,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: item.badgeColor,
-                                ),
-                              ),
-                            ),
-                        ],
+                      child: Text(
+                        item.title,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                          color: _slate900,
+                        ),
                       ),
                     ),
-                    if (item.amount != null) ...[
-                      SizedBox(width: 8),
-                      Text(
-                        item.amount!,
-                        style: AppTextStyles.h3.copyWith(fontSize: 16),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.title,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppTextStyles.bodyMedium.color,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    if (item.icon != null) ...[
-                      Icon(item.icon, size: 14, color: AppColors.textSlate),
-                      const SizedBox(width: 4),
-                    ] else ...[
-                      const Icon(
-                        Icons.access_time_rounded,
-                        size: 14,
-                        color: AppColors.textSlate,
-                      ),
-                      const SizedBox(width: 4),
-                    ],
                     Text(
-                      '${item.time} • ${item.ref ?? ""}',
-                      style: AppTextStyles.bodySmall,
+                      item.time,
+                      style: GoogleFonts.inter(
+                          fontSize: 11.sp, color: _slate500),
                     ),
                   ],
+                ),
+                if (item.ref != null) ...[
+                  SizedBox(height: 2.h),
+                  Text(
+                    item.ref!,
+                    style: GoogleFonts.inter(
+                        fontSize: 11.sp, color: _slate500),
+                  ),
+                ],
+                SizedBox(height: 4.h),
+                Text(
+                  item.body ?? '',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: _slate500,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),

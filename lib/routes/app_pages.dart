@@ -37,6 +37,8 @@ import '../modules/admin/views/user_management/admin_edit_user_view.dart';
 import '../modules/admin/views/user_management/admin_deactivate_user_view.dart';
 import '../modules/admin/views/user_management/admin_user_success_view.dart';
 import '../modules/admin/controllers/admin_user_controller.dart';
+import '../modules/admin/controllers/department_controller.dart';
+import '../modules/admin/views/department_list_view.dart';
 import 'app_routes.dart';
 import '../modules/auth/bindings/auth_binding.dart';
 import '../modules/auth/views/login_view.dart';
@@ -302,6 +304,13 @@ class AppPages {
       page: () => const AdminSetLimitsView(),
       binding: BindingsBuilder(() {
         Get.put(AdminSetLimitsController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_DEPARTMENTS,
+      page: () => const DepartmentListView(),
+      binding: BindingsBuilder(() {
+        Get.put(DepartmentController());
       }),
     ),
     GetPage(

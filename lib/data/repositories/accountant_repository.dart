@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart'
-    show DioException; // keep Dio for type use only
+    show DioException, Options, ResponseType;
+import 'package:flutter/foundation.dart';
 import '../../core/services/network_service.dart';
 import '../models/payment_response_model.dart';
 
@@ -7,6 +8,87 @@ class AccountantRepository {
   final NetworkService _networkService;
 
   AccountantRepository(this._networkService);
+
+  Future<Map<String, dynamic>> getDashboard() async {
+    try {
+      final response = await _networkService.get('/accountant/dashboard');
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error fetching dashboard: $e');
+      rethrow;
+    }
+  }
+
+  /// POST /accountant/balance
+  Future<Map<String, dynamic>> updateDailyBalance(double openingBalance) async {
+    if (openingBalance < 0) {
+      throw ArgumentError('openingBalance must be >= 0');
+    }
+    final response = await _networkService.post(
+      '/accountant/balance',
+      data: {'openingBalance': openingBalance},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getReportsSummary({int? month, int? year, String? category}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (month != null) queryParams['month'] = month;
+      if (year != null) queryParams['year'] = year;
+      if (category != null && category.isNotEmpty && category != 'All Categories') {
+        queryParams['category'] = category;
+      }
+      
+      final response = await _networkService.get('/accountant/reports/summary', queryParameters: queryParams);
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error fetching reports summary: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getSpendAnalytics({String? timeRange, String? department, String? category}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (timeRange != null && timeRange.isNotEmpty) queryParams['time_range'] = timeRange;
+      if (department != null && department.isNotEmpty && department != 'Department') queryParams['department'] = department;
+      if (category != null && category.isNotEmpty && category != 'Category' && category != 'All Categories') queryParams['category'] = category;
+      
+      final response = await _networkService.get('/accountant/analytics/spend', queryParameters: queryParams);
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error fetching spend analytics: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<int>> exportCsv({String? startDate, String? endDate, String? category}) async {
+    return _downloadExport('/accountant/reports/export/csv', startDate, endDate, category);
+  }
+
+  Future<List<int>> exportPdf({String? startDate, String? endDate, String? category}) async {
+    return _downloadExport('/accountant/reports/export/pdf', startDate, endDate, category);
+  }
+
+  Future<List<int>> _downloadExport(String path, String? startDate, String? endDate, String? category) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (startDate != null && startDate.isNotEmpty) queryParams['start_date'] = startDate;
+      if (endDate != null && endDate.isNotEmpty) queryParams['end_date'] = endDate;
+      if (category != null && category.isNotEmpty && category != 'All Categories') queryParams['category'] = category;
+
+      final response = await _networkService.get(
+        path,
+        queryParameters: queryParams,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data as List<int>;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error exporting $path: $e');
+      rethrow;
+    }
+  }
 
   /// Returns the pending-payment expenses as raw Maps (paginated → items).
   Future<List<Map<String, dynamic>>> getPendingExpenses() async {
@@ -22,7 +104,7 @@ class AccountantRepository {
           [];
       return rawList.cast<Map<String, dynamic>>();
     } catch (e) {
-      print('Error fetching pending expenses: $e');
+      if (kDebugMode) debugPrint('Error fetching pending expenses: $e');
       rethrow;
     }
   }
@@ -45,7 +127,7 @@ class AccountantRepository {
           [];
       return rawList.cast<Map<String, dynamic>>();
     } catch (e) {
-      print('Error fetching completed expenses: $e');
+      if (kDebugMode) debugPrint('Error fetching completed expenses: $e');
       rethrow;
     }
   }
@@ -58,9 +140,10 @@ class AccountantRepository {
       );
       return PaymentResponse.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      print('Error fetching pending payments: $e');
+      if (kDebugMode) debugPrint('Error fetching pending payments: $e');
       rethrow;
     }
   }
 }
+
 

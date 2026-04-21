@@ -1,485 +1,291 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:open_file/open_file.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/widgets/timeline_item_widget.dart';
 import '../../../../utils/widgets/attachment_card.dart';
 import 'widgets/rejected_request_view.dart';
 
 class RequestDetailsReadView extends StatelessWidget {
   const RequestDetailsReadView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _amber = AppColors.warningOrange;
+  static const _amberBg = Color(0xFFFFFBEB);
+
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> initialRequest = Get.arguments ?? {};
+    final request = Get.arguments as Map<String, dynamic>? ?? {};
+    final status = (request['status'] ?? 'Pending').toString().toLowerCase();
+
+    if (status == 'rejected') {
+      return RejectedRequestView(request: request);
+    }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          AppText.requestDetails,
-          style: AppTextStyles.h3.copyWith(
-            color: Theme.of(context).appBarTheme.titleTextStyle?.color,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: Theme.of(context).iconTheme.color,
-          ),
-          onPressed: () => Get.back(),
-        ),
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(child: _buildContent(request)),
+        ],
       ),
-      body: _buildContent(context, initialRequest),
     );
   }
 
-  Widget _buildContent(BuildContext context, Map<String, dynamic> request) {
-    final String status = request['status'] ?? 'Pending';
-    final String category = request['category'] ?? 'General';
-    // Date Logic: Prefer 'created_at' for parsing, fallback to 'date'
-    String dateStr =
-        request['created_at']?.toString() ??
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_back_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            AppText.requestDetails,
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(Map<String, dynamic> request) {
+    final status = (request['status'] ?? 'Pending').toString().toLowerCase();
+    final category = (request['category'] ?? 'General').toString();
+    final title = (request['title'] ?? request['purpose'] ?? 'Request').toString();
+
+    String dateStr = request['created_at']?.toString() ??
         request['date']?.toString() ??
         DateTime.now().toString();
     String date = dateStr;
     try {
-      final DateTime dt = DateTime.parse(dateStr);
-      final List<String> months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+      final dt = DateTime.parse(dateStr);
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
       ];
       date = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-    } catch (e) {
-      // If parsing fails, it might be already formatted or simple YYYY-MM-DD
+    } catch (_) {
       if (date.contains('T')) date = date.split('T')[0];
     }
-    final String amount = (request['amount'] as double? ?? 0.0).toStringAsFixed(
-      2,
-    );
-    final String title = request['title'] ?? 'Request';
 
-    // Check for Rejected Status explicitly for Custom UI
-    if (status.toLowerCase() == 'rejected') {
-      return RejectedRequestView(request: request);
-    }
+    final amount = (request['amount'] as num?)?.toDouble() ?? 0.0;
 
-    // Default UI for Approved/Pending
-    // Status Styling
-    // Status Styling (Case Insensitive)
     final isApproved =
-        status.toLowerCase() == 'approved' ||
-        status.toLowerCase() == 'auto_approved' ||
-        status.toLowerCase() == 'paid';
-    final statusColor = isApproved
-        ? AppColors.successGreen
-        : const Color(0xFFF59E0B);
-    final statusBg = isApproved
-        ? const Color(0xFFD1FAE5)
-        : const Color(0xFFFEF3C7);
-    final statusIcon = isApproved ? Icons.check_circle : Icons.pending;
+        status == 'approved' || status == 'auto_approved' || status == 'paid';
+    final statusColor = isApproved ? _green : _amber;
+    final statusBg = isApproved ? _greenBg : _amberBg;
+    final statusIcon = isApproved
+        ? Icons.check_circle_rounded
+        : Icons.pending_rounded;
     final statusText = isApproved ? 'Approved' : 'Pending';
+    final catIcon = _iconForCategory(category);
 
-    // Category Icon Logic
-    IconData catIcon = Icons.category;
-    if (category.toLowerCase().contains('food') ||
-        category.toLowerCase().contains('meal'))
-      catIcon = Icons.restaurant;
-    else if (category.toLowerCase().contains('travel'))
-      catIcon = Icons.flight;
-    else if (category.toLowerCase().contains('office'))
-      catIcon = Icons.work;
-    else if (category.toLowerCase().contains('transport'))
-      catIcon = Icons.directions_car;
-
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 1. Icon & Title Header
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0F2FE),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(catIcon, size: 40, color: AppColors.primaryBlue),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero amount card
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(22.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 16.r,
+                  offset: Offset(0, 4.h),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSlate,
-                fontSize: 16,
-              ),
-            ),
-
-            // 2. Amount
-            const SizedBox(height: 8),
-            Text(
-              '₹$amount',
-              style: AppTextStyles.h1.copyWith(
-                fontSize: 48,
-                letterSpacing: -1.0,
-              ),
-            ),
-
-            // 3. Status Pill
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: statusBg,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(statusIcon, size: 16, color: statusColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    statusText,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // 4. Info Grid (Category & Date)
-            Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: _buildInfoCard(
-                    context,
-                    'Category',
-                    category,
-                    Icons.category,
+                Container(
+                  width: 64.w,
+                  height: 64.w,
+                  decoration: BoxDecoration(
+                    color: _purpleLight,
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                  child: Icon(catIcon, size: 32.sp, color: _purple),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: _slate500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  '₹${amount.toStringAsFixed(2)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 38.sp,
+                    fontWeight: FontWeight.w800,
+                    color: _slate900,
+                    letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildInfoCard(
-                    context,
-                    'Date',
-                    date,
-                    Icons.calendar_today,
+                SizedBox(height: 12.h),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+                  decoration: BoxDecoration(
+                    color: statusBg,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 14.sp, color: statusColor),
+                      SizedBox(width: 6.w),
+                      Text(
+                        statusText,
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+          ),
 
-            const SizedBox(height: 24),
+          SizedBox(height: 16.h),
 
-            // 5. Description
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Description',
-                style: AppTextStyles.h3.copyWith(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Text(
-                request['description'] ?? 'No description provided.',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                  height: 1.5,
+          // Info row — Category + Date
+          Row(
+            children: [
+              Expanded(
+                child: _infoCard(
+                  label: 'CATEGORY',
+                  value: category,
+                  icon: Icons.category_rounded,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 6. Attachments
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Attachments',
-                style: AppTextStyles.h3.copyWith(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Builder(
-              builder: (context) {
-                final List<dynamic> allAttachments = [];
-                if (request['attachments'] != null &&
-                    request['attachments'] is List) {
-                  allAttachments.addAll(request['attachments']);
-                }
-
-                if (request['qr_url'] != null) {
-                  allAttachments.add({
-                    'name': 'QR Code',
-                    'url': request['qr_url'],
-                  });
-                }
-                if (request['receipt_url'] != null) {
-                  allAttachments.add({
-                    'name': 'Receipt',
-                    'url': request['receipt_url'],
-                  });
-                }
-                if (request['bill_urls'] != null &&
-                    request['bill_urls'] is List) {
-                  final bills = request['bill_urls'] as List;
-                  for (int i = 0; i < bills.length; i++) {
-                    allAttachments.add({
-                      'name': 'Bill ${i + 1}',
-                      'url': bills[i],
-                    });
-                  }
-                } else if (request['bill_url'] != null) {
-                  allAttachments.add({
-                    'name': 'Bill',
-                    'url': request['bill_url'],
-                  });
-                }
-
-                if (allAttachments.isEmpty) {
-                  return Text(
-                    'No attachments',
-                    style: TextStyle(color: Colors.grey[400]),
-                  );
-                }
-
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: allAttachments.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    return AttachmentCard(
-                      attachment: allAttachments[index],
-                      index: index,
-                    );
-                  },
-                );
-              },
-            ),
-
-            const SizedBox(height: 40),
-            const SizedBox(height: 24),
-
-            const SizedBox(height: 24),
-
-            // 7. Approval Timeline (New)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Timeline",
-                style: AppTextStyles.h3.copyWith(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: Colors.grey[300] ?? Colors.grey.shade300, width: 2),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _infoCard(
+                  label: 'DATE',
+                  value: date,
+                  icon: Icons.calendar_today_rounded,
                 ),
               ),
-              margin: const EdgeInsets.only(left: 12),
-              padding: const EdgeInsets.only(left: 24),
-              child: _buildApprovalTimeline(context, request),
-            ),
-
-            const SizedBox(height: 40),
-
-            // 8. Conversation History
-            if ((request['clarifications'] != null &&
-                    (request['clarifications'] as List).isNotEmpty) ||
-                (request['admin_remarks'] != null &&
-                    request['admin_remarks'].toString().isNotEmpty)) ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  AppText.clarificationHistory,
-                  style: AppTextStyles.h3.copyWith(fontSize: 18),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    left: BorderSide(color: Colors.grey[300]!, width: 2),
-                  ),
-                ),
-                margin: const EdgeInsets.only(left: 12),
-                padding: const EdgeInsets.only(left: 24),
-                child: _buildConversationHistory(context, request),
-              ),
-              const SizedBox(height: 40),
             ],
+          ),
+
+          SizedBox(height: 20.h),
+
+          // Description
+          _sectionLabel('DESCRIPTION'),
+          SizedBox(height: 10.h),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 12.r,
+                  offset: Offset(0, 3.h),
+                ),
+              ],
+            ),
+            child: Text(
+              request['description']?.toString() ?? 'No description provided.',
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                color: _slate900,
+                height: 1.5,
+              ),
+            ),
+          ),
+
+          SizedBox(height: 20.h),
+
+          // Attachments
+          _sectionLabel('ATTACHMENTS'),
+          SizedBox(height: 10.h),
+          _buildAttachments(request),
+
+          // Clarification history
+          if ((request['clarifications'] != null &&
+                  (request['clarifications'] as List).isNotEmpty) ||
+              (request['admin_remarks'] != null &&
+                  request['admin_remarks'].toString().isNotEmpty)) ...[
+            SizedBox(height: 20.h),
+            _sectionLabel('CLARIFICATION HISTORY'),
+            SizedBox(height: 10.h),
+            _buildConversation(request),
           ],
-        ),
+
+          SizedBox(height: 20.h),
+        ],
       ),
     );
   }
 
-  Widget _buildApprovalTimeline(
-    BuildContext context,
-    Map<String, dynamic> request,
-  ) {
-    // Basic lifecycle: Submitted -> [Approvals] -> Current Status
-    final created = request['created_at']?.toString() ?? '';
-    final updated = request['updated_at']?.toString() ?? '';
-    final status = (request['status'] ?? 'Pending').toString();
-    final isApproved =
-        status.toLowerCase() == 'approved' ||
-        status.toLowerCase() == 'auto_approved';
-    final isRejected = status.toLowerCase() == 'rejected';
-
-    return Column(
-      children: [
-        // 1. Submitted
-        TimelineItemWidget(
-          question: "Request Submitted",
-          response: "Request created successfully",
-          askedAt: _formatDate(created),
-          respondedAt: "",
-          approverName: "System",
-          isSystemEvent:
-              true, // You might need to update TimelineItemWidget to handle this look, or use a custom row
-        ),
-
-        // 2. Decision (if any)
-        if (isApproved)
-          TimelineItemWidget(
-            question: "Request Approved",
-            response: request['admin_remarks'] ?? "Approved by admin",
-            askedAt: _formatDate(updated),
-            respondedAt: "",
-            approverName: request['approver_name'] ?? AppText.approver,
-            isSystemEvent: true,
-            isSuccess: true,
-          ),
-
-        if (isRejected)
-          TimelineItemWidget(
-            question: "Request Rejected",
-            response: request['rejection_reason'] ?? "Rejected by admin",
-            askedAt: _formatDate(updated),
-            respondedAt: "",
-            approverName: request['approver_name'] ?? AppText.approver,
-            isSystemEvent: true,
-            isError: true,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildConversationHistory(
-    BuildContext context,
-    Map<String, dynamic> request,
-  ) {
-    final clarifications = request['clarifications'] as List? ?? [];
-
-    if (clarifications.isEmpty) {
-      final adminComment = request['admin_remarks'] ?? request['comments'];
-      if (adminComment != null && adminComment.toString().isNotEmpty) {
-        return TimelineItemWidget(
-          question: adminComment,
-          response: '',
-          askedAt: AppText.recently,
-          respondedAt: '',
-          approverName: AppText.approver,
-        );
-      }
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      children: List.generate(clarifications.length, (index) {
-        final item = clarifications[index];
-        final String question = item['question'] ?? '';
-        final String response = item['response'] ?? '';
-        final String askedAt = _formatDate(item['asked_at']?.toString() ?? '');
-        final String respondedAt = _formatDate(
-          item['responded_at']?.toString() ?? '',
-        );
-
-        return TimelineItemWidget(
-          question: question,
-          response: response,
-          askedAt: askedAt,
-          respondedAt: respondedAt,
-          approverName: AppText.approver,
-        );
-      }),
-    );
-  }
-
-  String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return AppText.recently;
-    try {
-      final dt = DateTime.parse(dateStr);
-      return "${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
-    } catch (_) {
-      return AppText.recently;
-    }
-  }
-
-  Widget _buildInfoCard(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
+  Widget _infoCard({
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -487,38 +293,30 @@ class RequestDetailsReadView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(7.w),
             decoration: BoxDecoration(
-              color: label == 'Category'
-                  ? const Color(0xFFE0E7FF)
-                  : const Color(0xFFF3E8FF),
-              borderRadius: BorderRadius.circular(12),
+              color: _purpleLight,
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: label == 'Category'
-                  ? const Color(0xFF4338CA)
-                  : const Color(0xFF7E22CE),
-            ),
+            child: Icon(icon, size: 16.sp, color: _purple),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 10.h),
           Text(
-            label.toUpperCase(),
-            style: const TextStyle(
-              color: AppColors.textSlate,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: _slate500,
+              letterSpacing: 1,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 3.h),
           Text(
             value,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: _slate900,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -526,5 +324,228 @@ class RequestDetailsReadView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _sectionLabel(String text) {
+    return Padding(
+      padding: EdgeInsets.only(left: 4.w),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w700,
+          color: _slate500,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttachments(Map<String, dynamic> request) {
+    final List<dynamic> all = [];
+    if (request['attachments'] is List) all.addAll(request['attachments']);
+    if (request['payment_qr_url'] != null || request['qr_url'] != null) {
+      all.add({
+        'name': 'QR Code',
+        'url': request['payment_qr_url'] ?? request['qr_url'],
+      });
+    }
+    if (request['receipt_url'] != null) {
+      all.add({'name': 'Receipt', 'url': request['receipt_url']});
+    }
+    if (request['bill_urls'] is List) {
+      final bills = request['bill_urls'] as List;
+      for (int i = 0; i < bills.length; i++) {
+        all.add({'name': 'Bill ${i + 1}', 'url': bills[i]});
+      }
+    } else if (request['bill_url'] != null) {
+      all.add({'name': 'Bill', 'url': request['bill_url']});
+    }
+
+    if (all.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 20.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        child: Center(
+          child: Text(
+            'No attachments',
+            style: GoogleFonts.inter(fontSize: 12.sp, color: _slate300),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: all.length,
+        separatorBuilder: (_, __) => SizedBox(height: 10.h),
+        itemBuilder: (context, index) =>
+            AttachmentCard(attachment: all[index], index: index),
+      ),
+    );
+  }
+
+  Widget _buildConversation(Map<String, dynamic> request) {
+    final raw = request['clarifications'];
+    final items = <Map<String, dynamic>>[];
+    if (raw is List) {
+      for (final it in raw) {
+        if (it is Map) items.add(Map<String, dynamic>.from(it));
+      }
+    }
+
+    if (items.isEmpty) {
+      final adminComment = request['admin_remarks'] ?? request['comments'];
+      if (adminComment != null && adminComment.toString().isNotEmpty) {
+        return Container(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          child: _msg(true, adminComment.toString(), AppText.recently),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: items.map((item) {
+          final q = item['question']?.toString() ?? '';
+          final r = item['response']?.toString() ?? '';
+          final askedAt = _formatDate(item['asked_at']?.toString() ?? '');
+          final respondedAt =
+              _formatDate(item['responded_at']?.toString() ?? '');
+          return Column(
+            children: [
+              if (q.isNotEmpty) _msg(true, q, askedAt),
+              if (r.isNotEmpty) ...[
+                SizedBox(height: 10.h),
+                _msg(false, r, respondedAt),
+              ],
+              SizedBox(height: 12.h),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _msg(bool fromApprover, String text, String time) {
+    final bg = fromApprover ? _purpleLight : _greenBg;
+    final color = fromApprover ? _purple : _green;
+    final label = fromApprover ? AppText.approver : 'You';
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment:
+          fromApprover ? MainAxisAlignment.start : MainAxisAlignment.end,
+      children: [
+        Flexible(
+          child: Column(
+            crossAxisAlignment: fromApprover
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    time,
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      color: _slate500,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 4.h),
+              Container(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(fromApprover ? 4.r : 14.r),
+                    topRight: Radius.circular(fromApprover ? 14.r : 4.r),
+                    bottomLeft: Radius.circular(14.r),
+                    bottomRight: Radius.circular(14.r),
+                  ),
+                ),
+                child: Text(
+                  text,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: _slate900,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _iconForCategory(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('food') || c.contains('meal'))
+      return Icons.restaurant_rounded;
+    if (c.contains('travel') || c.contains('flight'))
+      return Icons.flight_rounded;
+    if (c.contains('office')) return Icons.work_rounded;
+    if (c.contains('transport')) return Icons.directions_car_rounded;
+    if (c.contains('supplies')) return Icons.shopping_bag_rounded;
+    return Icons.receipt_long_rounded;
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return AppText.recently;
+    try {
+      final dt = DateTime.parse(dateStr);
+      return '${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return AppText.recently;
+    }
   }
 }

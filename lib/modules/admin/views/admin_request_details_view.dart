@@ -703,8 +703,8 @@ class AdminRequestDetailsView extends GetView<AdminRequestDetailsController> {
     // Receipt: 'receipt_url'
     String? receiptUrl = req['receipt_url'];
 
-    // QR: 'qr_url' (primary) or 'qr_code_url'
-    String? qrUrl = req['qr_url'] ?? req['qr_code_url'];
+    // QR: 'payment_qr_url' (primary) or 'qr_url' or 'qr_code_url'
+    String? qrUrl = req['payment_qr_url'] ?? req['qr_url'] ?? req['qr_code_url'];
 
     // Logic based on Request Type
 

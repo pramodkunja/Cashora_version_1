@@ -7,6 +7,7 @@
 import 'dart:html' as html;
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 /// Returns a MIME type string based on the file extension.
 String _mimeType(String filename) {
@@ -48,7 +49,7 @@ Future<Map<String, dynamic>> webMultipartPost({
     // Blob with explicit MIME type — FastAPI validates this
     final blob = html.Blob([bytes], mime);
     nativeFormData.appendBlob(fieldKey, blob, filename);
-    print('📎 Appended file: key=$fieldKey, filename=$filename, '
+    if (kDebugMode) debugPrint('Appended file: key=$fieldKey, filename=$filename, '
         'bytes=${bytes.length}, mime=$mime');
   }
 
@@ -60,7 +61,7 @@ Future<Map<String, dynamic>> webMultipartPost({
   xhr.onLoad.listen((_) {
     final status = xhr.status ?? 0;
     final body = xhr.responseText ?? '';
-    print('📬 XHR response: status=$status');
+    if (kDebugMode) debugPrint('XHR response: status=$status');
     if (status >= 200 && status < 300) {
       try {
         final decoded = json.decode(body);
@@ -70,7 +71,7 @@ Future<Map<String, dynamic>> webMultipartPost({
       }
     } else {
       // Print the full error body so we can see FastAPI's validation message
-      print('❌ Server error $status: $body');
+      if (kDebugMode) debugPrint('Server error $status: $body');
       completer.completeError(
         Exception('HTTP $status: $body'),
       );
@@ -81,7 +82,7 @@ Future<Map<String, dynamic>> webMultipartPost({
     completer.completeError(Exception('XHR network error during upload'));
   });
 
-  print('📤 Sending XHR to $url with ${fields.length} fields, '
+  if (kDebugMode) debugPrint('Sending XHR to $url with ${fields.length} fields, '
       '${files.length} files...');
   xhr.send(nativeFormData);
   return completer.future;

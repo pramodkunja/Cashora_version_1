@@ -13,6 +13,7 @@ class AppConfig {
   
   // 3. For Physical Device (Replace with your computer's local IP)
   // Find your IP: Windows (ipconfig), Mac/Linux (ifconfig)
+  // static const String apiBaseUrl = 'https://cashora.nxsys.in';
   static const String apiBaseUrl = 'http://192.168.0.149:8000';
   
   // 4. For Production/Remote Server
@@ -27,6 +28,4 @@ class AppConfig {
   // Debug mode - set to true to see detailed network logs
   static const bool enableDebugLogs = true;
 
-  // Razorpay Configuration
-  static const String razorpayKey = 'rzp_live_SHyLej883Cqx6y';
 }

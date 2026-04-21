@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../routes/app_routes.dart';
@@ -6,12 +7,9 @@ import '../../../../data/repositories/payment_repository.dart'; // Added import
 import '../../../../core/services/network_service.dart';
 import '../../../../data/models/payment_response_model.dart';
 
-class AccountantPaymentsController extends GetxController
-    with GetSingleTickerProviderStateMixin {
-  late TabController tabController;
+class AccountantPaymentsController extends GetxController {
   late final AccountantRepository _repository;
 
-  // Raw expense maps from the backend (shape matches the /my-requests response)
   final RxList<Map<String, dynamic>> pendingExpenses =
       <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> completedExpenses =
@@ -19,20 +17,27 @@ class AccountantPaymentsController extends GetxController
 
   final RxBool isLoading = false.obs;
 
+  final pendingScroll = ScrollController();
+  final completedScroll = ScrollController();
+
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 2, vsync: this);
     _repository = AccountantRepository(Get.find<NetworkService>());
     fetchPendingPayments();
     fetchCompletedPayments();
+  }
 
-    tabController.addListener(() {
-      if (!tabController.indexIsChanging) {
-        if (tabController.index == 0) fetchPendingPayments();
-        else if (tabController.index == 1) fetchCompletedPayments();
-      }
-    });
+  @override
+  void onClose() {
+    pendingScroll.dispose();
+    completedScroll.dispose();
+    super.onClose();
+  }
+
+  void resetScroll() {
+    if (pendingScroll.hasClients) pendingScroll.jumpTo(0);
+    if (completedScroll.hasClients) completedScroll.jumpTo(0);
   }
 
   Future<void> fetchPendingPayments() async {
@@ -41,7 +46,7 @@ class AccountantPaymentsController extends GetxController
       final raw = await _repository.getPendingExpenses();
       pendingExpenses.value = raw;
     } catch (e) {
-      print('Error fetching pending: $e');
+      if (kDebugMode) debugPrint('Error fetching pending: $e');
     } finally {
       isLoading.value = false;
     }
@@ -53,17 +58,13 @@ class AccountantPaymentsController extends GetxController
       final raw = await _repository.getCompletedExpenses(page: 1, size: 25);
       completedExpenses.value = raw;
     } catch (e) {
-      print('Error fetching completed: $e');
+      if (kDebugMode) debugPrint('Error fetching completed: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  @override
-  void onClose() {
-    tabController.dispose();
-    super.onClose();
-  }
+
 
   void onBottomNavTap(int index) {
     switch (index) {

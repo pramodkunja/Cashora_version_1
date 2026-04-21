@@ -1,10 +1,39 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../core/services/network_service.dart';
 
 class AdminRepository {
   final NetworkService _networkService;
 
   AdminRepository(this._networkService);
+
+  /// GET /admin/dashboard
+  Future<Map<String, dynamic>> getDashboard() async {
+    final response = await _networkService.get('/admin/dashboard');
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+    throw Exception('Invalid dashboard response');
+  }
+
+  /// GET /admin/history
+  Future<List<Map<String, dynamic>>> getHistory({
+    String? search,
+    String? status,
+  }) async {
+    final Map<String, dynamic> queryParams = {};
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
+    if (status != null && status.isNotEmpty) queryParams['status'] = status;
+
+    final response = await _networkService.get(
+      '/admin/history',
+      queryParameters: queryParams,
+    );
+    if (response.data is List) {
+      return List<Map<String, dynamic>>.from(response.data);
+    }
+    return [];
+  }
 
   Future<List<Map<String, dynamic>>> getOrgExpenses({
     String? status,
@@ -25,7 +54,7 @@ class AdminRepository {
       }
       return [];
     } catch (e) {
-      print("Error fetching org expenses: $e");
+      if (kDebugMode) debugPrint("Error fetching org expenses: $e");
       rethrow; // Or return empty list based on error handling policy
     }
   }
@@ -51,7 +80,7 @@ class AdminRepository {
         data: data,
       );
     } catch (e) {
-      print("Error submitting decision: $e");
+      if (kDebugMode) debugPrint("Error submitting decision: $e");
       rethrow;
     }
   }
@@ -71,7 +100,7 @@ class AdminRepository {
         data: {'expense_id': id, 'question': message},
       );
     } catch (e) {
-      print("Error asking clarification: $e");
+      if (kDebugMode) debugPrint("Error asking clarification: $e");
       rethrow;
     }
   }

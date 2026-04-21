@@ -1,189 +1,214 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../controllers/payment_flow_controller.dart';
 
 class PaymentSuccessView extends GetView<PaymentFlowController> {
   const PaymentSuccessView({super.key});
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
+    final amount = (Get.arguments?['amount'] as num?)?.toDouble() ?? 0.0;
+    final txnId = Get.arguments?['txnId']?.toString() ?? 'N/A';
+    final utr = Get.arguments?['utr']?.toString();
+    final dateStr = Get.arguments?['date']?.toString();
+    final paymentSource =
+        Get.arguments?['paymentSource']?.toString() ?? 'Bank Transfer';
+    final payee = Get.arguments?['payee']?.toString() ?? 'Unknown';
+
+    String displayDate = 'Unknown Date';
+    if (dateStr != null) {
+      try {
+        final dt = DateTime.parse(dateStr).toLocal();
+        displayDate =
+            '${dt.day}/${dt.month}/${dt.year}  ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+      } catch (_) {}
+    }
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: _bg,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(24.0.w),
+          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
           child: Column(
             children: [
+              // Close button
               Align(
                 alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => controller.backToDashboard(),
+                child: GestureDetector(
+                  onTap: () => controller.backToDashboard(),
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8.r,
+                        ),
+                      ],
+                    ),
+                    child: Icon(Icons.close_rounded,
+                        color: _slate900, size: 20.sp),
+                  ),
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 12.h),
+
+              // Success icon
               Container(
-                width: 80.w,
-                height: 80.w,
+                width: 110.w,
+                height: 110.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
+                  color: _greenBg,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.1),
-                      blurRadius: 20.r,
-                      offset: Offset(0, 10.h),
+                      color: _green.withOpacity(0.2),
+                      blurRadius: 30.r,
+                      spreadRadius: 4.r,
                     ),
                   ],
                 ),
-                child: Icon(Icons.check, color: Colors.green, size: 40.sp),
+                child: Icon(Icons.check_rounded, color: _green, size: 60.sp),
               ),
               SizedBox(height: 24.h),
               Text(
                 AppText.success,
-                style: AppTextStyles.h1.copyWith(fontSize: 28.sp),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                AppText.fundsTransferred,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSlate,
-                  height: 1.5,
+                style: GoogleFonts.inter(
+                  fontSize: 26.sp,
+                  fontWeight: FontWeight.w800,
+                  color: _slate900,
                 ),
               ),
-              SizedBox(height: 32.h),
+              SizedBox(height: 10.h),
+              Text(
+                AppText.fundsTransferred,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: _slate500,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
 
+              SizedBox(height: 28.h),
+
+              // Receipt card
               Container(
                 width: double.infinity,
+                padding: EdgeInsets.all(22.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24.r),
+                  borderRadius: BorderRadius.circular(20.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 20.r,
-                      offset: Offset(0, 10.h),
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 16.r,
+                      offset: Offset(0, 4.h),
                     ),
                   ],
                 ),
-                padding: EdgeInsets.all(24.w),
                 child: Column(
                   children: [
                     Text(
-                      AppText.totalPaid,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        letterSpacing: 1.0,
-                        color: AppColors.textSlate,
-                        fontWeight: FontWeight.bold,
+                      'TOTAL PAID',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: _slate500,
+                        letterSpacing: 1.2,
                       ),
                     ),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 6.h),
                     Text(
-                      '₹${Get.arguments?['amount']?.toStringAsFixed(2) ?? '0.00'}',
-                      style: AppTextStyles.h1.copyWith(
-                        fontSize: 32.sp,
-                        fontWeight: FontWeight.bold,
+                      '₹${amount.toStringAsFixed(2)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 34.sp,
+                        fontWeight: FontWeight.w800,
+                        color: _slate900,
                       ),
                     ),
-                    SizedBox(height: 24.h),
-                    const Divider(),
-                    SizedBox(height: 24.h),
-                    _buildReceiptRow(
-                      AppText.transactionId,
-                      '${Get.arguments?['txnId'] ?? 'N/A'}',
-                      icon: Icons.copy,
-                    ),
+                    SizedBox(height: 18.h),
+                    Divider(height: 1.h, color: const Color(0xFFF1F5F9)),
                     SizedBox(height: 16.h),
-                    if ((Get.arguments?['utr'] ?? 'N/A') != 'N/A')
-                      _buildReceiptRow(
-                        'UTR Number',
-                        '${Get.arguments?['utr']}',
-                        icon: Icons.copy,
+
+                    _row(AppText.transactionId, txnId,
+                        trailing: Icon(Icons.copy_rounded,
+                            size: 14.sp, color: _slate500)),
+                    if (utr != null && utr != 'N/A')
+                      Padding(
+                        padding: EdgeInsets.only(top: 14.h),
+                        child: _row('UTR Number', utr,
+                            trailing: Icon(Icons.copy_rounded,
+                                size: 14.sp, color: _slate500)),
                       ),
-                    if ((Get.arguments?['utr'] ?? 'N/A') != 'N/A')
-                      SizedBox(height: 16.h),
-                    Builder(
-                      builder: (context) {
-                        final dateStr = Get.arguments?['date']?.toString();
-                        String displayDate = 'Unknown Date';
-                        if (dateStr != null) {
-                          try {
-                            final dt = DateTime.parse(dateStr).toLocal();
-                            displayDate =
-                                "${dt.day}/${dt.month}/${dt.year}\n${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
-                          } catch (_) {}
-                        }
-                        return _buildReceiptRow(
-                          AppText.paymentDate,
-                          displayDate,
-                        );
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-                    _buildReceiptRow(
+                    SizedBox(height: 14.h),
+                    _row(AppText.paymentDate, displayDate),
+                    SizedBox(height: 14.h),
+                    _row(
                       AppText.paymentSource,
-                      '${Get.arguments?['paymentSource'] ?? 'Bank Transfer'}',
+                      paymentSource,
+                      valueColor: _green,
                       isStatus: true,
-                      statusColor: Colors.green,
                     ),
-                    SizedBox(height: 16.h),
-                    _buildReceiptRow(
-                      AppText.recipient,
-                      '${Get.arguments?['payee'] ?? 'Unknown'}',
-                      useLocalAvatar: true,
-                    ),
+                    SizedBox(height: 14.h),
+                    _rowWithAvatar(AppText.recipient, payee),
                   ],
                 ),
               ),
-              SizedBox(height: 48.h), // Replaces Spacer
+
+              SizedBox(height: 28.h),
 
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Get.toNamed(AppRoutes.ACCOUNTANT_PAYMENT_COMPLETED_DETAILS);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00C853),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
+                height: 52.h,
+                child: ElevatedButton.icon(
+                  onPressed: () => Get.toNamed(
+                      AppRoutes.ACCOUNTANT_PAYMENT_COMPLETED_DETAILS),
+                  icon: Icon(Icons.arrow_forward_rounded, size: 18.sp),
+                  label: Text(
+                    AppText.viewRequestDetails,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
                     ),
-                    elevation: 0,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppText.viewRequestDetails,
-                        style: AppTextStyles.buttonText.copyWith(
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      const Icon(Icons.arrow_forward, color: Colors.white),
-                    ],
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _purple,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
                   ),
                 ),
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 10.h),
               TextButton(
                 onPressed: () => controller.backToDashboard(),
                 child: Text(
                   AppText.backToDashboard,
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: _slate500,
                   ),
                 ),
               ),
-              SizedBox(height: 16.h),
             ],
           ),
         ),
@@ -191,85 +216,94 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
     );
   }
 
-  Widget _buildReceiptRow(
-    String label,
-    String value, {
-    IconData? icon,
-    bool isStatus = false,
-    Color? statusColor,
-    bool useLocalAvatar = false,
-  }) {
+  Widget _row(String label, String value,
+      {Widget? trailing, Color? valueColor, bool isStatus = false}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSlate),
-        ),
         Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (isStatus) ...[
-                Container(
-                  width: 8.w,
-                  height: 8.w,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-              ],
-              if (useLocalAvatar) ...[
-                CircleAvatar(
-                  radius: 12.r,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                  child: Text(
-                    'SJ',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primaryBlue,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10.sp,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-              ],
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      value.split('\n')[0],
-                      textAlign: TextAlign.right,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.sp,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (value.contains('\n'))
-                      Text(
-                        value.split('\n')[1],
-                        textAlign: TextAlign.right,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSlate,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              if (icon != null) ...[
-                SizedBox(width: 8.w),
-                Icon(icon, size: 16.sp, color: AppColors.textSlate),
-              ],
-            ],
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: _slate500,
+            ),
+          ),
+        ),
+        if (isStatus) ...[
+          Container(
+            width: 8.w,
+            height: 8.w,
+            decoration: BoxDecoration(
+              color: valueColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          SizedBox(width: 6.w),
+        ],
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? _slate900,
+            ),
+          ),
+        ),
+        if (trailing != null) ...[SizedBox(width: 6.w), trailing],
+      ],
+    );
+  }
+
+  Widget _rowWithAvatar(String label, String name) {
+    final initials = _initials(name);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: _slate500,
+            ),
+          ),
+        ),
+        CircleAvatar(
+          radius: 12.r,
+          backgroundColor: _purpleLight,
+          child: Text(
+            initials,
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: _purple,
+            ),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Flexible(
+          child: Text(
+            name,
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: _slate900,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
     );
+  }
+
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length > 1 && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
   }
 }

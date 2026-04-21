@@ -78,7 +78,7 @@ class CreateRequestController extends GetxController {
 
       expenseCategories.value = mappedCategories;
     } catch (e) {
-      print("Failed to load categories: $e");
+      if (kDebugMode) debugPrint("Failed to load categories: $e");
     }
   }
 
@@ -94,7 +94,7 @@ class CreateRequestController extends GetxController {
             : (val as double? ?? 0.0);
       }
     } catch (e) {
-      print("Failed to fetch limits: $e");
+      if (kDebugMode) debugPrint("Failed to fetch limits: $e");
     }
   }
 

@@ -1,349 +1,450 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as image_filter; // Added for BackdropFilter
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../controllers/profile_controller.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
+import '../../../../utils/widgets/app_loader.dart';
 import '../../../../routes/app_routes.dart';
+import '../controllers/profile_controller.dart';
 import '../../admin/views/widgets/admin_bottom_bar.dart';
 import '../../requestor/views/widgets/requestor_bottom_bar.dart';
-import '../../../../utils/widgets/app_loader.dart';
 import '../../../../core/services/auth_service.dart';
-// Needs custom layout for list items as per image (Icon box left, Text, Arrow)
 
 class ProfileView extends GetView<ProfileController> {
   final bool isTab;
   const ProfileView({Key? key, this.isTab = false}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = Color(0xFF16A34A);
+  static const _greenBg = Color(0xFFF0FDF4);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: AppColors.backgroundLight, // Removed to use Theme default
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: isTab
-            ? null
-            : IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: AppColors.textDark,
-                  size: 24.sp,
-                ),
-                onPressed: () => Get.offNamed(AppRoutes.ADMIN_DASHBOARD),
-              ),
-        automaticallyImplyLeading: !isTab,
-        centerTitle: true,
-        title: Text(AppText.myProfile, style: AppTextStyles.h3),
-        actions: [
-          TextButton(
-            onPressed: controller.editProfile,
-            child: Text(
-              AppText.edit,
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.primary,
-                fontSize: 16.sp,
-              ),
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: _bg,
       bottomNavigationBar: isTab ? null : _buildBottomBar(),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: AppSpinner());
+          return const AppLoader();
         }
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-          child: Column(
-            children: [
-              // Profile Image
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.lightBlue.shade100,
-                    width: 4.w,
-                  ),
-                ),
-                child: CircleAvatar(
-                  radius: 50.r,
-                  backgroundColor: Colors.orangeAccent,
-                  child: Icon(Icons.person, size: 50.sp, color: Colors.white),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Obx(
-                () => Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min, // Prevent taking full width
-                  children: [
-                    Flexible(
-                      // allow text to shrink
-                      child: Text(
-                        controller.rxName.value,
-                        style: AppTextStyles.h2,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        controller.rxRole.value.toUpperCase(),
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10.sp,
-                        ),
-                      ),
-                    ),
+        return CustomScrollView(
+          slivers: [
+            // ── Header ──────────────────────────────────────
+            SliverToBoxAdapter(child: _buildHeader(context)),
+            // ── Body ────────────────────────────────────────
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 40.h),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // Info section
+                  _buildSectionLabel('PERSONAL INFO'),
+                  SizedBox(height: 10.h),
+                  _buildInfoCard(context),
+                  SizedBox(height: 20.h),
+
+                  // Admin actions
+                  if (_isAdmin) ...[
+                    _buildSectionLabel('ADMIN'),
+                    SizedBox(height: 10.h),
+                    _buildAdminCard(),
+                    SizedBox(height: 20.h),
                   ],
-                ),
+
+                  // General actions
+                  _buildSectionLabel('SETTINGS'),
+                  SizedBox(height: 10.h),
+                  _buildSettingsCard(),
+
+                  SizedBox(height: 36.h),
+                  _buildLogoutButton(),
+                  SizedBox(height: 20.h),
+                ]),
               ),
-              SizedBox(height: 4.h),
-              Obx(
-                () => Text(
-                  controller.rxEmail.value,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSlate,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 32.h),
-
-              // Info Card
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
-                padding: EdgeInsets.all(20.w),
-                child: Obx(
-                  () => Column(
-                    children: [
-                      _buildInfoTile(
-                        icon: Icons.business,
-                        iconBg: AppColors.infoBg,
-                        iconColor: AppColors.primary,
-                        label: 'Organization Name',
-                        value: controller.rxOrgName.value,
-                      ),
-                      Divider(height: 24.h),
-                      _buildInfoTile(
-                        icon: Icons.qr_code,
-                        iconBg: AppColors.infoBg,
-                        iconColor: AppColors.primary,
-                        label: 'Organization Code',
-                        value: controller.rxOrgCode.value,
-                      ),
-                      Divider(height: 24.h),
-                      _buildInfoTile(
-                        icon: Icons.phone,
-                        iconBg: AppColors.infoBg,
-                        iconColor: AppColors.primary,
-                        label: AppText.phone,
-                        value: controller.rxPhone.value,
-                      ),
-                      Divider(height: 24.h),
-                      _buildInfoTile(
-                        icon: Icons.badge,
-                        iconBg: AppColors.infoBg,
-                        iconColor: AppColors.primary,
-                        label: AppText.role,
-                        value: controller.rxRole.value,
-                        showArrow: false,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-
-
-              if (['admin', 'super_admin'].contains(
-                Get.find<AuthService>().currentUser.value?.role.toLowerCase(),
-              )) ...[
-                SizedBox(height: 24.h),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                  padding: EdgeInsets.all(20.w),
-                  child: Column(
-                    children: [
-                      _buildActionTile(
-                        icon: Icons.people_outline_rounded,
-                        iconBg: const Color(0xFFF0FDF4), // Light Green
-                        iconColor: const Color(0xFF16A34A), // Green
-                        title: AppText.manageUsers,
-                        onTap: controller.navigateToManageUsers,
-                      ),
-                      Divider(height: 24.h),
-                      _buildActionTile(
-                        icon: Icons.tune_rounded,
-                        iconBg: AppColors.surfacePurple,
-                        iconColor: AppColors.primary,
-                        title: 'Set Approval Limits',
-                        onTap: () => Get.toNamed(AppRoutes.ADMIN_SET_LIMITS),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              SizedBox(height: 24.h),
-
-              // Actions Card
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
-                padding: EdgeInsets.all(20.w),
-                child: Column(
-                  children: [
-                    _buildActionTile(
-                      icon: Icons.lock,
-                      iconBg: AppColors.infoBg,
-                      iconColor: AppColors.primary,
-                      title: AppText.changePassword,
-                      onTap: controller.navigateToChangePassword,
-                    ),
-                    Divider(height: 24.h),
-                    _buildActionTile(
-                      icon: Icons.settings,
-                      iconBg: AppColors.infoBg,
-                      iconColor: AppColors.primary,
-                      title: AppText.appSettings,
-                      onTap: controller.navigateToSettings,
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 40.h),
-              TextButton.icon(
-                onPressed: controller.logout,
-                icon: Icon(Icons.logout, color: Colors.red, size: 24.sp),
-                label: Text(
-                  AppText.logOut,
-                  style: AppTextStyles.buttonText.copyWith(
-                    color: Colors.red,
-                    fontSize: 16.sp,
-                  ),
-                ),
-              ),
-              SizedBox(height: 20.h),
-            ],
-          ),
+            ),
+          ],
         );
       }),
     );
   }
 
-  Widget _buildInfoTile({
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String label,
-    required String value,
-    bool showArrow = true,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(10.w),
-          decoration: BoxDecoration(
-            color: iconBg.withOpacity(
-              Get.isDarkMode ? 0.2 : 1.0,
-            ), // Adjust for dark mode visibility
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: iconColor, size: 20.sp),
+  bool get _isAdmin => ['admin', 'super_admin']
+      .contains(Get.find<AuthService>().currentUser.value?.role.toLowerCase());
+
+  // ════════════════════════════════════════════════════════════════════════
+  // HEADER — purple gradient with avatar + name + role badge
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        MediaQuery.of(context).padding.top + 12.h,
+        24.w,
+        32.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Column(
+        children: [
+          // Top row — back + edit
+          Row(
             children: [
+              if (!isTab)
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.arrow_back_rounded,
+                        color: Colors.white, size: 20.sp),
+                  ),
+                )
+              else
+                SizedBox(width: 36.w),
+              const Spacer(),
               Text(
-                label,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppTextStyles.bodySmall.color,
-                  fontSize: 12.sp,
+                AppText.myProfile,
+                style: GoogleFonts.inter(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
-              SizedBox(height: 4.h),
-              Text(value, style: AppTextStyles.h3.copyWith(fontSize: 16.sp)),
+              const Spacer(),
+              GestureDetector(
+                onTap: controller.editProfile,
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    AppText.edit,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
-        if (showArrow)
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16.sp,
-            color: AppTextStyles.bodySmall.color,
-          ),
-      ],
-    );
-  }
+          SizedBox(height: 24.h),
 
-  Widget _buildActionTile({
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        children: [
+          // Avatar
           Container(
-            padding: EdgeInsets.all(10.w),
+            padding: EdgeInsets.all(3.w),
             decoration: BoxDecoration(
-              color: iconBg.withOpacity(Get.isDarkMode ? 0.2 : 1.0),
               shape: BoxShape.circle,
+              border: Border.all(
+                  color: Colors.white.withOpacity(0.4), width: 2.5.w),
             ),
-            child: Icon(icon, color: iconColor, size: 20.sp),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Text(
-              title,
-              style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
+            child: CircleAvatar(
+              radius: 42.r,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              child: Obx(
+                () => Text(
+                  _initials(controller.rxName.value),
+                  style: GoogleFonts.inter(
+                    fontSize: 28.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
           ),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16.sp,
-            color: AppTextStyles.bodySmall.color,
+          SizedBox(height: 14.h),
+
+          // Name
+          Obx(
+            () => Text(
+              controller.rxName.value,
+              style: GoogleFonts.inter(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(height: 6.h),
+
+          // Role badge + email
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    controller.rxRole.value.toUpperCase(),
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Flexible(
+                  child: Text(
+                    controller.rxEmail.value,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: Colors.white70,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // INFO CARD
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildInfoCard(BuildContext context) {
+    return Obx(
+      () => _card([
+        _infoRow(Icons.business_rounded, 'Organization',
+            controller.rxOrgName.value),
+        _infoRow(Icons.qr_code_rounded, 'Org Code',
+            controller.rxOrgCode.value),
+        _infoRow(Icons.phone_rounded, AppText.phone, controller.rxPhone.value),
+        _infoRow(Icons.badge_rounded, AppText.role, controller.rxRole.value),
+        if (controller.rxDepartmentName.value.isNotEmpty)
+          _infoRow(Icons.business_rounded, 'Department',
+              controller.rxDepartmentName.value),
+      ]),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // ADMIN CARD
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildAdminCard() {
+    return _card([
+      _actionRow(Icons.people_outline_rounded, AppText.manageUsers,
+          controller.navigateToManageUsers,
+          accent: _green, accentBg: _greenBg),
+      _actionRow(Icons.business_rounded, 'Manage Departments',
+          () => Get.toNamed(AppRoutes.ADMIN_DEPARTMENTS)),
+      _actionRow(Icons.tune_rounded, 'Set Approval Limits',
+          () => Get.toNamed(AppRoutes.ADMIN_SET_LIMITS)),
+    ]);
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // SETTINGS CARD
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildSettingsCard() {
+    return _card([
+      _actionRow(Icons.lock_outline_rounded, AppText.changePassword,
+          controller.navigateToChangePassword),
+      _actionRow(Icons.settings_rounded, AppText.appSettings,
+          controller.navigateToSettings),
+    ]);
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LOGOUT
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildLogoutButton() {
+    return GestureDetector(
+      onTap: controller.logout,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 16.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEF2F2),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: const Color(0xFFFECACA)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.logout_rounded, color: AppColors.errorRed, size: 20.sp),
+            SizedBox(width: 8.w),
+            Text(
+              AppText.logOut,
+              style: GoogleFonts.inter(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.errorRed,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // REUSABLE BUILDERS
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildSectionLabel(String text) {
+    return Padding(
+      padding: EdgeInsets.only(left: 4.w),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w700,
+          color: _slate500,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _card(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1)
+              Divider(height: 0, indent: 62.w, color: const Color(0xFFF1F5F9)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(9.w),
+            decoration: BoxDecoration(
+              color: _purpleLight,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(icon, color: _purple, size: 18.sp),
+          ),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: _slate500,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  value.isEmpty ? '-' : value,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _slate900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionRow(IconData icon, String title, VoidCallback onTap,
+      {Color? accent, Color? accentBg}) {
+    final color = accent ?? _purple;
+    final bg = accentBg ?? _purpleLight;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(9.w),
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(icon, color: color, size: 18.sp),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: _slate900,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: _slate300, size: 22.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length > 1) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+  }
 
   Widget _buildBottomBar() {
-    final userRole = Get.find<AuthService>().currentUser.value?.role
-        .toLowerCase();
+    final userRole =
+        Get.find<AuthService>().currentUser.value?.role.toLowerCase();
 
-    // Explicitly check for Admin/Approver
     if (userRole == 'admin' || userRole == 'super_admin') {
       return AdminBottomBar(
         currentIndex: 3,
@@ -351,21 +452,14 @@ class ProfileView extends GetView<ProfileController> {
           if (index == 0) Get.offNamed(AppRoutes.ADMIN_DASHBOARD);
           if (index == 1) Get.offNamed(AppRoutes.ADMIN_APPROVALS);
           if (index == 2) Get.offNamed(AppRoutes.ADMIN_HISTORY);
-          if (index == 3) {
-            /* Current Page */
-          }
         },
       );
     } else {
-      // Default to Requestor for any other role (including 'requestor', 'user', null)
       return RequestorBottomBar(
         currentIndex: 2,
         onTap: (index) {
           if (index == 0) Get.offNamed(AppRoutes.REQUESTOR);
           if (index == 1) Get.offNamed(AppRoutes.MY_REQUESTS);
-          if (index == 2) {
-            /* Current Page */
-          }
         },
       );
     }

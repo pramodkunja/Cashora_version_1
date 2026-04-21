@@ -1,252 +1,371 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
+import '../../../../utils/widgets/app_loader.dart';
+import '../../../../routes/app_routes.dart';
 import '../controllers/accountant_profile_controller.dart';
-import 'widgets/accountant_bottom_bar.dart';
 
 class AccountantProfileView extends GetView<AccountantProfileController> {
   const AccountantProfileView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Bottom Nav handles navigation
-        centerTitle: true,
-        title: Text(
-          AppText.myProfile,
-          style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          TextButton(
-            onPressed: controller.editProfile,
-            child: Text(
-              AppText.edit,
-              style: AppTextStyles.buttonText.copyWith(
-                color: AppColors.primaryBlue,
+      backgroundColor: _bg,
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const AppLoader();
+        }
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _buildHeader(context)),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 40.h),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildSectionLabel('PERSONAL INFO'),
+                  SizedBox(height: 10.h),
+                  _buildInfoCard(),
+                  SizedBox(height: 20.h),
+                  _buildSectionLabel('SETTINGS'),
+                  SizedBox(height: 10.h),
+                  _buildSettingsCard(),
+                  SizedBox(height: 36.h),
+                  _buildLogoutButton(),
+                  SizedBox(height: 20.h),
+                ]),
               ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  // ── Header ───────────────────────────────────────────────────────────
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        MediaQuery.of(context).padding.top + 12.h,
+        24.w,
+        32.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Column(
+        children: [
+          // Top row
+          Row(
+            children: [
+              SizedBox(width: 36.w),
+              const Spacer(),
+              Text(
+                AppText.myProfile,
+                style: GoogleFonts.inter(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: controller.editProfile,
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    AppText.edit,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 24.h),
+
+          // Avatar
+          Container(
+            padding: EdgeInsets.all(3.w),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: Colors.white.withOpacity(0.4), width: 2.5.w),
+            ),
+            child: CircleAvatar(
+              radius: 42.r,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              child: Obx(
+                () => Text(
+                  _initials(controller.rxName.value),
+                  style: GoogleFonts.inter(
+                    fontSize: 28.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 14.h),
+
+          // Name + email
+          Obx(
+            () => Text(
+              controller.rxName.value,
+              style: GoogleFonts.inter(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    controller.rxRole.value.toUpperCase(),
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Flexible(
+                  child: Text(
+                    controller.rxEmail.value,
+                    style: GoogleFonts.inter(
+                        fontSize: 12.sp, color: Colors.white70),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Obx(
-          () => Column(
-            children: [
-              // Profile Image
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.lightBlue.shade100,
-                    width: 4,
-                  ),
-                ),
-                child: const CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.orangeAccent,
-                  // backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=sarah'), // Mock
-                  child: Icon(Icons.person, size: 50, color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                controller.rxName.value,
-                style: AppTextStyles.h3.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                controller.rxEmail.value,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSlate,
-                ),
-              ),
+    );
+  }
 
-              const SizedBox(height: 32),
+  // ── Info Card ─────────────────────────────────────────────────────────
+  Widget _buildInfoCard() {
+    return Obx(
+      () => _card([
+        _infoRow(Icons.person_rounded, AppText.fullName,
+            controller.rxName.value),
+        _infoRow(Icons.email_rounded, AppText.emailAddress,
+            controller.rxEmail.value),
+        _infoRow(
+            Icons.phone_rounded, AppText.phone, controller.rxPhone.value),
+        _infoRow(
+            Icons.badge_rounded, AppText.role, controller.rxRole.value),
+        if (controller.rxDepartmentName.value.isNotEmpty)
+          _infoRow(Icons.business_rounded, 'Department',
+              controller.rxDepartmentName.value),
+      ]),
+    );
+  }
 
-              // Info Card
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildInfoTile(
-                      icon: Icons.person,
-                      iconBg: const Color(0xFFE0F2FE),
-                      iconColor: AppColors.primaryBlue,
-                      label: AppText.fullName,
-                      value: controller.rxName.value,
-                    ),
-                    const Divider(height: 24),
-                    _buildInfoTile(
-                      icon: Icons.email,
-                      iconBg: const Color(0xFFE0F2FE),
-                      iconColor: AppColors.primaryBlue,
-                      label: AppText.emailAddress,
-                      value: controller.rxEmail.value,
-                    ),
-                    const Divider(height: 24),
-                    _buildInfoTile(
-                      icon: Icons.phone,
-                      iconBg: const Color(0xFFE0F2FE),
-                      iconColor: AppColors.primaryBlue,
-                      label: AppText.phone,
-                      value: controller.rxPhone.value,
-                    ),
-                    const Divider(height: 24),
-                    _buildInfoTile(
-                      icon: Icons.badge,
-                      iconBg: const Color(0xFFE0F2FE),
-                      iconColor: AppColors.primaryBlue,
-                      label: AppText.role,
-                      value: controller.rxRole.value,
-                      showArrow: false,
-                    ),
-                  ],
-                ),
+  // ── Settings Card ────────────────────────────────────────────────────
+  Widget _buildSettingsCard() {
+    return _card([
+      _actionRow(Icons.lock_outline_rounded, AppText.changePassword,
+          controller.navigateToChangePassword),
+      _actionRow(Icons.settings_rounded, AppText.appSettings,
+          controller.navigateToSettings),
+    ]);
+  }
+
+  // ── Logout ───────────────────────────────────────────────────────────
+  Widget _buildLogoutButton() {
+    return GestureDetector(
+      onTap: controller.logout,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 16.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEF2F2),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: const Color(0xFFFECACA)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.logout_rounded, color: AppColors.errorRed, size: 20.sp),
+            SizedBox(width: 8.w),
+            Text(
+              AppText.logOut,
+              style: GoogleFonts.inter(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.errorRed,
               ),
-
-              const SizedBox(height: 24),
-
-              // Actions Card
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildActionTile(
-                      icon: Icons.lock,
-                      iconBg: const Color(0xFFE0F2FE),
-                      iconColor: AppColors.primaryBlue,
-                      title: AppText.changePassword,
-                      onTap: controller.navigateToChangePassword,
-                    ),
-                    const Divider(height: 24),
-                    _buildActionTile(
-                      icon: Icons.settings,
-                      iconBg: const Color(0xFFE0F2FE),
-                      iconColor: AppColors.primaryBlue,
-                      title: AppText.appSettings,
-                      onTap: controller.navigateToSettings,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-              TextButton.icon(
-                onPressed: controller.logout,
-                icon: const Icon(Icons.logout, color: Colors.red),
-                label: Text(
-                  AppText.logOut,
-                  style: AppTextStyles.buttonText.copyWith(color: Colors.red),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-
-  Widget _buildInfoTile({
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String label,
-    required String value,
-    bool showArrow = true,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: iconBg.withOpacity(Get.isDarkMode ? 0.2 : 1.0),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: iconColor, size: 20),
+  // ── Reusable ─────────────────────────────────────────────────────────
+  Widget _buildSectionLabel(String text) {
+    return Padding(
+      padding: EdgeInsets.only(left: 4.w),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w700,
+          color: _slate500,
+          letterSpacing: 1.2,
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: AppTextStyles.bodySmall),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (showArrow)
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: AppTextStyles.bodySmall.color,
-          ),
-      ],
+      ),
     );
   }
 
-  Widget _buildActionTile({
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
+  Widget _card(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1)
+              Divider(height: 0, indent: 62.w, color: const Color(0xFFF1F5F9)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(9.w),
             decoration: BoxDecoration(
-              color: iconBg.withOpacity(Get.isDarkMode ? 0.2 : 1.0),
-              shape: BoxShape.circle,
+              color: _purpleLight,
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Icon(icon, color: _purple, size: 18.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 14.w),
           Expanded(
-            child: Text(
-              title,
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.normal,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: _slate500,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  value.isEmpty ? '-' : value,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _slate900,
+                  ),
+                ),
+              ],
             ),
-          ),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: AppTextStyles.bodySmall.color,
           ),
         ],
       ),
     );
+  }
+
+  Widget _actionRow(IconData icon, String title, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(9.w),
+              decoration: BoxDecoration(
+                color: _purpleLight,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(icon, color: _purple, size: 18.sp),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: _slate900,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: _slate300, size: 22.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length > 1) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
   }
 }

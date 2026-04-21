@@ -118,7 +118,7 @@ class RequestMapper {
         return AppColors.successGreen;
       case 'rejected':
         return AppColors.error;
-      case 'clarification_required':
+      case 'clarification':
         return Colors.orange;
       case 'paid':
         return Colors.purple;

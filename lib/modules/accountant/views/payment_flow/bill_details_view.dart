@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Added
 import 'package:get/get.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart'; // Added
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_text_styles.dart';
+import '../../../../utils/widgets/app_loader.dart';
 import '../../controllers/payment_flow_controller.dart'; // Correct relative import
 
 class BillDetailsView extends GetView<PaymentFlowController> {
@@ -121,7 +123,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
                                     );
                                   },
                               errorBuilder: (context, error, stackTrace) {
-                                print("Image Load Error for $url: $error");
+                                if (kDebugMode) debugPrint("Image Load Error for $url: $error");
                                 return Center(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -431,7 +433,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
       }
 
       Get.dialog(
-        const Center(child: CircularProgressIndicator()),
+        const AppLoader(),
         barrierDismissible: false,
       );
 
@@ -454,7 +456,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
         margin: EdgeInsets.all(16.w),
       );
     } catch (e, stackTrace) {
-      print("Download Image Error: $e\n$stackTrace");
+      if (kDebugMode) debugPrint("Download Image Error: $e\n$stackTrace");
       if (Get.isDialogOpen ?? false) {
         Get.back(); // close dialog if open
       }

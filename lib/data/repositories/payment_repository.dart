@@ -1,5 +1,6 @@
 ﻿import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../core/services/network_service.dart';
 import '../../core/services/storage_service.dart';
 
@@ -45,6 +46,9 @@ class PaymentRepository {
     }
   }
 
+  static final RegExp _vpaRegex =
+      RegExp(r'^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,}$');
+
   Future<Map<String, dynamic>> initiatePayment({
     required String requestId,
     required String payeeVpa,
@@ -52,6 +56,14 @@ class PaymentRepository {
     String? payeeName,
     String? transactionNote,
   }) async {
+    final vpa = payeeVpa.trim();
+    if (!_vpaRegex.hasMatch(vpa)) {
+      throw ArgumentError('Invalid UPI ID format: "$payeeVpa"');
+    }
+    if (!amount.isFinite || amount <= 0) {
+      throw ArgumentError('Amount must be greater than zero');
+    }
+
     try {
       // Fetch token explicitly as requested
       final storage = Get.find<StorageService>();
@@ -61,7 +73,7 @@ class PaymentRepository {
         '/payments/initiate',
         data: {
           'request_id': requestId,
-          'payee_vpa': payeeVpa,
+          'payee_vpa': vpa,
           'amount': amount,
           'payee_name': payeeName,
           'transaction_note': transactionNote,
@@ -117,7 +129,7 @@ class PaymentRepository {
       }
       return [];
     } catch (e) {
-      print("Error fetching completed payments: $e");
+      if (kDebugMode) debugPrint("Error fetching completed payments: $e");
       return [];
     }
   }
@@ -148,33 +160,16 @@ class PaymentRepository {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
     } catch (e) {
-      print("Error marking as paid: $e");
+      if (kDebugMode) debugPrint("Error marking as paid: $e");
       rethrow;
     }
   }
 
   Future<List<Map<String, dynamic>>> fetchPaymentMethods() async {
-    try {
-      // No auth required as per specs, but we can pass token if _networkService handles it automatically.
-      final response = await _networkService.get('/accountant/payment-methods');
-      if (response.data is List) {
-        return List<Map<String, dynamic>>.from(response.data);
-      }
-      return [];
-    } catch (e) {
-      print("Error fetching payment methods: $e");
-      // Return a safe fallback based on the spec if API fails
-      return [
-        { "value": "upi",           "label": "UPI" },
-        { "value": "bank_transfer", "label": "Bank Transfer" },
-        { "value": "cash",          "label": "Cash" },
-        { "value": "cheque",        "label": "Cheque" },
-        { "value": "neft",          "label": "NEFT" },
-        { "value": "rtgs",          "label": "RTGS" },
-        { "value": "imps",          "label": "IMPS" },
-        { "value": "other",         "label": "Other" }
-      ];
+    final response = await _networkService.get('/accountant/payment-methods');
+    if (response.data is List) {
+      return List<Map<String, dynamic>>.from(response.data);
     }
+    return [];
   }
-
 }

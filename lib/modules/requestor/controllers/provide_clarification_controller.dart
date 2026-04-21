@@ -35,18 +35,14 @@ class ProvideClarificationController extends GetxController {
 
     try {
       isLoading.value = true;
-      final id =
-          request['id'] ?? request['request_id']; // Ensure we use numeric ID
+      final id = request['id'] ?? request['request_id'];
       if (id == null) {
         Get.snackbar(AppText.error, AppText.invalidRequestId);
         return;
       }
 
-      final int requestId = id is int ? id : int.parse(id.toString());
-
-      // Call repository method
       await _requestRepository.submitClarification(
-        requestId,
+        id,
         responseController.text.trim(),
       );
 

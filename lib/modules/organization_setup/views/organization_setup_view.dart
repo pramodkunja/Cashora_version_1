@@ -1,359 +1,510 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart'; // Retain for now if generic text field styles need specific GoogleFonts calls, but aiming to remove.
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import '../controllers/organization_setup_controller.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 
-class OrganizationSetupView extends GetView<OrganizationSetupController> {
+class OrganizationSetupView extends StatefulWidget {
   const OrganizationSetupView({Key? key}) : super(key: key);
+
+  @override
+  State<OrganizationSetupView> createState() => _OrganizationSetupViewState();
+}
+
+class _OrganizationSetupViewState extends State<OrganizationSetupView> {
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+
+  OrganizationSetupController get controller =>
+      Get.find<OrganizationSetupController>();
+
+  // Phone field state
+  int _phoneDigits = 0;
+  int _phoneMaxDigits = 10; // Default for IN (India)
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textSlate),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(AppText.setupOrganization, style: AppTextStyles.h3),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Stepper UI
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     _buildStep(1, AppText.stepperOrganization, isActive: true),
-                //     Container(
-                //       width: 40,
-                //       height: 1,
-                //       color: AppColors.borderLight,
-                //       margin: const EdgeInsets.symmetric(horizontal: 12),
-                //     ),
-                //     //_buildStep(2, AppText.stepperPreferences, isActive: false),
-                //   ],
-                // ),
-                //const SizedBox(height: 32),
-
-                // Organization Details Section
-                Text(
-                  AppText.organizationDetails,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTextStyles.bodyMedium.color,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                _buildLabel(AppText.organizationName),
-                const SizedBox(height: 8),
-                _buildTextField(
-                  controller: controller.orgNameController,
-                  hint: AppText.hintOrgName,
-                  context: context,
-                ),
-                const SizedBox(height: 20),
-
-                // _buildLabel(AppText.organizationCode),
-                // const SizedBox(height: 8),
-                // Obx(() => Container(
-                //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                //   decoration: BoxDecoration(
-                //     color: Theme.of(context).cardColor, // Light grey background for readonly
-                //     borderRadius: BorderRadius.circular(12),
-                //   ),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Text(
-                //         controller.orgCode.value,
-                //         style: AppTextStyles.bodyMedium.copyWith(
-                //           color: AppTextStyles.bodyMedium.color,
-                //           fontWeight: FontWeight.w500,
-                //         ),
-                //       ),
-                //       GestureDetector(
-                //         onTap: controller.copyToClipboard,
-                //         child: const Icon(Icons.copy_rounded, size: 20, color: AppColors.primaryBlue),
-                //       ),
-                //     ],
-                //   ),
-                // )),
-                // const SizedBox(height: 32),
-
-                // Admin Details Section
-                Text(
-                  AppText.adminDetails,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTextStyles.bodyMedium.color,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                Row(
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 500.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Column(
+                    // ── Organization Details Card ─────────────────
+                    _buildSectionCard(
+                      icon: Icons.business_rounded,
+                      title: AppText.organizationDetails,
+                      children: [
+                        _buildLabel(AppText.organizationName),
+                        SizedBox(height: 8.h),
+                        _buildTextField(
+                          controller: controller.orgNameController,
+                          hint: AppText.hintOrgName,
+                          icon: Icons.apartment_rounded,
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    // ── Admin Details Card ────────────────────────
+                    _buildSectionCard(
+                      icon: Icons.admin_panel_settings_rounded,
+                      title: AppText.adminDetails,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('First Name'),
+                                  SizedBox(height: 8.h),
+                                  _buildTextField(
+                                    controller: controller.firstNameController,
+                                    hint: 'First Name',
+                                    icon: Icons.person_rounded,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('Last Name'),
+                                  SizedBox(height: 8.h),
+                                  _buildTextField(
+                                    controller: controller.lastNameController,
+                                    hint: 'Last Name',
+                                    icon: Icons.person_rounded,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 18.h),
+                        _buildLabel(AppText.workEmail),
+                        SizedBox(height: 8.h),
+                        _buildTextField(
+                          controller: controller.emailController,
+                          hint: AppText.hintAdminEmail,
+                          icon: Icons.email_rounded,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        SizedBox(height: 18.h),
+                        _buildLabel('Phone Number'),
+                        SizedBox(height: 8.h),
+                        _buildPhoneField(context),
+                      ],
+                    ),
+
+                    SizedBox(height: 20.h),
+
+                    // ── Info Banner ───────────────────────────────
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 14.h),
+                      decoration: BoxDecoration(
+                        color: _purpleLight,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel('First Name'),
-                          const SizedBox(height: 8),
-                          _buildTextField(
-                            controller: controller.firstNameController,
-                            hint: 'First Name',
-                            context: context,
+                          Icon(Icons.info_outline_rounded,
+                              color: _purple, size: 20.sp),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Text(
+                              AppText.adminCredentialsInfo,
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w500,
+                                color: _purple,
+                                height: 1.4,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                    SizedBox(height: 24.h),
+
+                    // ── Secure SSL Indicator ──────────────────────
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildLabel('Last Name'),
-                          const SizedBox(height: 8),
-                          _buildTextField(
-                            controller: controller.lastNameController,
-                            hint: 'Last Name',
-                            context: context,
+                          Icon(Icons.lock_rounded,
+                              color: _slate300, size: 13.sp),
+                          SizedBox(width: 6.w),
+                          Text(
+                            AppText.secureSSL,
+                            style: GoogleFonts.inter(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w500,
+                              color: _slate500,
+                            ),
                           ),
                         ],
                       ),
                     ),
+
+                    SizedBox(height: 16.h),
+
+                    // ── Create Button ─────────────────────────────
+                    Obx(
+                      () => SizedBox(
+                        width: double.infinity,
+                        height: 52.h,
+                        child: ElevatedButton(
+                          onPressed: controller.isLoading
+                              ? null
+                              : controller.createOrganization,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _purple,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: _purple.withOpacity(0.6),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                          ),
+                          child: controller.isLoading
+                              ? SizedBox(
+                                  width: 22.w,
+                                  height: 22.w,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  AppText.createOrganizationAction,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 20.h),
                   ],
                 ),
-                const SizedBox(height: 20),
-
-                _buildLabel(AppText.workEmail),
-                const SizedBox(height: 8),
-                _buildTextField(
-                  controller: controller.emailController,
-                  hint: AppText.hintAdminEmail,
-                  context: context,
-                ),
-                const SizedBox(height: 20),
-
-                _buildLabel('Phone Number'),
-                const SizedBox(height: 8),
-                IntlPhoneField(
-                  decoration: InputDecoration(
-                    hintText: 'Phone Number',
-                    hintStyle: AppTextStyles.hintText,
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
-                  ),
-                  initialCountryCode:
-                      'IN', // Default to India or US as per user preference, strictly 'IN' is a safe guess for this context, or 'US'. Let's pick 'IN' as a common default or maybe 'US'. Given the name 'Pramod' in paths, 'IN' is a good guess, but 'US' is standard default. I'll use 'IN' as it seems more likely for this user context, or just 'US'. I'll stick to 'IN' as it's often safer for international/mixed use if I'm unsure. Actually, let's use 'US' as universal default or 'IN' if I want to be localized. I'll use 'IN'.
-                  onChanged: (phone) {
-                    controller.fullPhoneNumber.value = phone.completeNumber;
-                    controller.isPhoneValid.value =
-                        true; // Basic check, advanced validation happens internally but we need to trust the parser.
-                    // Actually IntlPhoneField has internal validation. We can capture it via onCountryChanged or similar?
-                    // Verify: isValid is a property of the phone object? No.
-                    // We might need to rely on the form state or just use the complete string.
-                    // Actually, we should use the `onChanged` to just store result. The validation visual is automatic.
-                  },
-                  onCountryChanged: (country) {
-                    // Update validation logic if needed
-                    print('Country changed to: ' + country.name);
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Info Box
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.info_rounded,
-                        color: AppColors.primaryBlue,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          AppText.adminCredentialsInfo,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppTextStyles.bodyMedium.color,
-                            fontSize: 14,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Secure SSL Label
-                Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.lock_rounded,
-                        color: AppColors.borderLight,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        AppText.secureSSL,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.borderLight,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Create Button
-                Obx(
-                  () => PrimaryButton(
-                    text: AppText.createOrganizationAction,
-                    onPressed: controller.createOrganization,
-                    isLoading: controller.isLoading,
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStep(int step, String label, {required bool isActive}) {
-    return Row(
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? AppColors.primaryBlue : Colors.transparent,
-            border: Border.all(
-              color: isActive ? AppColors.primaryBlue : AppColors.borderLight,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              step.toString(),
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: isActive ? Colors.white : AppColors.borderLight,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: isActive
-                ? AppColors.textDark
-                : AppTextStyles.bodyMedium.color,
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // HEADER
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 12.h,
+        20.w,
+        28.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.close_rounded,
+                      color: Colors.white, size: 20.sp),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                AppText.setupOrganization,
+                style: GoogleFonts.inter(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20.h),
+          // Hero illustration/info
+          Container(
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.corporate_fare_rounded,
+                color: Colors.white, size: 32.sp),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'Let\'s set up your workspace',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'Create your organization in a few simple steps',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: Colors.white70,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // SECTION CARD — wraps each group with icon + title header
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildSectionCard({
+    required IconData icon,
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: _purpleLight,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, color: _purple, size: 18.sp),
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: _slate900,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 18.h),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LABEL
+  // ════════════════════════════════════════════════════════════════════════
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: AppTextStyles.bodyMedium.copyWith(
-        fontSize: 14,
+      style: GoogleFonts.inter(
+        fontSize: 12.sp,
         fontWeight: FontWeight.w600,
-        color: AppTextStyles.h3.color,
+        color: _slate500,
       ),
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // TEXT FIELD
+  // ════════════════════════════════════════════════════════════════════════
   Widget _buildTextField({
-    required BuildContext context,
     required TextEditingController controller,
     required String hint,
+    IconData? icon,
+    TextInputType? keyboardType,
   }) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: AppTextStyles.hintText,
-        filled: true,
-        fillColor: Theme.of(context).cardColor,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryBlue),
+    return Container(
+      decoration: BoxDecoration(
+        color: _bg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: _slate300,
+          ),
+          prefixIcon: icon != null
+              ? Icon(icon, color: _slate500, size: 18.sp)
+              : null,
+          border: InputBorder.none,
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         ),
       ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // PHONE FIELD — digits only with live counter
+  // ════════════════════════════════════════════════════════════════════════
+  Widget _buildPhoneField(BuildContext context) {
+    final isComplete = _phoneDigits == _phoneMaxDigits;
+    final hasInput = _phoneDigits > 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: _bg,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: hasInput && !isComplete
+                  ? AppColors.warningOrange.withOpacity(0.5)
+                  : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: IntlPhoneField(
+            style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+            dropdownTextStyle:
+                GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            disableLengthCheck: false,
+            decoration: InputDecoration(
+              hintText: 'Phone Number',
+              hintStyle:
+                  GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+              counterText: '', // hide default material counter
+              errorStyle: const TextStyle(height: 0, fontSize: 0),
+            ),
+            initialCountryCode: 'IN',
+            onChanged: (phone) {
+              final digits = phone.number;
+              setState(() {
+                _phoneDigits = digits.length;
+              });
+              controller.fullPhoneNumber.value = phone.completeNumber;
+              controller.isPhoneValid.value =
+                  digits.length == _phoneMaxDigits;
+            },
+            onCountryChanged: (country) {
+              setState(() {
+                // Country maxLength sets the expected digit count
+                _phoneMaxDigits = country.maxLength;
+                _phoneDigits = 0;
+              });
+              controller.isPhoneValid.value = false;
+            },
+          ),
+        ),
+        SizedBox(height: 6.h),
+        // ── Counter / helper text ─────────────────────────────────
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          child: Row(
+            children: [
+              Icon(
+                isComplete
+                    ? Icons.check_circle_rounded
+                    : Icons.info_outline_rounded,
+                size: 13.sp,
+                color: isComplete
+                    ? AppColors.successGreen
+                    : (hasInput ? AppColors.warningOrange : _slate500),
+              ),
+              SizedBox(width: 5.w),
+              Expanded(
+                child: Text(
+                  isComplete
+                      ? 'Valid phone number'
+                      : 'Enter $_phoneMaxDigits digits',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: isComplete
+                        ? AppColors.successGreen
+                        : (hasInput
+                            ? AppColors.warningOrange
+                            : _slate500),
+                  ),
+                ),
+              ),
+              Text(
+                '$_phoneDigits/$_phoneMaxDigits',
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isComplete
+                      ? AppColors.successGreen
+                      : _slate500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

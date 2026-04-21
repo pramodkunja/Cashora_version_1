@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/user_repository.dart';
@@ -12,6 +13,7 @@ class AccountantProfileController extends GetxController {
   final rxEmail = ''.obs;
   final rxPhone = ''.obs;
   final rxRole = ''.obs;
+  final rxDepartmentName = ''.obs;
   final isLoading = false.obs;
 
   @override
@@ -29,9 +31,10 @@ class AccountantProfileController extends GetxController {
         rxEmail.value = user.email;
         rxRole.value = user.role;
         rxPhone.value = user.phoneNumber;
+        rxDepartmentName.value = user.departmentName;
       }
     } catch (e) {
-      print('Error fetching accountant profile: $e');
+      if (kDebugMode) debugPrint('Error fetching accountant profile: $e');
     } finally {
       isLoading.value = false;
     }

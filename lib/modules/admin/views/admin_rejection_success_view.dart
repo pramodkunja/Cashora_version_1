@@ -1,91 +1,134 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
 import '../../../../routes/app_routes.dart';
 import '../controllers/admin_dashboard_controller.dart';
 
 class AdminRejectionSuccessView extends StatelessWidget {
   const AdminRejectionSuccessView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _red = AppColors.errorRed;
+  static const _redBg = Color(0xFFFEF2F2);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
+  void _navigateBack() {
+    Get.offNamedUntil(AppRoutes.ADMIN_DASHBOARD, (route) => false);
+    Future.delayed(const Duration(milliseconds: 100), () {
+      try {
+        Get.find<AdminDashboardController>().changeTab(1);
+      } catch (_) {}
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textDark),
-          onPressed: () {
-            Get.offNamedUntil(AppRoutes.ADMIN_DASHBOARD, (route) => false);
-            Future.delayed(const Duration(milliseconds: 100), () {
-              try {
-                Get.find<AdminDashboardController>().changeTab(1);
-              } catch (_) {}
-            });
-          },
-        ),
-        centerTitle: true,
-        title: Text(AppText.confirmation, style: AppTextStyles.h3),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
+      backgroundColor: _bg,
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF7F1D1D).withOpacity(0.5)
-                    : const Color(0xFFFEE2E2), // Darker red in dark mode
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFEF4444).withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: _navigateBack,
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8.r,
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.close_rounded,
+                          color: _slate900, size: 20.sp),
+                    ),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.thumb_down_alt_rounded,
-                color: Color(0xFFEF4444), // Red
-                size: 48,
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      width: 120.w,
+                      height: 120.w,
+                      decoration: BoxDecoration(
+                        color: _redBg,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _red.withOpacity(0.2),
+                            blurRadius: 30.r,
+                            spreadRadius: 4.r,
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.thumb_down_alt_rounded,
+                          color: _red, size: 52.sp),
+                    ),
+                    SizedBox(height: 32.h),
+                    Text(
+                      AppText.requestRejected,
+                      style: GoogleFonts.inter(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w800,
+                        color: _slate900,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 12.h),
+                    Text(
+                      AppText.requestRejectedDesc,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: _slate500,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed: _navigateBack,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _purple,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                        ),
+                        child: Text(
+                          AppText.backToApprovalsList,
+                          style: GoogleFonts.inter(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 32.h),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 32),
-            Text(
-              AppText.requestRejected,
-              style: AppTextStyles.h1.copyWith(fontSize: 24),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              AppText.requestRejectedDesc,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSlate,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const Spacer(),
-            PrimaryButton(
-              text: AppText.backToApprovalsList,
-              onPressed: () {
-                Get.offNamedUntil(AppRoutes.ADMIN_DASHBOARD, (route) => false);
-                Future.delayed(const Duration(milliseconds: 100), () {
-                  try {
-                    Get.find<AdminDashboardController>().changeTab(1);
-                  } catch (_) {}
-                });
-              },
-              width: double.infinity,
-            ),
-            const SizedBox(height: 32),
           ],
         ),
       ),

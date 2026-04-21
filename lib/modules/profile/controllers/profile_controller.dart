@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../routes/app_routes.dart';
@@ -19,6 +20,7 @@ class ProfileController extends GetxController {
   final rxOrgName = ''.obs;
   final rxOrgCode = ''.obs;
   final rxUserId = ''.obs;
+  final rxDepartmentName = ''.obs;
 
   // Form Controllers
   final firstNameController = TextEditingController();
@@ -50,7 +52,7 @@ class ProfileController extends GetxController {
         }
       }
     } catch (e) {
-      print('Profile fetch error: $e');
+      if (kDebugMode) debugPrint('Profile fetch error: $e');
     } finally {
       isLoading.value = false;
     }
@@ -74,6 +76,7 @@ class ProfileController extends GetxController {
     rxOrgCode.value = user.orgCode;
     rxPhone.value = user.phoneNumber;
     rxUserId.value = user.id;
+    rxDepartmentName.value = user.departmentName;
     _updateControllers();
   }
 

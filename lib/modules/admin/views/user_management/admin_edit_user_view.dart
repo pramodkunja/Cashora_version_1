@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_text_styles.dart';
@@ -215,7 +216,68 @@ class AdminEditUserView extends GetView<AdminUserController> {
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+
+              // Department Dropdown
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6.0, left: 4),
+                    child: Text(
+                      'Department',
+                      style: AppTextStyles.h3.copyWith(fontSize: 14),
+                    ),
+                  ),
+                  Obx(() {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<int?>(
+                          value: controller.selectedDepartmentId.value,
+                          isExpanded: true,
+                          hint: Text(
+                            'Select Department',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSlate,
+                            ),
+                          ),
+                          items: [
+                            const DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text('Unassigned'),
+                            ),
+                            ...controller.departments
+                                .where((d) => d['is_active'] == true)
+                                .map((d) {
+                              final id = d['id'] is int
+                                  ? d['id'] as int
+                                  : int.tryParse(d['id'].toString());
+                              final name = d['name']?.toString() ?? '';
+                              final code = d['code']?.toString() ?? '';
+                              return DropdownMenuItem<int?>(
+                                value: id,
+                                child: Text(
+                                  code.isNotEmpty ? '$name ($code)' : name,
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                              );
+                            }),
+                          ],
+                          onChanged: (v) =>
+                              controller.selectedDepartmentId.value = v,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+
               const SizedBox(height: 20),
             ],
           ),

@@ -10,8 +10,8 @@ import '../../../../utils/widgets/app_loader.dart';
 class SettingsController extends GetxController {
   final StorageService _storage = Get.find<StorageService>();
   final AuthRepository _authRepository = Get.find<AuthRepository>();
-  final rxThemeMode = 0.obs; // 0: Light, 1: Dark, 2: System
-  final rxPendingThemeMode = 0.obs; // Temporary selection before saving
+  final rxThemeMode = 0.obs; // 0: Light (default), 1: Dark, 2: System
+  final rxPendingThemeMode = 0.obs;
 
   // Notification Toggles
   final rxNotifyApproval = true.obs;

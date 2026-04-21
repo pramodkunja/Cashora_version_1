@@ -13,17 +13,20 @@ class RequestRepository {
   RequestRepository(this._networkService);
 
   Future<List<String>> getCategories() async {
-    try {
-      final response = await _networkService.get('/requestor/categories');
-      if (response.data is List) {
-        return List<String>.from(response.data);
-      }
-      return [];
-    } catch (e) {
-      // Fallback or rethrow? For now return empty or rethrow
-      print("Error fetching categories: $e");
-      return [];
+    final response = await _networkService.get('/requestor/categories');
+    if (response.data is List) {
+      return List<String>.from(response.data);
     }
+    return [];
+  }
+
+  /// GET /requestor/dashboard
+  Future<Map<String, dynamic>> getDashboard() async {
+    final response = await _networkService.get('/requestor/dashboard');
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+    throw Exception('Invalid dashboard response');
   }
 
   Future<Map<String, dynamic>> submitRequest({
@@ -120,29 +123,27 @@ class RequestRepository {
 
 
 
+  /// GET /requestor/requests
+  ///
+  /// [status] — one of: All, Pending, Clarification, Approved, Rejected, Unpaid
+  /// [search] — optional free-text search
   Future<List<Map<String, dynamic>>> getMyRequests({
     String? status,
-    String? paymentStatus,
+    String? search,
   }) async {
-    try {
-      final Map<String, dynamic> queryParams = {};
-      if (status != null) queryParams['status'] = status;
-      if (paymentStatus != null) queryParams['payment_status'] = paymentStatus;
+    final Map<String, dynamic> queryParams = {};
+    if (status != null && status.isNotEmpty) queryParams['status'] = status;
+    if (search != null && search.isNotEmpty) queryParams['search'] = search;
 
-      final response = await _networkService.get(
-        '/requestor/my-requests',
-        queryParameters: queryParams,
-      );
+    final response = await _networkService.get(
+      '/requestor/requests',
+      queryParameters: queryParams,
+    );
 
-      if (response.data is List) {
-        return List<Map<String, dynamic>>.from(response.data);
-      }
-      return [];
-    } catch (e) {
-      // Log error or handle
-      print("Error fetching requests: $e");
-      return [];
+    if (response.data is List) {
+      return List<Map<String, dynamic>>.from(response.data);
     }
+    return [];
   }
 
   /// Process payment QR code and extract payment details
@@ -169,12 +170,12 @@ class RequestRepository {
 
       return response.data;
     } catch (e) {
-      print('Error processing payment QR: $e');
+      if (kDebugMode) debugPrint('Error processing payment QR: $e');
       rethrow;
     }
   }
 
-  Future<void> submitClarification(int id, String remarks) async {
+  Future<void> submitClarification(dynamic id, String remarks) async {
     try {
       await _networkService.post(
         '/requestor/respond-clarification/$id',

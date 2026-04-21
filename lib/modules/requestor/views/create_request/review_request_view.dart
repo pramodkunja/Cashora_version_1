@@ -1,256 +1,432 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../controllers/create_request_controller.dart';
-import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
 import '../../../../utils/widgets/app_loader.dart';
 
 class ReviewRequestView extends GetView<CreateRequestController> {
   const ReviewRequestView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(AppText.reviewRequest, style: AppTextStyles.h3),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              Text(
-                AppText.totalRequestedAmount,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppTextStyles.bodyMedium.color,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Obx(
-                () => Text(
-                  '₹${controller.amount.value.toStringAsFixed(2)}',
-                  style: AppTextStyles.h1.copyWith(fontSize: 40),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppText.requestDetails,
-                      style: AppTextStyles.h3.copyWith(fontSize: 18),
-                    ),
-                    const SizedBox(height: 24),
-
-                    _buildDetailItem(
-                      icon: Icons.person,
-                      title: "Requestor",
-                      value:
-                          Get.find<AuthService>().currentUser.value?.name ??
-                          'Unknown',
-                    ),
-                    const SizedBox(height: 24),
-
-                    Obx(
-                      () => _buildDetailItem(
-                        icon: Icons.receipt_long,
-                        title: AppText.requestType,
-                        value: controller.requestType.value,
+      backgroundColor: _bg,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+              child: Column(
+                children: [
+                  // Total Amount Card
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(22.w),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6B55CE), Color(0xFF8B74E8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      borderRadius: BorderRadius.circular(20.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _purple.withOpacity(0.25),
+                          blurRadius: 20.r,
+                          offset: Offset(0, 8.h),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    Obx(() {
-                      final cat = controller.selectedExpenseCategory.value;
-                      return _buildDetailItem(
-                        icon: cat?['icon'] ?? Icons.category,
-                        title: AppText.category,
-                        value: cat?['name'] ?? AppText.notSelected,
-                        iconColorOverride: AppColors.primaryBlue,
-                      );
-                    }),
-                    const SizedBox(height: 24),
-                    Obx(
-                      () => _buildDetailItem(
-                        icon: Icons.label,
-                        title: AppText.purpose,
-                        value: controller.purpose.value,
-                      ),
+                    child: Column(
+                      children: [
+                        Text(
+                          AppText.totalRequestedAmount,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withOpacity(0.85),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+                        Obx(
+                          () => Text(
+                            '₹${controller.amount.value.toStringAsFixed(2)}',
+                            style: GoogleFonts.inter(
+                              fontSize: 38.sp,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              height: 1.1,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    Obx(
-                      () => _buildDetailItem(
-                        icon: Icons.description,
-                        title: AppText.description,
-                        value: controller.description.value,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+                  ),
 
-              // Attachments
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppText.attachments,
-                      style: AppTextStyles.h3.copyWith(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    Obx(() {
-                      final allFiles = <XFile>[];
-                      // Add QR if present
-                      if (controller.qrFile.value != null) {
-                        // Ideally we might want to tag this visually, but for now just adding to list
-                        allFiles.add(controller.qrFile.value!);
-                      }
-                      // Add Receipt if present
-                      if (controller.receiptFile.value != null) {
-                        allFiles.add(controller.receiptFile.value!);
-                      }
-                      // Add standard attachments (bills)
-                      allFiles.addAll(controller.attachedFiles);
+                  SizedBox(height: 16.h),
 
-                      if (allFiles.isNotEmpty) {
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: allFiles.length,
-                          separatorBuilder: (ctx, idx) =>
-                              const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            XFile file = allFiles[index];
-                            // Determine specific icon or label based on file identity?
-                            // For now, uniform display.
-                            bool isQr = file == controller.qrFile.value;
-                            bool isReceipt =
+                  // Request Details Card
+                  _buildSectionCard(
+                    icon: Icons.description_rounded,
+                    title: AppText.requestDetails,
+                    children: [
+                      _detailRow(
+                        Icons.person_rounded,
+                        'Requestor',
+                        Get.find<AuthService>().currentUser.value?.name ??
+                            'Unknown',
+                      ),
+                      Obx(() => _detailRow(
+                            Icons.receipt_long_rounded,
+                            AppText.requestType,
+                            controller.requestType.value,
+                          )),
+                      Obx(() {
+                        final cat = controller.selectedExpenseCategory.value;
+                        return _detailRow(
+                          Icons.category_rounded,
+                          AppText.category,
+                          cat?['name'] ?? AppText.notSelected,
+                        );
+                      }),
+                      Obx(() => _detailRow(
+                            Icons.label_rounded,
+                            AppText.purpose,
+                            controller.purpose.value,
+                          )),
+                      Obx(() => _detailRow(
+                            Icons.notes_rounded,
+                            AppText.description,
+                            controller.description.value,
+                            last: true,
+                          )),
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Attachments Card
+                  _buildSectionCard(
+                    icon: Icons.attach_file_rounded,
+                    title: AppText.attachments,
+                    children: [
+                      Obx(() {
+                        final allFiles = <XFile>[];
+                        if (controller.qrFile.value != null) {
+                          allFiles.add(controller.qrFile.value!);
+                        }
+                        if (controller.receiptFile.value != null) {
+                          allFiles.add(controller.receiptFile.value!);
+                        }
+                        allFiles.addAll(controller.attachedFiles);
+
+                        if (allFiles.isEmpty) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: Text(
+                              AppText.noAttachments,
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: _slate500,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: allFiles.map((file) {
+                            final isQr = file == controller.qrFile.value;
+                            final isReceipt =
                                 file == controller.receiptFile.value;
                             String label = file.name;
-                            IconData icon = Icons.image;
-                            Color iconColor = AppColors.primaryBlue;
-
+                            IconData icon = Icons.image_rounded;
                             if (isQr) {
-                              label = "QR Code";
-                              icon = Icons.qr_code_2;
-                              iconColor = Colors.purple;
+                              label = 'QR Code';
+                              icon = Icons.qr_code_2_rounded;
                             } else if (isReceipt) {
-                              label = "Receipt";
-                              icon = Icons.receipt;
-                              iconColor = Colors.green;
+                              label = 'Receipt';
+                              icon = Icons.receipt_long_rounded;
                             }
-
-                            return GestureDetector(
-                              onTap: () => _showImagePreview(context, file),
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Theme.of(context).dividerColor,
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _showImagePreview(Get.context!, file),
+                                child: Container(
+                                  padding: EdgeInsets.all(12.w),
+                                  decoration: BoxDecoration(
+                                    color: _bg,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(
+                                        color: const Color(0xFFE2E8F0)),
                                   ),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.infoBg,
-                                        borderRadius: BorderRadius.circular(8),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(8.w),
+                                        decoration: BoxDecoration(
+                                          color: _purpleLight,
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                        ),
+                                        child: Icon(icon,
+                                            color: _purple, size: 18.sp),
                                       ),
-                                      child: Icon(icon, color: iconColor),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            label,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          if (isQr || isReceipt)
+                                      SizedBox(width: 10.w),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
                                             Text(
-                                              file.name,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.grey,
+                                              label,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 13.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: _slate900,
                                               ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                        ],
+                                            if (isQr || isReceipt)
+                                              Text(
+                                                file.name,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 10.sp,
+                                                  color: _slate500,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    const Icon(
-                                      Icons.visibility,
-                                      size: 18,
-                                      color: AppColors.textLight,
-                                    ),
-                                  ],
+                                      Icon(Icons.visibility_rounded,
+                                          color: _slate500, size: 16.sp),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
-                          },
+                          }).toList(),
                         );
-                      } else {
-                        return Text(
-                          AppText.noAttachments,
-                          style: const TextStyle(color: Colors.grey),
-                        );
-                      }
-                    }),
-                  ],
+                      }),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          _buildBottomBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_back_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            AppText.reviewRequest,
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10.r,
+            offset: Offset(0, -4.h),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Obx(
+          () => SizedBox(
+            width: double.infinity,
+            height: 52.h,
+            child: ElevatedButton.icon(
+              onPressed: controller.isLoading.value
+                  ? null
+                  : controller.submitRequest,
+              icon: controller.isLoading.value
+                  ? SizedBox(
+                      width: 18.w,
+                      height: 18.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(Icons.send_rounded, size: 18.sp),
+              label: Text(
+                controller.isLoading.value
+                    ? 'Submitting...'
+                    : AppText.submitRequest,
+                style: GoogleFonts.inter(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                child: Obx(
-                  () => PrimaryButton(
-                    text: controller.isLoading.value
-                        ? 'Submitting...'
-                        : AppText.submitRequest,
-                    onPressed: controller.isLoading.value
-                        ? null
-                        : controller.submitRequest,
-                  ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _purple,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: _purple.withOpacity(0.5),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required IconData icon,
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: _purpleLight,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(icon, color: _purple, size: 18.sp),
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: _slate900,
                 ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 16.h),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(IconData icon, String label, String value,
+      {bool last = false}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0 : 14.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(7.w),
+            decoration: BoxDecoration(
+              color: _purpleLight,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(icon, color: _purple, size: 15.sp),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    color: _slate500,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  value.isEmpty ? '-' : value,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _slate900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -263,25 +439,24 @@ class ReviewRequestView extends GetView<CreateRequestController> {
           alignment: Alignment.topRight,
           children: [
             Container(
-              width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16.r),
+                color: Colors.white,
               ),
               clipBehavior: Clip.hardEdge,
               child: FutureBuilder<Uint8List>(
                 future: file.readAsBytes(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 200,
-                      child: Center(child: AppSpinner()),
+                    return SizedBox(
+                      height: 200.h,
+                      child: const AppLoader(),
                     );
                   }
                   if (snapshot.hasError) {
-                    return const SizedBox(
-                      height: 200,
-                      child: Center(child: Text("Error loading preview")),
+                    return SizedBox(
+                      height: 200.h,
+                      child: const Center(child: Text('Error loading preview')),
                     );
                   }
                   if (snapshot.hasData) {
@@ -292,67 +467,23 @@ class ReviewRequestView extends GetView<CreateRequestController> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.black54,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => Get.back(),
+              padding: EdgeInsets.all(8.w),
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.close_rounded,
+                      color: Colors.white, size: 20.sp),
                 ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDetailItem({
-    required IconData icon,
-    required String title,
-    required String value,
-    Color? iconColorOverride,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
-            color: Color(0xFFE0F2FE),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: iconColorOverride ?? const Color(0xFF0EA5E9),
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: AppTextStyles.bodyMedium.color,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value.isEmpty ? '-' : value,
-                style: TextStyle(
-                  color: AppTextStyles.h3.color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/create_request_controller.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
 
 class RequestSuccessView extends GetView<CreateRequestController> {
   const RequestSuccessView({Key? key}) : super(key: key);
 
-  @override
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _amber = AppColors.warningOrange;
+  static const _amberBg = Color(0xFFFFFBEB);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _bg = Color(0xFFF8FAFC);
+
   @override
   Widget build(BuildContext context) {
     final args = Get.arguments as Map<String, dynamic>? ?? {};
@@ -19,359 +28,309 @@ class RequestSuccessView extends GetView<CreateRequestController> {
     final amount = (args['amount'] as num?)?.toDouble() ?? 0.0;
     final requestId = args['request_id'] as String? ?? '';
     final categoryName = args['category'] as String? ?? 'General';
-
-    // Extra details for View Details
     final purpose = args['purpose'] as String? ?? '';
     final description = args['description'] as String? ?? '';
     final date = args['date'] as String? ?? '';
     final attachments = args['attachments'] ?? [];
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: AppColors.textSlate),
-            onPressed: () => Get.offAllNamed(AppRoutes.REQUESTOR),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12),
-          child: _buildDetailedSuccessUI(
-            context,
-            status,
-            paymentStatus,
-            amount,
-            requestId,
-            categoryName,
-            purpose,
-            description,
-            date,
-            attachments,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailedSuccessUI(
-    BuildContext context,
-    String status,
-    String paymentStatus,
-    double amount,
-    String requestId,
-    String categoryName,
-    String purpose,
-    String description,
-    String date,
-    dynamic attachments,
-  ) {
     final isApproved = status == 'auto_approved';
-    final mainIcon = isApproved
-        ? Icons.check_rounded
-        : Icons.hourglass_top_rounded;
-    final mainColor = isApproved
-        ? AppColors.successGreen
-        : AppColors.primaryBlue;
-    final bgShapeColor = isApproved
-        ? (Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF064E3B)
-              : const Color(0xFFE4F8F0))
-        : (Theme.of(context).primaryColor.withOpacity(0.1));
+    final iconColor = isApproved ? _green : _amber;
+    final iconBg = isApproved ? _greenBg : _amberBg;
+    final mainIcon =
+        isApproved ? Icons.check_rounded : Icons.hourglass_top_rounded;
+    final title =
+        isApproved ? AppText.requestApproved : AppText.requestSubmitted;
+    final subtitle =
+        isApproved ? AppText.fundsAdded : AppText.requestSubmittedDesc;
 
-    final title = isApproved
-        ? AppText.requestApproved
-        : AppText.requestSubmitted;
-    final subtitle = isApproved
-        ? AppText.fundsAdded
-        : AppText.requestSubmittedDesc;
-
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: bgShapeColor,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(mainIcon, size: 40, color: mainColor),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.h1.copyWith(
-            fontSize: 24,
-            height: 1.2,
-            color: AppTextStyles.h1.color,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppTextStyles.bodyMedium.color,
-              height: 1.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
-
-        Stack(
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+            // Close button
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () => Get.offAllNamed(AppRoutes.REQUESTOR),
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8.r,
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.close_rounded,
+                          color: _slate900, size: 20.sp),
+                    ),
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  Text(
-                    AppText.totalAmount,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '₹${amount.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.w800,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Divider(color: Theme.of(context).dividerColor),
-                  const SizedBox(height: 24),
-
-                  _buildRowItem(
-                    icon: Icons.inventory_2_outlined,
-                    iconBg: Theme.of(context).primaryColor.withOpacity(0.1),
-                    iconColor: AppColors.primaryBlue,
-                    label: AppText.category,
-                    value: categoryName,
-                    context: context,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildRowItem(
-                    icon: Icons.tag,
-                    iconBg: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.1)
-                        : const Color(0xFFF1F5F9),
-                    iconColor:
-                        Theme.of(context).textTheme.bodySmall?.color ??
-                        const Color(0xFF64748B),
-                    label: AppText.requestId,
-                    value: '#$requestId',
-                    context: context,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Status Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppText.status,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  children: [
+                    // Icon
+                    Container(
+                      width: 100.w,
+                      height: 100.w,
+                      decoration: BoxDecoration(
+                        color: iconBg,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: iconColor.withOpacity(0.2),
+                            blurRadius: 30.r,
+                            spreadRadius: 3.r,
+                          ),
+                        ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                      child: Icon(mainIcon, size: 48.sp, color: iconColor),
+                    ),
+                    SizedBox(height: 24.h),
+
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w800,
+                        color: _slate900,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 10.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      child: Text(
+                        subtitle,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          color: _slate500,
+                          height: 1.5,
                         ),
-                        decoration: BoxDecoration(
-                          color: isApproved
-                              ? AppColors.successGreen.withOpacity(0.1)
-                              : Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isApproved
-                                ? AppColors.successGreen.withOpacity(0.3)
-                                : Colors.orange.withOpacity(0.3),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(height: 28.h),
+
+                    // Summary Card
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(20.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 16.r,
+                            offset: Offset(0, 4.h),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Amount
+                          Text(
+                            AppText.totalAmount.toUpperCase(),
+                            style: GoogleFonts.inter(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                              color: _slate500,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          SizedBox(height: 6.h),
+                          Text(
+                            '₹${amount.toStringAsFixed(2)}',
+                            style: GoogleFonts.inter(
+                              fontSize: 36.sp,
+                              fontWeight: FontWeight.w800,
+                              color: _slate900,
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                          Divider(
+                              height: 1.h, color: const Color(0xFFF1F5F9)),
+                          SizedBox(height: 16.h),
+
+                          // Details
+                          _infoRow(Icons.inventory_2_rounded,
+                              AppText.category, categoryName),
+                          SizedBox(height: 14.h),
+                          _infoRow(Icons.tag_rounded, AppText.requestId,
+                              '#$requestId'),
+                          SizedBox(height: 16.h),
+
+                          _statusRow(
+                            label: AppText.status,
+                            value: isApproved
+                                ? AppText.approvedSC
+                                : AppText.pendingSC,
+                            icon: isApproved
+                                ? Icons.check_circle_rounded
+                                : Icons.access_time_rounded,
+                            color: isApproved ? _green : _amber,
+                            bg: isApproved ? _greenBg : _amberBg,
+                          ),
+                          SizedBox(height: 12.h),
+                          _statusRow(
+                            label: AppText.paymentStatus,
+                            value: paymentStatus,
+                            icon: Icons.hourglass_empty_rounded,
+                            color: _slate500,
+                            bg: const Color(0xFFF1F5F9),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 28.h),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            Get.offAllNamed(AppRoutes.REQUESTOR),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _purple,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              isApproved
-                                  ? Icons.check
-                                  : Icons.access_time_rounded,
-                              size: 14,
-                              color: isApproved
-                                  ? AppColors.successGreen
-                                  : Colors.orange,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              isApproved
-                                  ? AppText.approvedSC
-                                  : AppText.pendingSC,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: isApproved
-                                    ? AppColors.successGreen
-                                    : Colors.orange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppText.paymentStatus,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).disabledColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Theme.of(context).dividerColor,
+                        child: Text(
+                          AppText.goToDashboard,
+                          style: GoogleFonts.inter(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.hourglass_empty,
-                              size: 14,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.color,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              paymentStatus,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(
-                                  context,
-                                ).textTheme.bodySmall?.color,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    TextButton(
+                      onPressed: () {
+                        Get.toNamed(
+                          AppRoutes.REQUEST_DETAILS_READ,
+                          arguments: {
+                            'title': purpose,
+                            'amount': amount,
+                            'status': status == 'auto_approved'
+                                ? 'Approved'
+                                : 'Pending',
+                            'category': categoryName,
+                            'date': date,
+                            'description': description,
+                            'attachments': attachments,
+                          },
+                        );
+                      },
+                      child: Text(
+                        AppText.viewDetails,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _purple,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
               ),
             ),
           ],
         ),
-
-        const SizedBox(height: 32),
-        SizedBox(
-          width: double.infinity,
-          child: PrimaryButton(
-            text: AppText.goToDashboard,
-            onPressed: () => Get.offAllNamed(AppRoutes.REQUESTOR),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () {
-            Get.toNamed(
-              AppRoutes.REQUEST_DETAILS_READ,
-              arguments: {
-                'title': purpose,
-                'amount': amount,
-                'status': status == 'auto_approved' ? 'Approved' : 'Pending',
-                'category': categoryName,
-                'date': date,
-                'description': description,
-                'attachments': attachments,
-              },
-            );
-          },
-          child: Text(
-            AppText.viewDetails,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.primaryBlue,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
+      ),
     );
   }
 
-  Widget _buildRowItem({
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String label,
-    required String value,
-    required BuildContext context,
-  }) {
+  Widget _infoRow(IconData icon, String label, String value) {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-          child: Icon(icon, color: iconColor, size: 20),
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: _purpleLight,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Icon(icon, color: _purple, size: 16.sp),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 12.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  color: _slate500,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2.h),
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 15,
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  color: _slate900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _statusRow({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required Color bg,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            color: _slate500,
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 13.sp, color: color),
+              SizedBox(width: 5.w),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w700,
+                  color: color,
                 ),
               ),
             ],

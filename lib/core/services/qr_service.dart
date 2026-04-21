@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -23,15 +24,17 @@ class QRService extends GetxService {
       // In production, you might want to use a different QR scanning package
       // that supports file-based scanning, such as 'qr_code_tools' or 'scan'
       
-      print('⚠️ QR scanning from file not fully implemented');
-      print('   Consider using a package like qr_code_tools for file-based scanning');
+      if (kDebugMode) {
+        debugPrint('QR scanning from file not fully implemented');
+        debugPrint('   Consider using a package like qr_code_tools for file-based scanning');
+      }
       
       // Dispose controller
       controller.dispose();
       
       return null;
     } catch (e) {
-      print('❌ Error scanning QR code: $e');
+      if (kDebugMode) debugPrint('Error scanning QR code: $e');
       return null;
     }
   }
@@ -84,7 +87,7 @@ class QRService extends GetxService {
         details['pa'] = qrData.trim();
       }
     } catch (e) {
-      print('Error extracting UPI details: $e');
+      if (kDebugMode) debugPrint('Error extracting UPI details: $e');
     }
 
     return details;
@@ -116,7 +119,7 @@ class QRService extends GetxService {
         details['ifsc'] = ifscMatch.group(0);
       }
     } catch (e) {
-      print('Error extracting bank details: $e');
+      if (kDebugMode) debugPrint('Error extracting bank details: $e');
     }
 
     return details;

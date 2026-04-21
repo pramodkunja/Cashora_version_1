@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; // Added
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../controllers/accountant_payments_controller.dart';
 
 class PendingPaymentsTab extends StatelessWidget {
   const PendingPaymentsTab({Key? key}) : super(key: key);
+
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _amber = AppColors.warningOrange;
+  static const _amberBg = Color(0xFFFFFBEB);
 
   @override
   Widget build(BuildContext context) {
@@ -21,28 +30,32 @@ class PendingPaymentsTab extends StatelessWidget {
       }
 
       final expenses = controller.pendingExpenses;
-
-      // Calculate Total Outstanding
-      double totalAmount = 0;
-      for (var item in expenses) {
-        totalAmount += (item['amount'] as num?)?.toDouble() ?? 0.0;
+      double total = 0;
+      for (final item in expenses) {
+        total += (item['amount'] as num?)?.toDouble() ?? 0.0;
       }
 
       return SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+        controller: controller.pendingScroll,
+        padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 24.h),
         child: Column(
           children: [
-            // Total Outstanding Card
+            // Outstanding card (gradient)
             Container(
-              padding: EdgeInsets.all(24.w),
+              width: double.infinity,
+              padding: EdgeInsets.all(22.w),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(24.r),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6B55CE), Color(0xFF8B74E8)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10.r,
-                    offset: Offset(0, 4.h),
+                    color: _purple.withOpacity(0.22),
+                    blurRadius: 20.r,
+                    offset: Offset(0, 8.h),
                   ),
                 ],
               ),
@@ -50,29 +63,27 @@ class PendingPaymentsTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: Text(
-                          AppText.totalOutstanding,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSlate,
-                            letterSpacing: 1.0,
-                            fontSize: 14.sp,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
                       Container(
                         padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12.r),
+                          color: Colors.white.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Icon(
-                          Icons.account_balance_wallet_outlined,
-                          color: AppColors.primaryBlue,
-                          size: 20.sp,
+                          Icons.account_balance_wallet_rounded,
+                          color: Colors.white,
+                          size: 18.sp,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Text(
+                        'Total Outstanding',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.85),
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
@@ -81,32 +92,47 @@ class PendingPaymentsTab extends StatelessWidget {
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      '₹${totalAmount.toStringAsFixed(2)}',
-                      style: AppTextStyles.h1,
+                      '₹${total.toStringAsFixed(2)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 34.sp,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 6.h),
                   Text(
-                    'Across ${expenses.length} Pending Requests',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSlate,
+                    '${expenses.length} pending requests',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: Colors.white70,
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 24.h),
 
-            // List of Pending Requests
+            SizedBox(height: 20.h),
+
+            // List
             if (expenses.isEmpty)
               Center(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 40.h),
-                  child: Text(
-                    "No pending payments",
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSlate,
-                    ),
+                  padding: EdgeInsets.only(top: 48.h),
+                  child: Column(
+                    children: [
+                      Icon(Icons.inbox_rounded,
+                          size: 56.sp, color: _slate300),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'No pending payments',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _slate500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )
@@ -115,28 +141,8 @@ class PendingPaymentsTab extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: expenses.length,
-                separatorBuilder: (context, index) => SizedBox(height: 16.h),
-                itemBuilder: (context, index) {
-                  final item = expenses[index];
-                  String name = 'Unknown User';
-                  if (item['requestor'] != null) {
-                    final req = item['requestor'];
-                    name = "${req['first_name'] ?? ''} ${req['last_name'] ?? ''}"
-                        .trim();
-                    if (name.isEmpty) name = req['email'] ?? 'Unknown User';
-                  }
-
-                  return _buildRequestItem(
-                    context,
-                    id: item['request_id'] ?? '#REQ-${item['id']}',
-                    date: _formatDate(item['created_at']),
-                    name: name,
-                    department: 'General',
-                    category: item['category'] ?? 'Expense',
-                    amount: '₹${((item['amount'] as num?)?.toDouble() ?? 0.0).toStringAsFixed(2)}',
-                    data: item,
-                  );
-                },
+                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                itemBuilder: (_, i) => _buildItem(expenses[i]),
               ),
           ],
         ),
@@ -144,60 +150,40 @@ class PendingPaymentsTab extends StatelessWidget {
     });
   }
 
+  Widget _buildItem(Map<String, dynamic> item) {
+    final id = item['request_id']?.toString() ?? '#REQ-${item['id']}';
+    final date = _formatDate(item['created_at']?.toString());
+    final amount = (item['amount'] as num?)?.toDouble() ?? 0.0;
+    final category = item['category']?.toString() ?? 'Expense';
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '';
-    try {
-      final dt = DateTime.parse(dateStr);
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-      return '${months[dt.month - 1]} ${dt.day}';
-    } catch (_) {
-      return '';
+    String name = 'Unknown';
+    if (item['requestor'] is Map) {
+      final r = item['requestor'];
+      name = '${r['first_name'] ?? ''} ${r['last_name'] ?? ''}'.trim();
+      if (name.isEmpty) name = r['email']?.toString() ?? 'Unknown';
     }
-  }
 
-  Widget _buildRequestItem(
-    BuildContext context, {
-    required String id,
-    required String date,
-    required String name,
-    required String department,
-    required String category,
-    required String amount,
-    Map<String, dynamic>? data, // Added data param
-  }) {
     return GestureDetector(
-      onTap: () {
-        if (data != null) {
-          Get.toNamed(
-            AppRoutes.ACCOUNTANT_PAYMENT_REQUEST_DETAILS,
-            arguments: {'request': data},
-          );
-        }
+      onTap: () async {
+        await Get.toNamed(
+          AppRoutes.ACCOUNTANT_PAYMENT_REQUEST_DETAILS,
+          arguments: {'request': item},
+        );
+        // Reset scroll + refresh list when returning
+        final ctrl = Get.find<AccountantPaymentsController>();
+        ctrl.resetScroll();
+        await ctrl.fetchPendingPayments();
       },
       child: Container(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24.r),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10.r,
-              offset: Offset(0, 2.h),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12.r,
+              offset: Offset(0, 3.h),
             ),
           ],
         ),
@@ -205,104 +191,110 @@ class PendingPaymentsTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  // Make ID/Date flexible
                   child: Text(
                     '$id • $date',
-                    style: AppTextStyles.bodySmall.copyWith(
+                    style: GoogleFonts.inter(
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textSlate,
-                      fontSize: 12.sp,
+                      color: _slate500,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  amount,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.primaryBlue,
+                  '₹${amount.toStringAsFixed(0)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: _purple,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8.h),
-            Text(name, style: AppTextStyles.bodyLarge),
-            SizedBox(height: 4.h),
-            Text(
-              '$department • $category',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSlate,
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Divider(color: Theme.of(context).dividerColor),
-            SizedBox(height: 16.h),
+            SizedBox(height: 10.h),
             Row(
               children: [
-                if (data != null) ...[
-                  // Status Tag based on request_type or status
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.successGreen.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
+                Container(
+                  width: 38.w,
+                  height: 38.w,
+                  decoration: BoxDecoration(
+                    color: _purpleLight,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Center(
                     child: Text(
-                      (data['status']?.toString().toUpperCase() ?? 'APPROVED'),
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.successGreen,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10.sp,
+                      _initials(name),
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: _purple,
                       ),
                     ),
                   ),
-                  SizedBox(width: 8.w),
-                  // Payment Status Tag
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.warningOrange.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Text(
-                      (data['payment_status']
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: _slate900,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        category,
+                        style: GoogleFonts.inter(
+                          fontSize: 11.sp,
+                          color: _slate500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Divider(height: 1.h, color: const Color(0xFFF1F5F9)),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                _statusChip(
+                  label: (item['status']?.toString() ?? 'APPROVED').toUpperCase(),
+                  color: _green,
+                  bg: _greenBg,
+                ),
+                SizedBox(width: 6.w),
+                _statusChip(
+                  label: (item['payment_status']
                               ?.toString()
                               .replaceAll('_', ' ')
                               .toUpperCase() ??
                           'PENDING'),
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.warningOrange,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10.sp,
-                      ),
-                    ),
-                  ),
-                ],
+                  color: _amber,
+                  bg: _amberBg,
+                ),
                 const Spacer(),
                 Row(
                   children: [
                     Text(
-                      AppText.view,
-                      style: AppTextStyles.buttonText.copyWith(
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                        fontSize: 14.sp,
+                      'View',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                        color: _purple,
                       ),
                     ),
-                    SizedBox(width: 4.w),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 20.sp,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
+                    SizedBox(width: 2.w),
+                    Icon(Icons.chevron_right_rounded,
+                        color: _purple, size: 18.sp),
                   ],
                 ),
               ],
@@ -311,5 +303,51 @@ class PendingPaymentsTab extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _statusChip({
+    required String label,
+    required Color color,
+    required Color bg,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 9.sp,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  String _initials(String name) {
+    if (name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length > 1 && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final dt = DateTime.parse(dateStr);
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      ];
+      return '${months[dt.month - 1]} ${dt.day}';
+    } catch (_) {
+      return '';
+    }
   }
 }

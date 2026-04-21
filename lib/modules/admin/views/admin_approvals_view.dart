@@ -1,106 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../../../routes/app_routes.dart';
-import '../utils/request_mapper.dart'; // Added Import
+import '../utils/request_mapper.dart';
 import '../controllers/admin_approvals_controller.dart';
-import 'widgets/admin_bottom_bar.dart';
 
 class AdminApprovalsView extends GetView<AdminApprovalsController> {
   const AdminApprovalsView({Key? key}) : super(key: key);
 
+  static const _purple = AppColors.primary;
+  static const _purpleLight = Color(0xFFF0EDFF);
+  static const _slate900 = AppColors.textDark;
+  static const _slate500 = AppColors.textSlate;
+  static const _slate300 = Color(0xFFCBD5E1);
+  static const _bg = Color(0xFFF8FAFC);
+  static const _green = AppColors.successGreen;
+  static const _greenBg = Color(0xFFECFDF5);
+  static const _red = AppColors.errorRed;
+  static const _redBg = Color(0xFFFEF2F2);
+  static const _amber = AppColors.warningOrange;
+  static const _amberBg = Color(0xFFFFFBEB);
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
-        // backgroundColor: AppColors.backgroundLight,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          elevation: 0,
-
-          centerTitle: true,
-          title: Text(AppText.approvalsTitle, style: AppTextStyles.h3),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.notifications_outlined,
-                color: AppColors.textDark,
-                size: 24.sp,
-              ),
-            ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(60.h),
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-              padding: EdgeInsets.all(4.r),
-              decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? Colors.black26
-                    : AppColors.backgroundAlt,
-                borderRadius: BorderRadius.circular(
-                  20.r,
-                ), // Pill shape for tab bar container
-              ),
-              child: TabBar(
-                padding: EdgeInsets.zero,
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
-                indicator: BoxDecoration(
-                  color: AppColors.primaryBlue,
-                  borderRadius: BorderRadius.circular(16.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryBlue.withOpacity(0.3),
-                      blurRadius: 8.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                  ],
-                ),
-                indicatorSize:
-                    TabBarIndicatorSize.tab, // Ensures it fills the tab
-                labelColor: Colors.white,
-                unselectedLabelColor: AppColors.textSlate,
-                labelStyle: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                tabs: [
-                  Tab(text: AppText.tabPending),
-                  Tab(text: AppText.tabApproved),
-                  Tab(text: AppText.unpaid), // Replaces Rejected
-                  Tab(text: AppText.clarification),
+        backgroundColor: _bg,
+        body: Column(
+          children: [
+            _buildHeader(context),
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildTab(controller.pendingRequests,
+                      controller.pendingScroll),
+                  _buildTab(controller.approvedRequests,
+                      controller.approvedScroll),
+                  _buildTab(controller.unpaidRequests,
+                      controller.unpaidScroll),
+                  _buildTab(controller.clarificationRequests,
+                      controller.clarificationScroll),
+                  _buildTab(controller.rejectedRequests,
+                      controller.rejectedScroll),
                 ],
               ),
-            ),
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            Obx(
-              () => controller.isLoading.value
-                  ? const SkeletonListView()
-                  : _buildRequestList(controller.pendingRequests),
-            ),
-            Obx(
-              () => controller.isLoading.value
-                  ? const SkeletonListView()
-                  : _buildRequestList(controller.approvedRequests),
-            ),
-            Obx(
-              () => controller.isLoading.value
-                  ? const SkeletonListView()
-                  : _buildRequestList(controller.unpaidRequests),
-            ),
-            Obx(
-              () => controller.isLoading.value
-                  ? const SkeletonListView()
-                  : _buildRequestList(controller.clarificationRequests),
             ),
           ],
         ),
@@ -108,208 +57,323 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
     );
   }
 
-  Widget _buildRequestList(List<Map<String, dynamic>> items) {
-    if (items.isEmpty) {
-      return Center(
-        child: Text(
-          AppText.noRequests,
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSlate),
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 14.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      );
-    }
-    return ListView.separated(
-      padding: EdgeInsets.all(24.r),
-      shrinkWrap: true,
-      physics:
-          const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works if added later
-      itemCount: items.length,
-      separatorBuilder: (_, __) => SizedBox(height: 12.h),
-      itemBuilder: (context, index) {
-        final item = items[index];
-
-        // Data Extraction
-        final String title =
-            item['title']?.toString() ??
-            item['purpose']?.toString() ??
-            AppText.unnamedRequest;
-        final String user = RequestMapper.getUserName(item);
-        final String amount = (item['amount'] is num)
-            ? (item['amount'] as num).toStringAsFixed(2)
-            : (item['amount']?.toString() ?? '0.00');
-        final String department = RequestMapper.getDepartment(item);
-        final String status = (item['status']?.toString() ?? 'Pending')
-            .toUpperCase();
-
-        String dateStr = RequestMapper.formatDate(
-            item['date'] ?? item['created_at']);
-
-        return GestureDetector(
-          onTap: () => controller.navigateToDetails(item),
-          child: Container(
-            padding: EdgeInsets.all(20.r),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(24.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 16.r,
-                  offset: Offset(0, 4.h),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // TOP ROW: Icon + Title/Dept + Status/Date
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Icon
-                    Container(
-                      width: 48.w,
-                      height: 48.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0F2FE), // Light Blue
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.inventory_2_outlined,
-                        color: AppColors.primaryBlue,
-                        size: 24.sp,
-                      ),
-                    ),
-                    SizedBox(width: 16.w),
-
-                    // Title & Department
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            department,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSlate,
-                              fontSize: 13.sp,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Status & Date
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: RequestMapper.getStatusColor(status).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
-                              color: RequestMapper.getStatusColor(status).withOpacity(0.2),
-                            ),
-                          ),
-                          child: Text(
-                            status,
-                            style: TextStyle(
-                              color: RequestMapper.getStatusColor(status),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10.sp,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          dateStr,
-                          style: TextStyle(
-                            color: AppColors.textSlate,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 16.h),
-                Divider(color: Theme.of(context).dividerColor.withOpacity(0.5)),
-                SizedBox(height: 16.h),
-
-                // BOTTOM ROW: User + Amount
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // User Info
-                    Expanded(
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 18.r,
-                            backgroundColor: const Color(0xFFF1F5F9), // Slate 100
-                            child: Text(
-                              RequestMapper.getInitials(user),
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: const Color(0xFF64748B),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Requested by",
-                                  style: TextStyle(
-                                    color: AppColors.textSlate,
-                                    fontSize: 11.sp,
-                                  ),
-                                ),
-                                SizedBox(height: 2.h),
-                                Text(
-                                  user,
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textDark,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 16.w), // Spacing between User and Amount
-
-                    // Amount
-                    Text(
-                      '₹$amount',
-                      style: AppTextStyles.h1.copyWith(fontSize: 20.sp),
-                    ),
-                  ],
-                ),
-              ],
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
+      ),
+      child: Row(
+        children: [
+          Text(
+            AppText.approvalsTitle,
+            style: GoogleFonts.inter(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
-        );
-      },
+          const Spacer(),
+          GestureDetector(
+            onTap: () => Get.toNamed(AppRoutes.ADMIN_NOTIFICATIONS),
+            child: Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.notifications_none_rounded,
+                  color: Colors.white, size: 20.sp),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 12.h),
+      height: 38.h,
+      child: TabBar(
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        padding: EdgeInsets.zero,
+        indicatorSize: TabBarIndicatorSize.label,
+        indicator: BoxDecoration(
+          color: _purple,
+          borderRadius: BorderRadius.circular(100.r),
+        ),
+        indicatorPadding:
+            EdgeInsets.symmetric(horizontal: -14.w, vertical: 4.h),
+        dividerColor: Colors.transparent,
+        labelColor: Colors.white,
+        unselectedLabelColor: _slate500,
+        labelStyle: GoogleFonts.inter(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: GoogleFonts.inter(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w500,
+        ),
+        labelPadding: EdgeInsets.symmetric(horizontal: 18.w),
+        overlayColor:
+            WidgetStateProperty.all(_purple.withOpacity(0.06)),
+        tabs: [
+          Tab(text: AppText.tabPending),
+          Tab(text: AppText.tabApproved),
+          Tab(text: AppText.unpaid),
+          Tab(text: AppText.clarification),
+          Tab(text: AppText.tabRejected),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTab(
+      RxList<Map<String, dynamic>> list, ScrollController scroll) {
+    return Obx(() {
+      if (controller.isLoading.value && list.isEmpty) {
+        return const SkeletonListView();
+      }
+      if (list.isEmpty) return _buildEmptyState();
+      return RefreshIndicator(
+        color: _purple,
+        onRefresh: controller.fetchAllRequests,
+        child: ListView.separated(
+          controller: scroll,
+          padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
+          itemCount: list.length,
+          separatorBuilder: (_, __) => SizedBox(height: 10.h),
+          itemBuilder: (_, i) => _buildCard(list[i]),
+        ),
+      );
+    });
+  }
+
+  Widget _buildCard(Map<String, dynamic> item) {
+    final title =
+        (item['title'] ?? item['purpose'] ?? AppText.unnamedRequest).toString();
+    final user = RequestMapper.getUserName(item);
+    final amount = (item['amount'] is num)
+        ? (item['amount'] as num).toDouble()
+        : double.tryParse(item['amount']?.toString() ?? '0') ?? 0.0;
+    final department = RequestMapper.getDepartment(item);
+    final rawStatus = (item['status'] ?? 'pending').toString().toLowerCase();
+    final dateStr = RequestMapper.formatDate(item['date'] ?? item['created_at']);
+
+    final statusColor = _colorForStatus(rawStatus);
+    final statusBg = _bgForStatus(rawStatus);
+    final statusLabel = _statusLabel(rawStatus);
+
+    return GestureDetector(
+      onTap: () => controller.navigateToDetails(item),
+      child: Container(
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12.r,
+              offset: Offset(0, 3.h),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: _purpleLight,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(Icons.receipt_long_rounded,
+                      color: _purple, size: 22.sp),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _slate900,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 3.h),
+                      Row(
+                        children: [
+                          Icon(Icons.apartment_rounded,
+                              size: 11.sp, color: _slate500),
+                          SizedBox(width: 4.w),
+                          Flexible(
+                            child: Text(
+                              department,
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                color: _slate500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 8.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: GoogleFonts.inter(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w700,
+                          color: statusColor,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      dateStr,
+                      style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: _slate500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Divider(height: 1.h, color: const Color(0xFFF1F5F9)),
+            SizedBox(height: 12.h),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 14.r,
+                  backgroundColor: _purpleLight,
+                  child: Text(
+                    RequestMapper.getInitials(user),
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                      color: _purple,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Requested by',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          color: _slate500,
+                        ),
+                      ),
+                      SizedBox(height: 1.h),
+                      Text(
+                        user,
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _slate900,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  '₹${amount.toStringAsFixed(0)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: _slate900,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_rounded, size: 56.sp, color: _slate300),
+          SizedBox(height: 14.h),
+          Text(
+            AppText.noRequests,
+            style: GoogleFonts.inter(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
+              color: _slate500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _colorForStatus(String status) {
+    if (status.contains('approved') || status.contains('paid')) return _green;
+    if (status.contains('rejected')) return _red;
+    if (status.contains('clarification')) return _purple;
+    return _amber;
+  }
+
+  Color _bgForStatus(String status) {
+    if (status.contains('approved') || status.contains('paid')) return _greenBg;
+    if (status.contains('rejected')) return _redBg;
+    if (status.contains('clarification')) return _purpleLight;
+    return _amberBg;
+  }
+
+  String _statusLabel(String status) {
+    if (status == 'auto_approved') return 'APPROVED';
+    if (status.contains('clarification')) return 'CLARIFICATION';
+    return status.toUpperCase();
   }
 }

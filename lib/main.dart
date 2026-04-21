@@ -9,6 +9,7 @@ import 'core/services/biometric_service.dart';
 import 'core/managers/app_lifecycle_manager.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/payment_repository.dart';
+import 'data/repositories/department_repository.dart';
 import 'data/repositories/user_repository.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
@@ -21,8 +22,9 @@ Future<void> main() async {
 
   // Read theme
   final storage = Get.find<StorageService>();
+  // Default to light theme. Only override if user explicitly saved a preference.
+  ThemeMode initialTheme = ThemeMode.light;
   String? themeIndex = await storage.read('theme_mode');
-  ThemeMode initialTheme = ThemeMode.system;
   if (themeIndex != null) {
     switch (int.parse(themeIndex)) {
       case 0:
@@ -47,6 +49,10 @@ Future<void> initServices() async {
   Get.lazyPut(
     () => PaymentRepository(Get.find<NetworkService>()),
   ); // Added Payment Repo
+  Get.lazyPut(
+    () => DepartmentRepository(Get.find<NetworkService>()),
+    fenix: true,
+  );
   await Get.putAsync(
     () => AuthService(
       Get.find<AuthRepository>(),
