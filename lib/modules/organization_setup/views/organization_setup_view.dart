@@ -9,19 +9,13 @@ import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 
 class OrganizationSetupView extends StatefulWidget {
-  const OrganizationSetupView({Key? key}) : super(key: key);
+  const OrganizationSetupView({super.key});
 
   @override
   State<OrganizationSetupView> createState() => _OrganizationSetupViewState();
 }
 
 class _OrganizationSetupViewState extends State<OrganizationSetupView> {
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
 
   OrganizationSetupController get controller =>
       Get.find<OrganizationSetupController>();
@@ -33,7 +27,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
           _buildHeader(context),
@@ -123,14 +117,14 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                       padding: EdgeInsets.symmetric(
                           horizontal: 16.w, vertical: 14.h),
                       decoration: BoxDecoration(
-                        color: _purpleLight,
+                        color: AppColors.purpleSurface,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(Icons.info_outline_rounded,
-                              color: _purple, size: 20.sp),
+                              color: AppColors.primary, size: 20.sp),
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
@@ -138,7 +132,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w500,
-                                color: _purple,
+                                color: AppColors.primary,
                                 height: 1.4,
                               ),
                             ),
@@ -155,14 +149,14 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.lock_rounded,
-                              color: _slate300, size: 13.sp),
+                              color: AppColors.slate300, size: 13.sp),
                           SizedBox(width: 6.w),
                           Text(
                             AppText.secureSSL,
                             style: GoogleFonts.inter(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w500,
-                              color: _slate500,
+                              color: AppColors.textSlate,
                             ),
                           ),
                         ],
@@ -181,9 +175,9 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                               ? null
                               : controller.createOrganization,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _purple,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: _purple.withOpacity(0.6),
+                            disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14.r),
@@ -248,7 +242,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                 child: Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.close_rounded,
@@ -271,7 +265,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
           Container(
             padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.corporate_fare_rounded,
@@ -315,7 +309,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -329,10 +323,10 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 18.sp),
+                child: Icon(icon, color: AppColors.primary, size: 18.sp),
               ),
               SizedBox(width: 12.w),
               Text(
@@ -340,7 +334,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -361,7 +355,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
       style: GoogleFonts.inter(
         fontSize: 12.sp,
         fontWeight: FontWeight.w600,
-        color: _slate500,
+        color: AppColors.textSlate,
       ),
     );
   }
@@ -377,22 +371,22 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: _bg,
+        color: AppColors.backgroundAlt,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+        style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: _slate300,
+            color: AppColors.slate300,
           ),
           prefixIcon: icon != null
-              ? Icon(icon, color: _slate500, size: 18.sp)
+              ? Icon(icon, color: AppColors.textSlate, size: 18.sp)
               : null,
           border: InputBorder.none,
           contentPadding:
@@ -414,25 +408,25 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: _bg,
+            color: AppColors.backgroundAlt,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: hasInput && !isComplete
-                  ? AppColors.warningOrange.withOpacity(0.5)
+                  ? AppColors.warningOrange.withValues(alpha: 0.5)
                   : const Color(0xFFE2E8F0),
             ),
           ),
           child: IntlPhoneField(
-            style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
             dropdownTextStyle:
-                GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+                GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             disableLengthCheck: false,
             decoration: InputDecoration(
               hintText: 'Phone Number',
               hintStyle:
-                  GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+                  GoogleFonts.inter(fontSize: 14.sp, color: AppColors.slate300),
               border: InputBorder.none,
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
@@ -472,7 +466,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                 size: 13.sp,
                 color: isComplete
                     ? AppColors.successGreen
-                    : (hasInput ? AppColors.warningOrange : _slate500),
+                    : (hasInput ? AppColors.warningOrange : AppColors.textSlate),
               ),
               SizedBox(width: 5.w),
               Expanded(
@@ -487,7 +481,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                         ? AppColors.successGreen
                         : (hasInput
                             ? AppColors.warningOrange
-                            : _slate500),
+                            : AppColors.textSlate),
                   ),
                 ),
               ),
@@ -498,7 +492,7 @@ class _OrganizationSetupViewState extends State<OrganizationSetupView> {
                   fontWeight: FontWeight.w600,
                   color: isComplete
                       ? AppColors.successGreen
-                      : _slate500,
+                      : AppColors.textSlate,
                 ),
               ),
             ],

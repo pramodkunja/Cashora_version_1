@@ -9,10 +9,10 @@ class CustomDatePickerDialog extends StatefulWidget {
   final Function(DateTime) onDateSelected;
 
   const CustomDatePickerDialog({
-    Key? key,
+    super.key,
     required this.initialDate,
     required this.onDateSelected,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomDatePickerDialog> createState() => _CustomDatePickerDialogState();
@@ -172,7 +172,6 @@ class _CustomDatePickerDialogState extends State<CustomDatePickerDialog> {
   }
 
   Widget _buildYearGrid() {
-    final currentYear = DateTime.now().year;
     // Years from 2022 to 2050
     final years = List.generate(2050 - 2022 + 1, (index) => 2022 + index);
 

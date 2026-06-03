@@ -5,24 +5,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/create_request_controller.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/widgets/app_gradient_header.dart';
 import '../../../../utils/app_text.dart';
 
 class SelectRequestTypeView extends GetView<CreateRequestController> {
-  const SelectRequestTypeView({Key? key}) : super(key: key);
+  const SelectRequestTypeView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
-          _buildHeader(context),
+          AppGradientHeader(title: AppText.selectRequestType),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20.w, 28.h, 20.w, 20.h),
@@ -34,7 +30,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -44,7 +40,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
-                      color: _slate900,
+                      color: AppColors.textDark,
                     ),
                   ),
                   SizedBox(height: 16.h),
@@ -80,50 +76,6 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            AppText.selectRequestType,
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildOptionCard({
     required String title,
     required String subtitle,
@@ -139,15 +91,15 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: isSelected ? _purpleLight.withOpacity(0.5) : Colors.white,
+          color: isSelected ? AppColors.purpleSurface.withValues(alpha: 0.5) : Colors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? _purple : const Color(0xFFE2E8F0),
+            color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 12.r,
               offset: Offset(0, 3.h),
             ),
@@ -158,10 +110,10 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: _purpleLight,
+                color: AppColors.purpleSurface,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: _purple, size: 24.sp),
+              child: Icon(icon, color: AppColors.primary, size: 24.sp),
             ),
             SizedBox(width: 14.w),
             Expanded(
@@ -173,7 +125,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
                     style: GoogleFonts.inter(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
-                      color: _slate900,
+                      color: AppColors.textDark,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -181,7 +133,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                       height: 1.4,
                     ),
                   ),
@@ -195,7 +147,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? _purple : const Color(0xFFCBD5E1),
+                  color: isSelected ? AppColors.primary : const Color(0xFFCBD5E1),
                   width: 2.w,
                 ),
               ),
@@ -205,7 +157,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
                         width: 10.w,
                         height: 10.w,
                         decoration: const BoxDecoration(
-                          color: _purple,
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -225,7 +177,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10.r,
             offset: Offset(0, -4.h),
           ),
@@ -246,7 +198,7 @@ class SelectRequestTypeView extends GetView<CreateRequestController> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _purple,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(

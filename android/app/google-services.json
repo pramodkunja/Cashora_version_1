@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "888609703277",
+    "project_id": "sria-cashora",
+    "storage_bucket": "sria-cashora.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888609703277:android:db4c6a924fc10abd860664",
+        "android_client_info": {
+          "package_name": "com.cashora.finance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjqIQJCEfrKWumeCz8m4mltZqRIZkp8ck"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

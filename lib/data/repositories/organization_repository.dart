@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../core/services/network_service.dart';
 
 class OrganizationRepository {

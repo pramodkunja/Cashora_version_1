@@ -7,18 +7,13 @@ import '../../../../utils/app_text.dart';
 import '../../../../routes/app_routes.dart';
 
 class AdminClarificationSuccessView extends StatelessWidget {
-  const AdminClarificationSuccessView({Key? key}) : super(key: key);
+  const AdminClarificationSuccessView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: SafeArea(
         child: Column(
           children: [
@@ -35,13 +30,13 @@ class AdminClarificationSuccessView extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 8.r,
                           ),
                         ],
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: _slate900, size: 20.sp),
+                          color: AppColors.textDark, size: 20.sp),
                     ),
                   ),
                 ],
@@ -57,18 +52,18 @@ class AdminClarificationSuccessView extends StatelessWidget {
                       width: 120.w,
                       height: 120.w,
                       decoration: BoxDecoration(
-                        color: _purpleLight,
+                        color: AppColors.purpleSurface,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: _purple.withOpacity(0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                             blurRadius: 30.r,
                             spreadRadius: 4.r,
                           ),
                         ],
                       ),
                       child: Icon(Icons.mark_email_read_rounded,
-                          color: _purple, size: 54.sp),
+                          color: AppColors.primary, size: 54.sp),
                     ),
                     SizedBox(height: 32.h),
                     Text(
@@ -76,7 +71,7 @@ class AdminClarificationSuccessView extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w800,
-                        color: _slate900,
+                        color: AppColors.textDark,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -85,7 +80,7 @@ class AdminClarificationSuccessView extends StatelessWidget {
                       AppText.sentBackDesc,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
-                        color: _slate500,
+                        color: AppColors.textSlate,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
@@ -98,7 +93,7 @@ class AdminClarificationSuccessView extends StatelessWidget {
                         onPressed: () =>
                             Get.offAllNamed(AppRoutes.ADMIN_APPROVALS),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _purple,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(

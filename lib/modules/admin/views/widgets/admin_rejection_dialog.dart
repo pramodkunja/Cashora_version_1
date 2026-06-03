@@ -9,8 +9,7 @@ import '../../../../utils/widgets/buttons/secondary_button.dart';
 class AdminRejectionDialog extends StatelessWidget {
   final Function(String) onConfirm;
 
-  const AdminRejectionDialog({Key? key, required this.onConfirm})
-    : super(key: key);
+  const AdminRejectionDialog({super.key, required this.onConfirm});
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +88,7 @@ class AdminRejectionDialog extends StatelessWidget {
             text: AppText.cancel,
             onPressed: () => Get.back(),
             width: double.infinity,
-            backgroundColor: Theme.of(context).disabledColor.withOpacity(0.1),
+            backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.1),
             textColor: AppColors.primaryBlue,
           ),
           const SizedBox(height: 16),

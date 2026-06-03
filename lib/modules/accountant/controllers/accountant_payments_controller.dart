@@ -3,9 +3,8 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/accountant_repository.dart';
-import '../../../../data/repositories/payment_repository.dart'; // Added import
+// Added import
 import '../../../../core/services/network_service.dart';
-import '../../../../data/models/payment_response_model.dart';
 
 class AccountantPaymentsController extends GetxController {
   late final AccountantRepository _repository;
@@ -20,18 +19,32 @@ class AccountantPaymentsController extends GetxController {
   final pendingScroll = ScrollController();
   final completedScroll = ScrollController();
 
+  /// First-load gate. Tab switches call [loadIfNeeded] so the network only
+  /// fires once; pull-to-refresh and explicit refreshes should keep calling
+  /// the raw [fetchPendingPayments] / [fetchCompletedPayments] directly.
+  bool _hasLoaded = false;
+
   @override
   void onInit() {
     super.onInit();
     _repository = AccountantRepository(Get.find<NetworkService>());
+    loadIfNeeded();
+  }
+
+  /// Idempotent first-load entry point.
+  void loadIfNeeded() {
+    if (_hasLoaded) return;
+    _hasLoaded = true;
     fetchPendingPayments();
     fetchCompletedPayments();
   }
 
   @override
   void onClose() {
-    pendingScroll.dispose();
-    completedScroll.dispose();
+    // Do not dispose ScrollControllers here to prevent "used after disposed" 
+    // exceptions when views are still in the widget tree (e.g. TabBarView/IndexedStack)
+    // pendingScroll.dispose();
+    // completedScroll.dispose();
     super.onClose();
   }
 

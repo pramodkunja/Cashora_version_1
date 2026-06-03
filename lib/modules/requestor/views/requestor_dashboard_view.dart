@@ -4,53 +4,92 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/formatters/currency_formatter.dart';
+import 'package:cash/utils/formatters/greeting_formatter.dart';
+import 'package:cash/utils/mappers/request_status_visuals.dart';
+import 'package:cash/utils/mappers/expense_category_visuals.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/date_helper.dart';
 import '../controllers/requestor_controller.dart';
 import '../controllers/my_requests_controller.dart';
 
 class RequestorDashboardView extends GetView<RequestorController> {
-  const RequestorDashboardView({Key? key}) : super(key: key);
+  const RequestorDashboardView({super.key});
 
-  // ─── Palette (same app colors, derived shades) ───────────────────────
-  static const _purple = AppColors.primary; // 0xFF6B55CE
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
-  static const _amber = AppColors.warningOrange;
-  static const _amberBg = Color(0xFFFFFBEB);
-  static const _bg = Color(0xFFF8FAFC);
+  // ─── Palette ────────────────────────────────────────────────────────
+  static const _blue = Color(0xFF0EA5E9);
+  static const _blueBg = Color(0xFFE0F2FE);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Obx(() {
         final loading = controller.isDashboardLoading.value;
         return RefreshIndicator(
-          color: _purple,
+          color: AppColors.primary,
           onRefresh: controller.fetchDashboard,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // ── Header ──────────────────────────────────────
               SliverToBoxAdapter(child: _buildHeader(context)),
-              // ── Body ────────────────────────────────────────
+
+              // Hero card overlaps the gradient header — same pattern as
+              // the admin dashboard so the two flows feel cohesive.
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0.h),
+                  child: _buildHeroCard(),
+                ),
+              ),
+
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 100.h),
+                padding: EdgeInsets.fromLTRB(20.w, 26.h, 20.w, 40.h),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    SizedBox(height: 24.h),
-                    _buildSpendCard(),
-                    SizedBox(height: 16.h),
-                    _buildQuickActions(),
-                    SizedBox(height: 24.h),
-                    _buildPendingBanner(),
+                    _sectionLabel('QUICK ACTIONS'),
+                    SizedBox(height: 12.h),
+                    _buildActionTile(
+                      icon: Icons.add_circle_outline_rounded,
+                      iconColor: AppColors.primary,
+                      iconBg: AppColors.purpleSurface,
+                      title: AppText.newRequest,
+                      subtitle: 'Submit a new expense or advance',
+                      onTap: () =>
+                          Get.toNamed(AppRoutes.CREATE_REQUEST_TYPE),
+                    ),
+                    SizedBox(height: 12.h),
+                    _buildActionTile(
+                      icon: Icons.hourglass_top_rounded,
+                      iconColor: AppColors.warningOrange,
+                      iconBg: AppColors.amberBg,
+                      title: AppText.pendingApprovals,
+                      subtitle: 'Requests awaiting admin review',
+                      onTap: () {
+                        Get.find<MyRequestsController>().changeTab(1);
+                        controller.changeTab(1);
+                      },
+                      trailingBuilder: () => Obx(
+                        () => _countPill(
+                          controller.pendingCount.value,
+                          accent: AppColors.warningOrange,
+                          bg: AppColors.amberBg,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    _buildActionTile(
+                      icon: Icons.history_rounded,
+                      iconColor: _blue,
+                      iconBg: _blueBg,
+                      title: 'All Requests',
+                      subtitle: 'View past and active requests',
+                      onTap: () {
+                        Get.find<MyRequestsController>().changeTab(0);
+                        controller.changeTab(1);
+                      },
+                    ),
+
                     SizedBox(height: 28.h),
                     _buildSectionHeader(
                       AppText.recentRequests,
@@ -59,7 +98,7 @@ class RequestorDashboardView extends GetView<RequestorController> {
                         controller.changeTab(1);
                       },
                     ),
-                    SizedBox(height: 14.h),
+                    SizedBox(height: 12.h),
                     if (loading && controller.recentRequests.isEmpty)
                       _buildShimmerList()
                     else if (controller.dashboardError.value.isNotEmpty &&
@@ -84,7 +123,13 @@ class RequestorDashboardView extends GetView<RequestorController> {
   // ════════════════════════════════════════════════════════════════════════
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, MediaQuery.of(context).padding.top + 16.h, 24.w, 28.h),
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(
+        24.w,
+        MediaQuery.of(context).padding.top + 18.h,
+        24.w,
+        26.h,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
@@ -93,63 +138,71 @@ class RequestorDashboardView extends GetView<RequestorController> {
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          // Top row — greeting + bell
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Good ${_greeting()}',
-                      style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70,
-                      ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Good ${GreetingFormatter.timeOfDay()}',
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Obx(
+                  () => Text(
+                    controller.shortName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 26.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.15,
+                      letterSpacing: -0.3,
                     ),
-                    SizedBox(height: 4.h),
-                    Obx(
-                      () => Text(
-                        controller.shortName,
-                        style: GoogleFonts.inter(
-                          fontSize: 26.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.2,
-                        ),
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 11.sp,
+                      color: Colors.white.withValues(alpha: 0.75),
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      DateHelper.getFormattedDate(),
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: Colors.white.withValues(alpha: 0.75),
                       ),
                     ),
                   ],
                 ),
-              ),
-              GestureDetector(
-                onTap: () => Get.toNamed(AppRoutes.REQUESTOR_NOTIFICATIONS),
-                child: Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.notifications_none_rounded,
-                    color: Colors.white,
-                    size: 22.sp,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          SizedBox(height: 6.h),
-          Text(
-            DateHelper.getFormattedDate(),
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: Colors.white60,
+          GestureDetector(
+            onTap: () => Get.toNamed(AppRoutes.REQUESTOR_NOTIFICATIONS),
+            child: Container(
+              padding: EdgeInsets.all(11.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+              ),
+              child: Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+                size: 22.sp,
+              ),
             ),
           ),
         ],
@@ -158,218 +211,340 @@ class RequestorDashboardView extends GetView<RequestorController> {
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  // SPEND CARD  — monthly expense with progress ring
+  // HERO CARD — twin stat tiles (Spent + Pending) on top, full-width
+  // monthly limit progress strip on the bottom. Mirrors admin's hero card.
   // ════════════════════════════════════════════════════════════════════════
-  Widget _buildSpendCard() {
-    return Obx(() {
-      final spent = controller.amountSpent.value;
-      final limit = controller.monthlyLimit.value;
-      final ratio = controller.progressRatio.value.clamp(0.0, 1.0);
-
-      return Container(
-        padding: EdgeInsets.all(20.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: _purple.withOpacity(0.06),
-              blurRadius: 20.r,
-              offset: Offset(0, 6.h),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Progress ring
-            SizedBox(
-              width: 72.w,
-              height: 72.w,
-              child: Stack(
-                alignment: Alignment.center,
+  Widget _buildHeroCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5B45B0).withValues(alpha: 0.12),
+            blurRadius: 28.r,
+            offset: Offset(0, 10.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Top: two stat tiles ────────────────────────────────────────
+          Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 18.h, 14.w, 16.h),
+            child: Obx(
+              () => Row(
                 children: [
+                  Expanded(
+                    child: _heroStatTile(
+                      icon: Icons.account_balance_wallet_rounded,
+                      accent: AppColors.primary,
+                      accentBg: AppColors.purpleSurface,
+                      label: 'Spent',
+                      value:
+                          '₹${CurrencyFormatter.inr(controller.amountSpent.value)}',
+                    ),
+                  ),
+                  Container(width: 1, height: 60.h, color: AppColors.slate100),
+                  Expanded(
+                    child: _heroStatTile(
+                      icon: Icons.hourglass_top_rounded,
+                      accent: AppColors.warningOrange,
+                      accentBg: AppColors.amberBg,
+                      label: 'Pending',
+                      value: controller.pendingCount.value.toString(),
+                      onTap: () {
+                        Get.find<MyRequestsController>().changeTab(1);
+                        controller.changeTab(1);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Bottom: monthly limit progress strip ─────────────────────────
+          Obx(() {
+            final spent = controller.amountSpent.value;
+            final limit = controller.monthlyLimit.value;
+            final ratio = controller.progressRatio.value.clamp(0.0, 1.0);
+            final overLimit = ratio > 0.85;
+            return Container(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(22.r),
+                ),
+                gradient: LinearGradient(
+                  colors: overLimit
+                      ? [AppColors.redBg, const Color(0xFFFEF7F7)]
+                      : [AppColors.purpleSurface, const Color(0xFFF7F5FF)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Circular percent badge
                   SizedBox(
-                    width: 72.w,
-                    height: 72.w,
-                    child: CircularProgressIndicator(
-                      value: ratio,
-                      strokeWidth: 7.w,
-                      backgroundColor: _purpleLight,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        ratio > 0.85 ? _red : _purple,
-                      ),
-                      strokeCap: StrokeCap.round,
+                    width: 44.w,
+                    height: 44.w,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 44.w,
+                          height: 44.w,
+                          child: CircularProgressIndicator(
+                            value: ratio,
+                            strokeWidth: 5.w,
+                            backgroundColor: Colors.white,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              overLimit ? AppColors.errorRed : AppColors.primary,
+                            ),
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
+                        Text(
+                          '${(ratio * 100).toInt()}%',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w800,
+                            color: overLimit ? AppColors.errorRed : AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    '${(ratio * 100).toInt()}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: _slate900,
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'MONTHLY LIMIT',
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: overLimit
+                                ? const Color(0xFF991B1B)
+                                : const Color(0xFF4338CA),
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '₹${CurrencyFormatter.inr(spent)} of ₹${CurrencyFormatter.inr(limit)}',
+                            maxLines: 1,
+                            style: GoogleFonts.inter(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textDark,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _heroStatTile({
+    required IconData icon,
+    required Color accent,
+    required Color accentBg,
+    required String label,
+    required String value,
+    VoidCallback? onTap,
+  }) {
+    final inner = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: accentBg,
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            SizedBox(width: 20.w),
-            // Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppText.monthlyExpense,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      color: _slate500,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    '₹${spent.toStringAsFixed(0)}',
-                    style: GoogleFonts.inter(
-                      fontSize: 28.sp,
-                      fontWeight: FontWeight.w800,
-                      color: _slate900,
-                      height: 1.1,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'of ₹${limit.toStringAsFixed(0)} ${AppText.limit}',
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      color: _slate500,
-                    ),
-                  ),
-                ],
+            child: Icon(icon, color: accent, size: 18.sp),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSlate,
+              letterSpacing: 0.7,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: GoogleFonts.inter(
+                fontSize: 26.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textDark,
+                height: 1.1,
+                letterSpacing: -0.5,
               ),
             ),
-            // View Details chevron
-            GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.MONTHLY_SPENT),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: _purpleLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: _purple,
-                  size: 18.sp,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+          ),
+        ],
+      ),
+    );
+    if (onTap == null) return inner;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        splashColor: accent.withValues(alpha: 0.08),
+        highlightColor: accent.withValues(alpha: 0.04),
+        child: inner,
+      ),
+    );
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  // QUICK ACTIONS  — single full-width "New Request" button
+  // ACTION TILE — colored icon + text + optional trailing pill/chevron.
+  // Identical pattern to admin dashboard so flows feel cohesive.
   // ════════════════════════════════════════════════════════════════════════
-  Widget _buildQuickActions() {
-    return SizedBox(
-      width: double.infinity,
-      height: 52.h,
-      child: ElevatedButton.icon(
-        onPressed: () => Get.toNamed(AppRoutes.CREATE_REQUEST_TYPE),
-        icon: Icon(Icons.add_rounded, size: 22.sp),
-        label: Text(
-          AppText.newRequest,
-          style: GoogleFonts.inter(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w600,
+  Widget _buildActionTile({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    Widget Function()? trailingBuilder,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16.r),
+        splashColor: iconColor.withValues(alpha: 0.08),
+        highlightColor: iconColor.withValues(alpha: 0.04),
+        child: Container(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 12.r,
+                offset: Offset(0, 3.h),
+              ),
+            ],
           ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _purple,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.r),
+          child: Row(
+            children: [
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(icon, color: iconColor, size: 22.sp),
+              ),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: AppColors.textSlate,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              trailingBuilder?.call() ??
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.slate300,
+                    size: 22.sp,
+                  ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // ════════════════════════════════════════════════════════════════════════
-  // PENDING BANNER
-  // ════════════════════════════════════════════════════════════════════════
-  Widget _buildPendingBanner() {
-    return Obx(() {
-      final count = controller.pendingCount.value;
-      return GestureDetector(
-        onTap: () {
-          Get.find<MyRequestsController>().changeTab(1);
-          controller.changeTab(1);
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: _purpleLight, width: 1),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(10.w),
-                decoration: BoxDecoration(
-                  color: _purpleLight,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(
-                  Icons.hourglass_top_rounded,
-                  color: _purple,
-                  size: 22.sp,
-                ),
-              ),
-              SizedBox(width: 14.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppText.pendingApprovals,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: _slate900,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      '$count ${AppText.requestsWaiting}',
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: _slate500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: _slate300,
-                size: 24.sp,
-              ),
-            ],
-          ),
+  Widget _countPill(int count, {required Color accent, required Color bg}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(100.r),
+      ),
+      child: Text(
+        count.toString(),
+        style: GoogleFonts.inter(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w700,
+          color: accent,
         ),
-      );
-    });
+      ),
+    );
+  }
+
+  Widget _sectionLabel(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 11.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textSlate,
+        letterSpacing: 1.0,
+      ),
+    );
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  // SECTION HEADER
+  // SECTION HEADER (with "See all" affordance)
   // ════════════════════════════════════════════════════════════════════════
   Widget _buildSectionHeader(String title, {VoidCallback? onSeeAll}) {
     return Row(
@@ -379,20 +554,26 @@ class RequestorDashboardView extends GetView<RequestorController> {
           style: GoogleFonts.inter(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
-            color: _slate900,
+            color: AppColors.textDark,
           ),
         ),
         const Spacer(),
         if (onSeeAll != null)
           GestureDetector(
             onTap: onSeeAll,
-            child: Text(
-              'See all',
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: _purple,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  'See all',
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+                SizedBox(width: 2.w),
+                Icon(Icons.arrow_forward_rounded, size: 14.sp, color: AppColors.primary),
+              ],
             ),
           ),
       ],
@@ -407,112 +588,119 @@ class RequestorDashboardView extends GetView<RequestorController> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: controller.recentRequests.length,
-      separatorBuilder: (_, __) => SizedBox(height: 10.h),
+      separatorBuilder: (_, _) => SizedBox(height: 10.h),
       itemBuilder: (_, i) {
         final item = controller.recentRequests[i];
         final purpose = (item['purpose'] ?? 'Request').toString();
         final status = (item['status'] ?? 'pending').toString();
         final category = (item['category'] ?? '').toString();
         final amount = (item['amount'] as num?)?.toDouble() ?? 0.0;
-        final dateStr = _formatDate(item['date']);
+        final dateStr = DateHelper.formatDate(item['date']?.toString());
 
-        final statusColor = _colorForStatus(status);
-        final statusBg = _bgForStatus(status);
+        final statusColor = RequestStatusVisuals.colorFor(status);
+        final statusBg = RequestStatusVisuals.bgFor(status);
+        final iconColor = ExpenseCategoryVisuals.colorFor(category);
+        final iconBg = ExpenseCategoryVisuals.bgFor(category);
 
-        return GestureDetector(
-          onTap: () =>
-              Get.toNamed(AppRoutes.REQUEST_DETAILS_READ, arguments: item),
-          child: Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 12.r,
-                  offset: Offset(0, 3.h),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Category icon
-                Container(
-                  width: 44.w,
-                  height: 44.w,
-                  decoration: BoxDecoration(
-                    color: _purpleLight,
-                    borderRadius: BorderRadius.circular(12.r),
+        return Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          child: InkWell(
+            onTap: () =>
+                Get.toNamed(AppRoutes.REQUEST_DETAILS_READ, arguments: item),
+            borderRadius: BorderRadius.circular(16.r),
+            splashColor: AppColors.primary.withValues(alpha: 0.08),
+            highlightColor: AppColors.primary.withValues(alpha: 0.04),
+            child: Container(
+              padding: EdgeInsets.all(14.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 12.r,
+                    offset: Offset(0, 3.h),
                   ),
-                  child: Icon(
-                    _iconForCategory(category),
-                    color: _purple,
-                    size: 22.sp,
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44.w,
+                    height: 44.w,
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Icon(
+                      ExpenseCategoryVisuals.iconFor(category),
+                      color: iconColor,
+                      size: 22.sp,
+                    ),
                   ),
-                ),
-                SizedBox(width: 12.w),
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          purpose,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 3.h),
+                        Text(
+                          dateStr,
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            color: AppColors.textSlate,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        purpose,
+                        '₹${CurrencyFormatter.inr(amount)}',
                         style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _slate900,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textDark,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 3.h),
-                      Text(
-                        dateStr,
-                        style: GoogleFonts.inter(
-                          fontSize: 11.sp,
-                          color: _slate500,
+                      SizedBox(height: 4.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusBg,
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          RequestStatusVisuals.labelFor(status),
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: statusColor,
+                            letterSpacing: 0.3,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(width: 8.w),
-                // Amount + status
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '₹${amount.toStringAsFixed(0)}',
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: _slate900,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 3.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusBg,
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Text(
-                        _statusLabel(status),
-                        style: GoogleFonts.inter(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                          color: statusColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -533,14 +721,14 @@ class RequestorDashboardView extends GetView<RequestorController> {
       ),
       child: Column(
         children: [
-          Icon(Icons.inbox_rounded, size: 48.sp, color: _slate300),
+          Icon(Icons.inbox_rounded, size: 48.sp, color: AppColors.slate300),
           SizedBox(height: 12.h),
           Text(
             'No recent requests',
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
-              color: _slate500,
+              color: AppColors.textSlate,
             ),
           ),
         ],
@@ -553,24 +741,24 @@ class RequestorDashboardView extends GetView<RequestorController> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 20.w),
       decoration: BoxDecoration(
-        color: _redBg,
+        color: AppColors.redBg,
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
         children: [
-          Icon(Icons.error_outline_rounded, size: 36.sp, color: _red),
+          Icon(Icons.error_outline_rounded, size: 36.sp, color: AppColors.errorRed),
           SizedBox(height: 8.h),
           Obx(
             () => Text(
               controller.dashboardError.value,
-              style: GoogleFonts.inter(fontSize: 13.sp, color: _red),
+              style: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.errorRed),
               textAlign: TextAlign.center,
             ),
           ),
           SizedBox(height: 12.h),
           TextButton(
             onPressed: controller.fetchDashboard,
-            child: Text('Retry', style: GoogleFonts.inter(color: _purple)),
+            child: Text('Retry', style: GoogleFonts.inter(color: AppColors.primary)),
           ),
         ],
       ),
@@ -596,7 +784,7 @@ class RequestorDashboardView extends GetView<RequestorController> {
                   width: 44.w,
                   height: 44.w,
                   decoration: BoxDecoration(
-                    color: _purpleLight.withOpacity(0.5),
+                    color: AppColors.purpleSurface.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
@@ -610,7 +798,7 @@ class RequestorDashboardView extends GetView<RequestorController> {
                         height: 12.h,
                         width: 120.w,
                         decoration: BoxDecoration(
-                          color: _purpleLight.withOpacity(0.4),
+                          color: AppColors.purpleSurface.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
@@ -619,7 +807,7 @@ class RequestorDashboardView extends GetView<RequestorController> {
                         height: 10.h,
                         width: 80.w,
                         decoration: BoxDecoration(
-                          color: _purpleLight.withOpacity(0.3),
+                          color: AppColors.purpleSurface.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
@@ -637,69 +825,14 @@ class RequestorDashboardView extends GetView<RequestorController> {
   // ════════════════════════════════════════════════════════════════════════
   // HELPERS
   // ════════════════════════════════════════════════════════════════════════
-  String _greeting() {
-    final h = DateTime.now().hour;
-    if (h < 12) return 'Morning';
-    if (h < 17) return 'Afternoon';
-    return 'Evening';
-  }
 
-  String _formatDate(dynamic iso) {
-    if (iso == null) return '';
-    final dt = DateTime.tryParse(iso.toString());
-    if (dt == null) return iso.toString();
-    return DateHelper.formatDate(dt.toIso8601String());
-  }
 
-  IconData _iconForCategory(String category) {
-    final c = category.toLowerCase();
-    if (c.contains('food') || c.contains('meal')) return Icons.restaurant_rounded;
-    if (c.contains('travel') || c.contains('flight')) return Icons.flight_rounded;
-    if (c.contains('transport') || c.contains('taxi')) return Icons.directions_car_rounded;
-    if (c.contains('office') || c.contains('supplies')) return Icons.shopping_bag_rounded;
-    return Icons.receipt_long_rounded;
-  }
+  /// Indian grouping (₹1,23,456). Strips trailing .00 for whole numbers
+  /// so the hero tiles don't run out of horizontal room.
 
-  Color _colorForStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-      case 'auto_approved':
-      case 'paid':
-        return _green;
-      case 'rejected':
-        return _red;
-      case 'clarification':
-        return _purple;
-      default:
-        return _amber;
-    }
-  }
 
-  Color _bgForStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-      case 'auto_approved':
-      case 'paid':
-        return _greenBg;
-      case 'rejected':
-        return _redBg;
-      case 'clarification':
-        return _purpleLight;
-      default:
-        return _amberBg;
-    }
-  }
 
-  String _statusLabel(String status) {
-    switch (status.toLowerCase()) {
-      case 'auto_approved':
-        return 'Approved';
-      case 'clarification':
-        return 'Clarification';
-      default:
-        return status.isEmpty
-            ? '-'
-            : status[0].toUpperCase() + status.substring(1);
-    }
-  }
+
+
+
 }

@@ -9,6 +9,7 @@ import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/network_service.dart';
 import '../../../../data/repositories/accountant_repository.dart';
 import '../../../../data/models/accountant_dashboard_model.dart';
+import '../controllers/accountant_analytics_controller.dart';
 import '../controllers/accountant_profile_controller.dart';
 import '../controllers/accountant_payments_controller.dart';
 
@@ -46,6 +47,11 @@ class AccountantDashboardController extends GetxController {
 
   final showWelcome = true.obs;
 
+  /// First-load gate. Tab switches call [loadIfNeeded] so the network only
+  /// fires once; pull-to-refresh on the Home view bypasses this and re-hits
+  /// [fetchDashboard] directly.
+  bool _hasLoaded = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -56,7 +62,7 @@ class AccountantDashboardController extends GetxController {
   void onReady() {
     super.onReady();
     _checkDailyBalanceUpdate();
-    fetchDashboard();
+    loadIfNeeded();
 
     // Auto-hide welcome message after 5 seconds
     Future.delayed(const Duration(seconds: 5), () {
@@ -64,15 +70,47 @@ class AccountantDashboardController extends GetxController {
     });
   }
 
+  /// Idempotent first-load entry point. Use this from tab switches.
+  /// Pull-to-refresh and explicit-refresh paths should keep calling
+  /// [fetchDashboard] directly.
+  void loadIfNeeded() {
+    if (_hasLoaded) return;
+    _hasLoaded = true;
+    fetchDashboard();
+  }
+
   Future<void> fetchDashboard() async {
     isDashboardLoading.value = true;
     errorMessage.value = '';
     try {
       final res = await _repository.getDashboard();
+      if (kDebugMode) {
+        debugPrint('[AccountantDashboard] response keys: ${res.keys.toList()}');
+      }
       dashboardData.value = AccountantDashboardModel.fromJson(res);
-    } catch (e) {
-      errorMessage.value = 'Failed to load dashboard data: $e';
-      if (kDebugMode) debugPrint(errorMessage.value);
+    } catch (e, st) {
+      final msg = _extractErrorMessage(e, fallback: 'Failed to load dashboard');
+      errorMessage.value = msg;
+      if (kDebugMode) {
+        debugPrint('[AccountantDashboard] FETCH FAILED: $msg');
+        if (e is DioException) {
+          debugPrint('  url: ${e.requestOptions.uri}');
+          debugPrint('  status: ${e.response?.statusCode}');
+          debugPrint('  body: ${e.response?.data}');
+          debugPrint('  type: ${e.type}');
+        } else {
+          debugPrint('  $e\n$st');
+        }
+      }
+      Get.snackbar(
+        'Dashboard error',
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 6),
+      );
     } finally {
       isDashboardLoading.value = false;
     }
@@ -173,26 +211,31 @@ class AccountantDashboardController extends GetxController {
   }
 
   void navigateToPayments() {
-    changeTabIndex(1);
-    // Trigger refresh for Payments
-    if (Get.isRegistered<AccountantPaymentsController>()) {
-      Get.find<AccountantPaymentsController>().fetchPendingPayments();
-    }
+    // Route through the same gated handler the bottom bar uses so the
+    // Payments list isn't re-fetched on every home-card tap. First visit
+    // still loads; subsequent visits are instant. Pull-to-refresh on the
+    // Payments tab handles staleness.
+    onBottomNavTap(1);
   }
 
   void onBottomNavTap(int index) {
     rxIndex.value = index;
+    // Each tab calls its controller's idempotent loadIfNeeded() so the
+    // network only fires the first time a tab is opened. Subsequent taps
+    // are instant. Pull-to-refresh and explicit refreshes still re-fetch.
     if (index == 0) {
-      fetchDashboard();
+      loadIfNeeded();
     } else if (index == 1) {
-      // Payments Tab
       if (Get.isRegistered<AccountantPaymentsController>()) {
-        Get.find<AccountantPaymentsController>().fetchPendingPayments();
+        Get.find<AccountantPaymentsController>().loadIfNeeded();
+      }
+    } else if (index == 2) {
+      if (Get.isRegistered<AccountantAnalyticsController>()) {
+        Get.find<AccountantAnalyticsController>().loadIfNeeded();
       }
     } else if (index == 3) {
-      // Profile Tab
       if (Get.isRegistered<AccountantProfileController>()) {
-        Get.find<AccountantProfileController>().fetchProfile();
+        Get.find<AccountantProfileController>().loadIfNeeded();
       }
     }
   }

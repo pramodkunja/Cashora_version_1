@@ -9,7 +9,6 @@ import 'dart:io';
 import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/payment_repository.dart';
 import '../../../../core/services/network_service.dart';
-import '../../../../core/services/storage_service.dart';
 import 'accountant_payments_controller.dart';
 
 class PaymentFlowController extends GetxController {
@@ -34,6 +33,7 @@ class PaymentFlowController extends GetxController {
   final RxMap<String, dynamic> currentRequest = <String, dynamic>{}.obs;
 
   // Payment State
+  // ignore: unused_field
   String? _currentPayoutId;
   final RxDouble requestedAmount = 150.00.obs;
   final RxDouble finalAmount = 150.00.obs;
@@ -110,6 +110,7 @@ class PaymentFlowController extends GetxController {
   // Navigation Helpers
   // ---------------------------------------------------------------------------
 
+  // ignore: unused_element
   void _navigateToSuccess(Map<String, dynamic> data) {
     Get.offNamed(
       AppRoutes.ACCOUNTANT_PAYMENT_SUCCESS,
@@ -220,7 +221,7 @@ class PaymentFlowController extends GetxController {
             Get.snackbar(
               'Amount Mismatch',
               'QR Amount (₹$parsedAmt) does not match Request Amount (₹${requestedAmount.value})',
-              backgroundColor: Colors.orange.withOpacity(0.9),
+              backgroundColor: Colors.orange.withValues(alpha: 0.9),
               colorText: Colors.white,
               duration: const Duration(seconds: 4),
             );
@@ -250,6 +251,7 @@ class PaymentFlowController extends GetxController {
     }
   }
 
+  // ignore: unused_element
   void _navigateToFailure(Map<String, dynamic> statusResponse) {
     Get.offNamed(
       AppRoutes.ACCOUNTANT_PAYMENT_FAILED,
@@ -310,7 +312,7 @@ class PaymentFlowController extends GetxController {
       Get.snackbar(
         'Success',
         'Request marked as paid successfully',
-        backgroundColor: Colors.green.withOpacity(0.9),
+        backgroundColor: Colors.green.withValues(alpha: 0.9),
         colorText: Colors.white,
       );
       
@@ -327,7 +329,7 @@ class PaymentFlowController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to mark as paid',
-        backgroundColor: Colors.red.withOpacity(0.9),
+        backgroundColor: Colors.red.withValues(alpha: 0.9),
         colorText: Colors.white,
       );
     } finally {

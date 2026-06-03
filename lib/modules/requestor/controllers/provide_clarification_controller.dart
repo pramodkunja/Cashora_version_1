@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../data/repositories/request_repository.dart';
 import '../../../../core/services/network_service.dart';
-import '../../../../routes/app_routes.dart';
 
 import '../../../../utils/app_text.dart';
 
@@ -41,19 +40,31 @@ class ProvideClarificationController extends GetxController {
         return;
       }
 
-      await _requestRepository.submitClarification(
-        id,
-        responseController.text.trim(),
-      );
+      final responseText = responseController.text.trim();
+      await _requestRepository.submitClarification(id, responseText);
 
-      // Update local state in-place
-      // We cannot fetch full details as endpoint is missing
-      // await _fetchFullDetails();
-
-      // Optimistic update status if fetch failed or just to be sure
+      // Optimistic update: flip status AND patch the latest clarification's
+      // `response` + `responded_at` so the view's "outstanding question"
+      // check (which inspects the last clarifications[] entry) flips to
+      // false immediately — hiding the input until the admin asks again.
       final updatedRequest = Map<String, dynamic>.from(request);
-      updatedRequest['status'] =
-          'clarification_responded'; // Update status to reflect change
+      updatedRequest['status'] = 'clarification_responded';
+
+      final rawList = updatedRequest['clarifications'];
+      if (rawList is List && rawList.isNotEmpty) {
+        final patched = rawList
+            .map((e) => e is Map ? Map<String, dynamic>.from(e) : e)
+            .toList();
+        final lastIdx = patched.length - 1;
+        final last = patched[lastIdx];
+        if (last is Map<String, dynamic>) {
+          last['response'] = responseText;
+          last['responded_at'] = DateTime.now().toIso8601String();
+          patched[lastIdx] = last;
+        }
+        updatedRequest['clarifications'] = patched;
+      }
+
       request.value = updatedRequest;
 
       responseController.clear();

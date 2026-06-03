@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/fcm_service.dart';
 import '../../../core/constants/user_roles.dart'; // Added Import
 import '../../../routes/app_routes.dart';
 
@@ -52,6 +53,11 @@ class AuthController extends BaseController {
 
       final user = _authService.currentUser.value;
       if (user != null) {
+        // Register FCM device token after successful login
+        if (Get.isRegistered<FCMService>()) {
+          Get.find<FCMService>().registerToken();
+        }
+
         final role = user.role.toLowerCase().trim();
         if (role == UserRoles.ADMIN || role == UserRoles.SUPER_ADMIN) {
           Get.offAllNamed(AppRoutes.ADMIN_DASHBOARD);

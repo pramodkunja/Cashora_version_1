@@ -61,7 +61,9 @@ class RequestRepository {
       if (receiptFile != null) await collectFile('receipt_file', receiptFile);
       // Bill attachments also go as receipt_file (multiple allowed)
       if (billFiles != null) {
-        for (final f in billFiles) await collectFile('receipt_file', f);
+        for (final f in billFiles) {
+          await collectFile('receipt_file', f);
+        }
       }
 
       final Map<String, String> fields = {
@@ -110,7 +112,9 @@ class RequestRepository {
       if (qrFile != null) await addFile('payment_qr_file', qrFile);
       if (receiptFile != null) await addFile('receipt_file', receiptFile);
       if (billFiles != null && billFiles.isNotEmpty) {
-        for (final f in billFiles) await addFile('receipt_file', f);
+        for (final f in billFiles) {
+          await addFile('receipt_file', f);
+        }
       }
 
       final response = await _networkService.post(
@@ -122,6 +126,20 @@ class RequestRepository {
   }
 
 
+
+  /// GET /requestor/requests/{request_id}
+  ///
+  /// Fetches a single request the authenticated requestor owns. Accepts
+  /// either the integer DB id (e.g. `106`) or the string request id
+  /// (e.g. `EXP-0E3247D9`). Backend returns the same shape as the list
+  /// endpoint plus `approved_at`, `rejected_at`, `paid_at`.
+  ///
+  /// Throws on 403/404 if the request does not belong to the caller.
+  Future<Map<String, dynamic>> getRequestById(Object id) async {
+    final response =
+        await _networkService.get('/requestor/requests/$id');
+    return Map<String, dynamic>.from(response.data as Map);
+  }
 
   /// GET /requestor/requests
   ///
@@ -153,6 +171,13 @@ class RequestRepository {
   /// [qrData] - Raw QR code data extracted from the image
   /// 
   /// Returns extracted payment details including payee name, VPA/account, etc.
+  /// Sentinel returned when the backend endpoint is missing. Callers should
+  /// check `result['unavailable'] == true` and fall back to manual entry.
+  static const Map<String, dynamic> qrProcessingUnavailable = {
+    'unavailable': true,
+    'message': 'QR payment processing unavailable',
+  };
+
   Future<Map<String, dynamic>> processPaymentQR({
     required int expenseId,
     required String qrImageUrl,
@@ -169,6 +194,16 @@ class RequestRepository {
       );
 
       return response.data;
+    } on DioException catch (e) {
+      // TODO(backend): /expenses/process-payment-qr not yet deployed.
+      // Returning a sentinel lets the UI fall back to manual entry instead
+      // of crashing the QR flow.
+      if (e.response?.statusCode == 404) {
+        if (kDebugMode) debugPrint('[processPaymentQR] endpoint missing — falling back to manual entry');
+        return qrProcessingUnavailable;
+      }
+      if (kDebugMode) debugPrint('Error processing payment QR: $e');
+      rethrow;
     } catch (e) {
       if (kDebugMode) debugPrint('Error processing payment QR: $e');
       rethrow;
@@ -184,5 +219,86 @@ class RequestRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// GET /requestor/history/{expense_id}
+  ///
+  /// Returns the clarification thread for the requestor-side view of an
+  /// expense.
+  Future<List<Map<String, dynamic>>> getClarificationHistory(int expenseId) async {
+    try {
+      final response = await _networkService.get('/requestor/history/$expenseId');
+      final data = response.data;
+      if (data is List) return List<Map<String, dynamic>>.from(data);
+      if (data is Map && data['history'] is List) {
+        return List<Map<String, dynamic>>.from(data['history']);
+      }
+      return const [];
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error fetching clarification history: $e');
+      rethrow;
+    }
+  }
+
+  /// GET /requestor/my-requests
+  ///
+  /// Alternate listing that also accepts `payment_status` as a filter.
+  /// Distinct from `/requestor/requests` (which is the search-aware listing
+  /// exposed by [getMyRequests]).
+  Future<List<Map<String, dynamic>>> getRequestsWithPaymentStatus({
+    String? status,
+    String? paymentStatus,
+  }) async {
+    final query = <String, dynamic>{};
+    if (status != null && status.isNotEmpty) query['status'] = status;
+    if (paymentStatus != null && paymentStatus.isNotEmpty) {
+      query['payment_status'] = paymentStatus;
+    }
+    final response = await _networkService.get(
+      '/requestor/my-requests',
+      queryParameters: query,
+    );
+    if (response.data is List) {
+      return List<Map<String, dynamic>>.from(response.data);
+    }
+    return const [];
+  }
+
+  /// POST /requestor/upload-payment-qr/{expense_id}
+  ///
+  /// Multipart upload of a payment QR image after the expense was created.
+  /// Separate from the QR included in the initial /requestor/submit call.
+  Future<Map<String, dynamic>> uploadPaymentQr({
+    required int expenseId,
+    required XFile file,
+    String? paymentNote,
+  }) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(file.path, filename: file.name),
+      if (paymentNote != null && paymentNote.isNotEmpty)
+        'payment_note': paymentNote,
+    });
+    final response = await _networkService.post(
+      '/requestor/upload-payment-qr/$expenseId',
+      data: formData,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// POST /requestor/upload-receipt/{expense_id}
+  ///
+  /// Multipart upload of a receipt image after the expense was created.
+  Future<Map<String, dynamic>> uploadReceipt({
+    required int expenseId,
+    required XFile file,
+  }) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(file.path, filename: file.name),
+    });
+    final response = await _networkService.post(
+      '/requestor/upload-receipt/$expenseId',
+      data: formData,
+    );
+    return response.data as Map<String, dynamic>;
   }
 }

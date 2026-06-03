@@ -16,9 +16,21 @@ class AccountantProfileController extends GetxController {
   final rxDepartmentName = ''.obs;
   final isLoading = false.obs;
 
+  /// First-load gate. Tab switches call [loadIfNeeded] so the network only
+  /// fires once; explicit refreshes (e.g. returning from Edit Profile) keep
+  /// calling [fetchProfile] directly.
+  bool _hasLoaded = false;
+
   @override
   void onInit() {
     super.onInit();
+    loadIfNeeded();
+  }
+
+  /// Idempotent first-load entry point.
+  void loadIfNeeded() {
+    if (_hasLoaded) return;
+    _hasLoaded = true;
     fetchProfile();
   }
 

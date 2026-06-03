@@ -3,18 +3,13 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/widgets/app_loader.dart';
+import 'package:cash/utils/widgets/app_gradient_header.dart';
+import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../controllers/payment_flow_controller.dart';
 
 class MarkAsPaidView extends GetView<PaymentFlowController> {
   const MarkAsPaidView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +20,10 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
     }
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
-          _buildHeader(context),
+          AppGradientHeader(title: 'Mark as Paid'),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
@@ -48,7 +43,7 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                       borderRadius: BorderRadius.circular(20.r),
                       boxShadow: [
                         BoxShadow(
-                          color: _purple.withOpacity(0.22),
+                          color: AppColors.primary.withValues(alpha: 0.22),
                           blurRadius: 20.r,
                           offset: Offset(0, 8.h),
                         ),
@@ -61,7 +56,7 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                           style: GoogleFonts.inter(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             letterSpacing: 1.2,
                           ),
                         ),
@@ -82,7 +77,7 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 10.w, vertical: 4.h),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20.r),
                             ),
                             child: Text(
@@ -107,12 +102,12 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                     title: 'Payment Method',
                     child: Obx(() {
                       if (controller.paymentMethods.isEmpty) {
-                        return const AppLoader();
+                        return SkeletonBlock(height: 48.h, radius: 12.r);
                       }
                       return Container(
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
                         decoration: BoxDecoration(
-                          color: _bg,
+                          color: AppColors.backgroundAlt,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
@@ -121,9 +116,9 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                             isExpanded: true,
                             value: controller.selectedPaidMethod.value,
                             icon: Icon(Icons.keyboard_arrow_down_rounded,
-                                color: _slate500, size: 22.sp),
+                                color: AppColors.textSlate, size: 22.sp),
                             style: GoogleFonts.inter(
-                                fontSize: 14.sp, color: _slate900),
+                                fontSize: 14.sp, color: AppColors.textDark),
                             dropdownColor: Colors.white,
                             items: controller.paymentMethods.map((m) {
                               return DropdownMenuItem<String>(
@@ -174,50 +169,6 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            'Mark as Paid',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
@@ -225,7 +176,7 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10.r,
             offset: Offset(0, -4.h),
           ),
@@ -258,9 +209,9 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _purple,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: _purple.withOpacity(0.5),
+                disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14.r),
@@ -285,7 +236,7 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -299,10 +250,10 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 16.sp),
+                child: Icon(icon, color: AppColors.primary, size: 16.sp),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -310,7 +261,7 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -329,17 +280,17 @@ class MarkAsPaidView extends GetView<PaymentFlowController> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: _bg,
+        color: AppColors.backgroundAlt,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+        style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+          hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.slate300),
           border: InputBorder.none,
           contentPadding:
               EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),

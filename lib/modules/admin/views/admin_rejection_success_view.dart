@@ -8,14 +8,8 @@ import '../../../../routes/app_routes.dart';
 import '../controllers/admin_dashboard_controller.dart';
 
 class AdminRejectionSuccessView extends StatelessWidget {
-  const AdminRejectionSuccessView({Key? key}) : super(key: key);
+  const AdminRejectionSuccessView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   void _navigateBack() {
     Get.offNamedUntil(AppRoutes.ADMIN_DASHBOARD, (route) => false);
@@ -29,7 +23,7 @@ class AdminRejectionSuccessView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: SafeArea(
         child: Column(
           children: [
@@ -46,13 +40,13 @@ class AdminRejectionSuccessView extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 8.r,
                           ),
                         ],
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: _slate900, size: 20.sp),
+                          color: AppColors.textDark, size: 20.sp),
                     ),
                   ),
                 ],
@@ -68,18 +62,18 @@ class AdminRejectionSuccessView extends StatelessWidget {
                       width: 120.w,
                       height: 120.w,
                       decoration: BoxDecoration(
-                        color: _redBg,
+                        color: AppColors.redBg,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: _red.withOpacity(0.2),
+                            color: AppColors.errorRed.withValues(alpha: 0.2),
                             blurRadius: 30.r,
                             spreadRadius: 4.r,
                           ),
                         ],
                       ),
                       child: Icon(Icons.thumb_down_alt_rounded,
-                          color: _red, size: 52.sp),
+                          color: AppColors.errorRed, size: 52.sp),
                     ),
                     SizedBox(height: 32.h),
                     Text(
@@ -87,7 +81,7 @@ class AdminRejectionSuccessView extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w800,
-                        color: _slate900,
+                        color: AppColors.textDark,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -96,7 +90,7 @@ class AdminRejectionSuccessView extends StatelessWidget {
                       AppText.requestRejectedDesc,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
-                        color: _slate500,
+                        color: AppColors.textSlate,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
@@ -108,7 +102,7 @@ class AdminRejectionSuccessView extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: _navigateBack,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _purple,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(

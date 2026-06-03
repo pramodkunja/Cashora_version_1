@@ -3,32 +3,27 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cash/utils/app_colors.dart';
+import 'package:cash/utils/date_helper.dart';
+import 'package:cash/modules/accountant/views/payment_flow/widgets/completed_audit_trail.dart';
+import 'package:cash/modules/accountant/views/payment_flow/widgets/completed_attachments_card.dart';
+import 'package:cash/modules/accountant/views/payment_flow/widgets/completed_payment_card.dart';
 import 'package:cash/utils/app_text.dart';
-import 'package:cash/utils/widgets/app_loader.dart';
+import 'package:cash/utils/widgets/skeletons/skeleton_loader.dart';
 import 'package:cash/modules/accountant/controllers/completed_request_details_controller.dart';
 
 class CompletedRequestDetailsView extends StatelessWidget {
   const CompletedRequestDetailsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _slate100 = Color(0xFFF1F5F9);
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(CompletedRequestDetailsController());
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoader();
+          return const SkeletonListView();
         }
         if (controller.errorMessage.isNotEmpty) {
           return _buildErrorState(context, controller.errorMessage.value);
@@ -54,7 +49,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.error_outline_rounded,
-                      size: 48.sp, color: _slate300),
+                      size: 48.sp, color: AppColors.slate300),
                   SizedBox(height: 12.h),
                   Text(
                     message,
@@ -76,20 +71,38 @@ class CompletedRequestDetailsView extends StatelessWidget {
   Widget _buildBody(BuildContext context, Map<String, dynamic> payment) {
     final amount = double.tryParse(payment['amount']?.toString() ?? '0') ?? 0.0;
     final createdAt = payment['created_at']?.toString() ?? '';
+    final approvedAt = payment['approved_at']?.toString() ?? '';
     final paidAt = payment['paid_at']?.toString() ??
         payment['payment_date']?.toString() ??
         createdAt;
 
-    final requestDate = _formatDate(createdAt);
-    final paymentDate = _formatDate(paidAt);
+    final requestDate = DateHelper.formatDate(createdAt);
+    final approvedDate = DateHelper.formatDate(approvedAt);
+    final paymentDate = DateHelper.formatDate(paidAt);
 
-    final requestorMap = payment['requestor'] as Map<String, dynamic>?;
-    final requestorName = requestorMap != null
-        ? '${requestorMap['first_name'] ?? ''} ${requestorMap['last_name'] ?? ''}'
-            .trim()
-        : 'Unknown';
+    final requestorName = _readRequestorName(payment);
+    final requestorEmail = _readRequestorEmail(payment);
 
-    final department = payment['department']?.toString() ?? '---';
+    // Department can come as a flat string OR nested under requestor/user.
+    String department = payment['department']?.toString() ?? '';
+    if (department.isEmpty || department == 'null') {
+      department = payment['department_name']?.toString() ?? '';
+    }
+    if (department.isEmpty || department == 'null') {
+      final r = payment['requestor'];
+      if (r is Map) {
+        department = (r['department'] ?? r['department_name'] ?? '').toString();
+      }
+    }
+    if (department.isEmpty || department == 'null') department = '---';
+
+    final vendorName = (payment['vendor_name'] ??
+            payment['vendor'] ??
+            payment['payee_name'] ??
+            '')
+        .toString()
+        .trim();
+
     final purpose = payment['purpose']?.toString() ?? '---';
     final description = payment['description']?.toString() ?? '---';
     final categoryKey = payment['category']?.toString() ?? '';
@@ -113,6 +126,11 @@ class CompletedRequestDetailsView extends StatelessWidget {
     final processedAt = _formatTime(paidAt);
     final auditTrail = payment['audit_trail'] as List? ?? [];
 
+    final receiptUrl = payment['receipt_url']?.toString() ?? '';
+    final paymentQrUrl = payment['payment_qr_url']?.toString() ?? '';
+    final hasAttachments =
+        receiptUrl.isNotEmpty || paymentQrUrl.isNotEmpty;
+
     return Column(
       children: [
         _buildHeader(context, referenceCode: referenceCode),
@@ -129,21 +147,33 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 SizedBox(height: 14.h),
                 _buildRequestInfoCard(
                   requestorName: requestorName,
+                  requestorEmail: requestorEmail,
                   department: department,
+                  vendorName: vendorName,
                   purpose: purpose,
                   description: description,
                   category: category,
                   referenceCode: referenceCode,
                 ),
                 SizedBox(height: 14.h),
-                _buildPaymentCard(
+                CompletedPaymentCard(
                   method: paymentMethod,
                   transactionId: transactionId,
                   processedAt: processedAt,
+                  approvedDate: approvedDate,
+                  requestDate: requestDate,
+                  paymentDate: paymentDate,
                 ),
+                if (hasAttachments) ...[
+                  SizedBox(height: 14.h),
+                  CompletedAttachmentsCard(
+                    receiptUrl: receiptUrl,
+                    paymentQrUrl: paymentQrUrl,
+                  ),
+                ],
                 if (auditTrail.isNotEmpty) ...[
                   SizedBox(height: 14.h),
-                  _buildAuditTrailCard(auditTrail),
+                  CompletedAuditTrail(auditTrail: auditTrail),
                 ],
               ],
             ),
@@ -178,7 +208,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.arrow_back_rounded,
@@ -203,7 +233,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                   '#$referenceCode',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -230,7 +260,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: _purple.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 18.r,
             offset: Offset(0, 6.h),
           ),
@@ -246,7 +276,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 width: 74.w,
                 height: 74.w,
                 decoration: BoxDecoration(
-                  color: _green.withOpacity(0.08),
+                  color: AppColors.successGreen.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -254,7 +284,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 width: 58.w,
                 height: 58.w,
                 decoration: const BoxDecoration(
-                  color: _green,
+                  color: AppColors.successGreen,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.check_rounded,
@@ -268,7 +298,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
-              color: _slate900,
+              color: AppColors.textDark,
             ),
           ),
           SizedBox(height: 4.h),
@@ -277,7 +307,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
-              color: _slate500,
+              color: AppColors.textSlate,
               letterSpacing: 0.8,
             ),
           ),
@@ -289,7 +319,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 34.sp,
                 fontWeight: FontWeight.w800,
-                color: _slate900,
+                color: AppColors.textDark,
                 letterSpacing: -0.5,
               ),
             ),
@@ -298,13 +328,13 @@ class CompletedRequestDetailsView extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: _bg,
+              color: AppColors.backgroundAlt,
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Row(
               children: [
                 Expanded(child: _dateCell('Requested', requestDate)),
-                Container(height: 32.h, width: 1.w, color: _slate100),
+                Container(height: 32.h, width: 1.w, color: AppColors.slate100),
                 Expanded(child: _dateCell('Paid', paymentDate)),
               ],
             ),
@@ -322,7 +352,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 9.sp,
             fontWeight: FontWeight.w700,
-            color: _slate500,
+            color: AppColors.textSlate,
             letterSpacing: 0.8,
           ),
         ),
@@ -332,7 +362,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 13.sp,
             fontWeight: FontWeight.w700,
-            color: _slate900,
+            color: AppColors.textDark,
           ),
         ),
       ],
@@ -348,6 +378,8 @@ class CompletedRequestDetailsView extends StatelessWidget {
     required String description,
     required String category,
     required String referenceCode,
+    String requestorEmail = '',
+    String vendorName = '',
   }) {
     return _sectionCard(
       icon: Icons.description_rounded,
@@ -356,8 +388,16 @@ class CompletedRequestDetailsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _infoRow(AppText.requestor, requestorName),
+          if (requestorEmail.isNotEmpty) ...[
+            _divider(),
+            _infoRow('Email', requestorEmail),
+          ],
           _divider(),
           _infoRow(AppText.department, department),
+          if (vendorName.isNotEmpty) ...[
+            _divider(),
+            _infoRow('Paid To', vendorName),
+          ],
           _divider(),
           _infoRowChip(AppText.category, category),
           _divider(),
@@ -373,7 +413,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 AppText.referenceCode,
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
-                  color: _slate500,
+                  color: AppColors.textSlate,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -381,7 +421,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 padding: EdgeInsets.symmetric(
                     horizontal: 10.w, vertical: 5.h),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(
@@ -389,7 +429,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                   style: GoogleFonts.robotoMono(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
-                    color: _purple,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -398,306 +438,10 @@ class CompletedRequestDetailsView extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // ───────────────────────────── Payment card ────────────────────────────
-
-  Widget _buildPaymentCard({
-    required String method,
-    required String transactionId,
-    required String processedAt,
-  }) {
-    return _sectionCard(
-      icon: Icons.payments_rounded,
-      title: AppText.paymentDetails,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: _purpleLight,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(_paymentIcon(method),
-                    color: _purple, size: 22.sp),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppText.paymentSource,
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        color: _slate500,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      method,
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: _slate900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: _greenBg,
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.check_circle_rounded,
-                        size: 12.sp, color: _green),
-                    SizedBox(width: 4.w),
-                    Text(
-                      'PAID',
-                      style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        color: _green,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: _bg,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Column(
-              children: [
-                _txnRow('UTR / Txn ID', transactionId, mono: true),
-                SizedBox(height: 10.h),
-                _txnRow('Processed At', processedAt),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _txnRow(String label, String value, {bool mono = false}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 110.w,
-          child: Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11.sp,
-              color: _slate500,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: (mono ? GoogleFonts.robotoMono : GoogleFonts.inter)(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: _slate900,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  IconData _paymentIcon(String method) {
-    final m = method.toLowerCase();
-    if (m.contains('upi')) return Icons.qr_code_2_rounded;
-    if (m.contains('cash')) return Icons.payments_rounded;
-    if (m.contains('cheque')) return Icons.receipt_long_rounded;
-    if (m.contains('neft') || m.contains('rtgs') || m.contains('imps')) {
-      return Icons.account_balance_rounded;
-    }
-    if (m.contains('bank')) return Icons.account_balance_rounded;
-    return Icons.account_balance_wallet_rounded;
   }
 
   // ───────────────────────────── Audit trail ─────────────────────────────
 
-  Widget _buildAuditTrailCard(List auditTrail) {
-    return _sectionCard(
-      icon: Icons.history_rounded,
-      title: AppText.auditTrail,
-      child: Column(
-        children: auditTrail.asMap().entries.map((entry) {
-          final index = entry.key;
-          final item = entry.value;
-          final isLast = index == auditTrail.length - 1;
-          final label = item['label']?.toString() ?? '';
-          final actor = item['actor']?.toString() ?? '';
-          final role = item['actor_role']?.toString() ?? '';
-          final note = item['note']?.toString();
-          final timestamp = item['timestamp']?.toString() ?? '';
-          return _timelineItem(
-            title: label,
-            actor: actor,
-            role: role,
-            note: note,
-            date: _formatDateTime(timestamp),
-            icon: _iconFor(label),
-            color: _colorFor(label),
-            bg: _bgFor(label),
-            isLast: isLast,
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _timelineItem({
-    required String title,
-    required String actor,
-    required String role,
-    required String? note,
-    required String date,
-    required IconData icon,
-    required Color color,
-    required Color bg,
-    required bool isLast,
-  }) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: 32.w,
-                height: 32.w,
-                decoration: BoxDecoration(
-                  color: bg,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color.withOpacity(0.15), width: 1),
-                ),
-                child: Icon(icon, color: color, size: 16.sp),
-              ),
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    width: 2.w,
-                    margin: EdgeInsets.symmetric(vertical: 2.h),
-                    color: _slate100,
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 18.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: _slate900,
-                    ),
-                  ),
-                  if (actor.isNotEmpty) ...[
-                    SizedBox(height: 3.h),
-                    Text(
-                      role.isNotEmpty ? '$actor • $role' : actor,
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        color: _slate500,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                  if (note != null && note.isNotEmpty) ...[
-                    SizedBox(height: 6.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: _bg,
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        note,
-                        style: GoogleFonts.inter(
-                          fontSize: 11.sp,
-                          color: _slate900,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (date.isNotEmpty) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      date,
-                      style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        color: _slate300,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _iconFor(String label) {
-    final l = label.toLowerCase();
-    if (l.contains('paid')) return Icons.payments_rounded;
-    if (l.contains('approv')) return Icons.check_rounded;
-    if (l.contains('submit')) return Icons.send_rounded;
-    if (l.contains('clarif')) return Icons.help_outline_rounded;
-    if (l.contains('reject')) return Icons.close_rounded;
-    return Icons.circle_outlined;
-  }
-
-  Color _colorFor(String label) {
-    final l = label.toLowerCase();
-    if (l.contains('paid')) return _green;
-    if (l.contains('approv')) return _purple;
-    if (l.contains('reject')) return AppColors.errorRed;
-    if (l.contains('submit')) return _slate500;
-    return _slate500;
-  }
-
-  Color _bgFor(String label) {
-    final l = label.toLowerCase();
-    if (l.contains('paid')) return _greenBg;
-    if (l.contains('approv')) return _purpleLight;
-    if (l.contains('reject')) return const Color(0xFFFEF2F2);
-    if (l.contains('submit')) return _bg;
-    return _bg;
-  }
 
   // ───────────────────────────── Helpers ─────────────────────────────────
 
@@ -714,7 +458,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -728,10 +472,10 @@ class CompletedRequestDetailsView extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 16.sp),
+                child: Icon(icon, color: AppColors.primary, size: 16.sp),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -739,7 +483,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -761,7 +505,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: _slate500,
+              color: AppColors.textSlate,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -773,7 +517,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: _slate900,
+              color: AppColors.textDark,
             ),
           ),
         ),
@@ -789,14 +533,14 @@ class CompletedRequestDetailsView extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             fontSize: 12.sp,
-            color: _slate500,
+            color: AppColors.textSlate,
             fontWeight: FontWeight.w500,
           ),
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: _purpleLight,
+            color: AppColors.purpleSurface,
             borderRadius: BorderRadius.circular(20.r),
           ),
           child: Text(
@@ -804,7 +548,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 11.sp,
               fontWeight: FontWeight.w700,
-              color: _purple,
+              color: AppColors.primary,
               letterSpacing: 0.2,
             ),
           ),
@@ -824,7 +568,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
               width: 3.w,
               height: 12.h,
               decoration: BoxDecoration(
-                color: _purple,
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -833,7 +577,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
               label.toUpperCase(),
               style: GoogleFonts.inter(
                 fontSize: 10.sp,
-                color: _slate500,
+                color: AppColors.textSlate,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
               ),
@@ -845,16 +589,16 @@ class CompletedRequestDetailsView extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           decoration: BoxDecoration(
-            color: _bg,
+            color: AppColors.backgroundAlt,
             borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: _slate100, width: 1),
+            border: Border.all(color: AppColors.slate100, width: 1),
           ),
           child: Text(
             hasValue ? value : 'Not provided',
             style: GoogleFonts.inter(
               fontSize: 13.sp,
               fontWeight: hasValue ? FontWeight.w500 : FontWeight.w400,
-              color: hasValue ? _slate900 : _slate300,
+              color: hasValue ? AppColors.textDark : AppColors.slate300,
               height: 1.5,
             ),
           ),
@@ -866,23 +610,94 @@ class CompletedRequestDetailsView extends StatelessWidget {
   Widget _divider() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Divider(height: 1.h, color: _slate100),
+      child: Divider(height: 1.h, color: AppColors.slate100),
     );
   }
 
-  String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return '---';
-    try {
-      final dt = DateTime.parse(dateStr);
-      const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
-      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-    } catch (_) {
-      return dateStr;
+  /// Best-effort requestor name extraction across all backend shapes we
+  /// have observed (flat, nested under `requestor`, nested under `user`,
+  /// `created_by`, etc.).
+  String _readRequestorName(Map<String, dynamic> payment) {
+    String s(dynamic v) => v?.toString().trim() ?? '';
+    bool ok(String v) => v.isNotEmpty && v.toLowerCase() != 'null';
+
+    for (final k in const [
+      'user_name',
+      'employee_name',
+      'requestor_name',
+      'submitted_by_name',
+      'created_by_name',
+      'requested_by_name',
+      'full_name',
+      'name',
+    ]) {
+      final v = s(payment[k]);
+      if (ok(v)) return v;
     }
+
+    final flatFirst = s(payment['first_name']);
+    final flatLast = s(payment['last_name']);
+    if (ok(flatFirst)) return '$flatFirst $flatLast'.trim();
+
+    for (final k in const [
+      'requestor',
+      'user',
+      'employee',
+      'created_by',
+      'submitted_by',
+      'requested_by',
+      'submitter',
+    ]) {
+      final raw = payment[k];
+      if (raw == null) continue;
+      if (raw is String && ok(raw)) return raw;
+      if (raw is Map) {
+        for (final sub in const ['name', 'full_name', 'display_name']) {
+          final v = s(raw[sub]);
+          if (ok(v)) return v;
+        }
+        final f = s(raw['first_name']);
+        final l = s(raw['last_name']);
+        if (ok(f)) return '$f $l'.trim();
+        final email = s(raw['email']);
+        if (ok(email)) return email.split('@').first;
+      }
+    }
+
+    final email = s(payment['email']);
+    if (ok(email)) return email.split('@').first;
+
+    debugPrint(
+      '[completed_details] requestor name not found — keys=${payment.keys.toList()}',
+    );
+    return 'Unknown';
   }
+
+  /// Best-effort requestor email extraction across the shapes the backend
+  /// may ship: flat `requestor_email` / `email`, nested `requestor.email`,
+  /// nested `user.email`.
+  String _readRequestorEmail(Map<String, dynamic> payment) {
+    String s(dynamic v) => v?.toString().trim() ?? '';
+    bool ok(String v) => v.isNotEmpty && v.toLowerCase() != 'null';
+
+    final flat = s(payment['requestor_email']);
+    if (ok(flat)) return flat;
+
+    for (final k in const ['requestor', 'user', 'employee']) {
+      final raw = payment[k];
+      if (raw is Map) {
+        final e = s(raw['email']);
+        if (ok(e)) return e;
+      }
+    }
+
+    final bare = s(payment['email']);
+    if (ok(bare)) return bare;
+
+    return '';
+  }
+
+
 
   String _formatTime(String dateStr) {
     if (dateStr.isEmpty) return '---';
@@ -892,23 +707,6 @@ class CompletedRequestDetailsView extends StatelessWidget {
       final amPm = dt.hour >= 12 ? 'PM' : 'AM';
       final m = dt.minute.toString().padLeft(2, '0');
       return '$h:$m $amPm';
-    } catch (_) {
-      return dateStr;
-    }
-  }
-
-  String _formatDateTime(String dateStr) {
-    if (dateStr.isEmpty) return '';
-    try {
-      final dt = DateTime.parse(dateStr);
-      const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
-      final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
-      final amPm = dt.hour >= 12 ? 'PM' : 'AM';
-      final m = dt.minute.toString().padLeft(2, '0');
-      return '${months[dt.month - 1]} ${dt.day}, ${dt.year} · $h:$m $amPm';
     } catch (_) {
       return dateStr;
     }

@@ -5,7 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'package:cash/data/repositories/request_repository.dart';
 import 'package:cash/data/repositories/organization_repository.dart';
@@ -85,15 +84,13 @@ class CreateRequestController extends GetxController {
   Future<void> fetchLimit() async {
     try {
       final response = await _orgRepository.getApprovalLimits();
-      if (response != null) {
-        // Handle backend response keys
-        var val =
-            response['deemed_approval_limit'] ?? response['deemed_limit'] ?? 0;
-        deemedLimit.value = (val is int)
-            ? val.toDouble()
-            : (val as double? ?? 0.0);
-      }
-    } catch (e) {
+      // Handle backend response keys
+      var val =
+          response['deemed_approval_limit'] ?? response['deemed_limit'] ?? 0;
+      deemedLimit.value = (val is int)
+          ? val.toDouble()
+          : (val as double? ?? 0.0);
+        } catch (e) {
       if (kDebugMode) debugPrint("Failed to fetch limits: $e");
     }
   }
@@ -198,68 +195,54 @@ class CreateRequestController extends GetxController {
     }
     // 3. Mobile
     else {
-      // Logic for permissions...
-      PermissionStatus status;
+      // For camera, we still request camera permission.
+      // For gallery, the system photo picker handles it securely without requiring explicit storage permissions.
       if (source == ImageSource.camera) {
-        status = await Permission.camera.request();
-      } else {
-        if (await Permission.photos.status.isGranted ||
-            await Permission.mediaLibrary.status.isGranted) {
-          status = PermissionStatus.granted;
-        } else if (await Permission.storage.isGranted) {
-          status = PermissionStatus.granted;
-        } else {
-          Map<Permission, PermissionStatus> statuses = await [
-            Permission.storage,
-            Permission.photos,
-            Permission.mediaLibrary,
-          ].request();
-          if (statuses.values.any((s) => s.isGranted)) {
-            status = PermissionStatus.granted;
-          } else {
-            status = PermissionStatus.denied;
-          }
-        }
-      }
-
-      if (status.isGranted || status.isLimited) {
-        try {
-          pickedFile = await _picker.pickImage(source: source);
-        } catch (e) {
+        PermissionStatus status = await Permission.camera.request();
+        if (status.isPermanentlyDenied) {
+          Get.dialog(
+            AlertDialog(
+              title: const Text('Permission Required'),
+              content: const Text('Please enable camera permission in settings.'),
+              actions: [
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () => Get.back(),
+                ),
+                TextButton(
+                  child: const Text('Settings'),
+                  onPressed: () {
+                    Get.back();
+                    openAppSettings();
+                  },
+                ),
+              ],
+            ),
+          );
+          return;
+        } else if (!status.isGranted && !status.isLimited) {
           Get.snackbar(
-            'Error',
-            'Failed to pick image: $e',
+            'Permission Denied',
+            'Camera permission is required.',
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red[100],
           );
           return;
         }
-      } else if (status.isPermanentlyDenied) {
-        Get.dialog(
-          AlertDialog(
-            title: const Text('Permission Required'),
-            content: const Text('Please enable permissions in settings.'),
-            actions: [
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () => Get.back(),
-              ),
-              TextButton(
-                child: const Text('Settings'),
-                onPressed: () {
-                  Get.back();
-                  openAppSettings();
-                },
-              ),
-            ],
-          ),
+      }
+
+      try {
+        pickedFile = await _picker.pickImage(
+          source: source,
+          maxWidth: 1920,
+          maxHeight: 1080,
+          imageQuality: 85,
         );
-        return;
-      } else {
+      } catch (e) {
         Get.snackbar(
-          'Permission Denied',
-          'Permission required.',
+          'Error',
+          'Failed to pick image: $e',
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[100],
         );
         return;
       }

@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/services/network_service.dart';
+import '../data/repositories/request_repository.dart';
 import '../modules/admin/views/admin_set_limits_view.dart';
 import '../modules/admin/controllers/admin_set_limits_controller.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/splash/controllers/splash_controller.dart';
-import '../modules/splash/controllers/splash_controller.dart';
 import '../modules/lock/views/lock_view.dart';
-import '../core/services/storage_service.dart';
-import '../modules/admin/views/admin_dashboard_view.dart';
 import '../modules/admin/views/admin_main_view.dart';
 import '../modules/admin/views/admin_approvals_view.dart';
 import '../modules/admin/views/admin_request_details_view.dart';
 import '../modules/admin/views/admin_success_view.dart';
 import '../modules/admin/controllers/admin_dashboard_controller.dart';
 import '../modules/admin/controllers/admin_approvals_controller.dart';
-import '../modules/admin/controllers/admin_request_details_controller.dart';
 import '../modules/admin/controllers/admin_request_details_controller.dart';
 import '../modules/admin/views/admin_rejection_success_view.dart';
 import '../modules/admin/views/admin_clarification_view.dart';
@@ -42,7 +40,6 @@ import '../modules/admin/views/department_list_view.dart';
 import 'app_routes.dart';
 import '../modules/auth/bindings/auth_binding.dart';
 import '../modules/auth/views/login_view.dart';
-import '../modules/home/views/home_view.dart';
 import '../modules/organization_setup/bindings/organization_setup_binding.dart';
 import '../modules/organization_setup/views/organization_setup_view.dart';
 import '../modules/organization_setup/views/organization_success_view.dart';
@@ -57,14 +54,12 @@ import '../modules/reset_password/bindings/reset_password_binding.dart';
 import '../modules/reset_password/views/reset_password_view.dart';
 import '../modules/reset_password/views/reset_password_success_view.dart';
 import '../modules/requestor/bindings/requestor_binding.dart';
-import '../modules/requestor/views/requestor_dashboard_view.dart';
 import '../modules/requestor/views/requestor_main_view.dart';
 import '../modules/requestor/bindings/create_request_binding.dart';
 import '../modules/requestor/views/create_request/select_request_type_view.dart';
 import '../modules/requestor/views/create_request/request_details_view.dart';
 import '../modules/requestor/views/create_request/review_request_view.dart';
 import '../modules/requestor/views/create_request/request_success_view.dart';
-import '../modules/requestor/views/monthly_spent_view.dart';
 import '../modules/requestor/views/my_requests_view.dart';
 import '../modules/requestor/views/request_details_read_view.dart';
 import '../modules/requestor/controllers/my_requests_controller.dart';
@@ -88,8 +83,10 @@ import '../modules/accountant/views/payment_flow/completed_request_details_view.
 import '../modules/accountant/views/payment_flow/mark_as_paid_view.dart';
 import '../modules/accountant/views/analytics/spend_analytics_view.dart';
 import '../modules/accountant/views/analytics/financial_reports_view.dart';
+import '../modules/accountant/views/manage_balances_view.dart';
 import '../core/constants/user_roles.dart'; // Added Import
 import '../modules/accountant/controllers/accountant_analytics_controller.dart';
+import '../modules/accountant/controllers/manage_balances_controller.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override
@@ -151,10 +148,12 @@ class RouteGuard extends GetMiddleware {
   }
 
   RouteSettings _getDashboardRoute(String role) {
-    if (role == UserRoles.ADMIN || role == UserRoles.SUPER_ADMIN)
+    if (role == UserRoles.ADMIN || role == UserRoles.SUPER_ADMIN) {
       return const RouteSettings(name: AppRoutes.ADMIN_DASHBOARD);
-    if (role == UserRoles.ACCOUNTANT)
+    }
+    if (role == UserRoles.ACCOUNTANT) {
       return const RouteSettings(name: AppRoutes.ACCOUNTANT_DASHBOARD);
+    }
     return const RouteSettings(name: AppRoutes.REQUESTOR);
   }
 }
@@ -254,10 +253,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.REQUEST_DETAILS_READ,
       page: () => const RequestDetailsReadView(),
-    ),
-    GetPage(
-      name: AppRoutes.MONTHLY_SPENT,
-      page: () => const MonthlySpentView(),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<RequestRepository>()) {
+          Get.put<RequestRepository>(
+            RequestRepository(Get.find<NetworkService>()),
+          );
+        }
+      }),
     ),
     GetPage(
       name: AppRoutes.ADMIN_DASHBOARD,
@@ -490,6 +492,13 @@ class AppPages {
       page: () => const FinancialReportsView(),
       binding: BindingsBuilder(() {
         Get.put(AccountantAnalyticsController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.ACCOUNTANT_MANAGE_BALANCES,
+      page: () => const ManageBalancesView(),
+      binding: BindingsBuilder(() {
+        Get.put(ManageBalancesController());
       }),
     ),
     GetPage(

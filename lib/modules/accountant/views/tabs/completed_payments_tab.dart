@@ -9,16 +9,8 @@ import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../controllers/accountant_payments_controller.dart';
 
 class CompletedPaymentsTab extends StatelessWidget {
-  const CompletedPaymentsTab({Key? key}) : super(key: key);
+  const CompletedPaymentsTab({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
 
   @override
   Widget build(BuildContext context) {
@@ -52,20 +44,20 @@ class CompletedPaymentsTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 10.r,
                     offset: Offset(0, 2.h),
                   ),
                 ],
               ),
               child: TextField(
-                style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+                style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
                 decoration: InputDecoration(
                   hintText: AppText.searchByIdOrName,
                   hintStyle:
-                      GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+                      GoogleFonts.inter(fontSize: 14.sp, color: AppColors.slate300),
                   prefixIcon: Icon(Icons.search_rounded,
-                      color: _slate500, size: 20.sp),
+                      color: AppColors.textSlate, size: 20.sp),
                   border: InputBorder.none,
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -83,7 +75,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 12.r,
                     offset: Offset(0, 3.h),
                   ),
@@ -94,11 +86,11 @@ class CompletedPaymentsTab extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(14.w),
                     decoration: BoxDecoration(
-                      color: _greenBg,
+                      color: AppColors.mintBg,
                       borderRadius: BorderRadius.circular(14.r),
                     ),
                     child: Icon(Icons.payments_rounded,
-                        color: _green, size: 24.sp),
+                        color: AppColors.successGreen, size: 24.sp),
                   ),
                   SizedBox(width: 14.w),
                   Expanded(
@@ -110,7 +102,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
-                            color: _slate500,
+                            color: AppColors.textSlate,
                           ),
                         ),
                         SizedBox(height: 4.h),
@@ -122,27 +114,13 @@ class CompletedPaymentsTab extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 24.sp,
                               fontWeight: FontWeight.w800,
-                              color: _slate900,
+                              color: AppColors.textDark,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 16.h),
-
-            // Filter chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _filterChip('Date Range'),
-                  SizedBox(width: 8.w),
-                  _filterChip('Category'),
                 ],
               ),
             ),
@@ -156,7 +134,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w700,
-                  color: _slate500,
+                  color: AppColors.textSlate,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -170,14 +148,14 @@ class CompletedPaymentsTab extends StatelessWidget {
                   child: Column(
                     children: [
                       Icon(Icons.inbox_rounded,
-                          size: 56.sp, color: _slate300),
+                          size: 56.sp, color: AppColors.slate300),
                       SizedBox(height: 12.h),
                       Text(
                         'No completed payments',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: _slate500,
+                          color: AppColors.textSlate,
                         ),
                       ),
                     ],
@@ -189,40 +167,13 @@ class CompletedPaymentsTab extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: expenses.length,
-                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                separatorBuilder: (_, _) => SizedBox(height: 10.h),
                 itemBuilder: (_, i) => _buildItem(expenses[i]),
               ),
           ],
         ),
       );
     });
-  }
-
-  Widget _filterChip(String label) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-              color: _slate500,
-            ),
-          ),
-          SizedBox(width: 4.w),
-          Icon(Icons.keyboard_arrow_down_rounded,
-              color: _slate500, size: 16.sp),
-        ],
-      ),
-    );
   }
 
   Widget _buildItem(Map<String, dynamic> item) {
@@ -283,7 +234,7 @@ class CompletedPaymentsTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 12.r,
               offset: Offset(0, 3.h),
             ),
@@ -299,7 +250,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                     padding: EdgeInsets.symmetric(
                         horizontal: 8.w, vertical: 3.h),
                     decoration: BoxDecoration(
-                      color: _bg,
+                      color: AppColors.backgroundAlt,
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
@@ -307,7 +258,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
-                        color: _slate500,
+                        color: AppColors.textSlate,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -318,7 +269,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                   padding:
                       EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    color: _greenBg,
+                    color: AppColors.mintBg,
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
@@ -326,7 +277,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w700,
-                      color: _green,
+                      color: AppColors.successGreen,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -340,7 +291,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                   width: 38.w,
                   height: 38.w,
                   decoration: BoxDecoration(
-                    color: _purpleLight,
+                    color: AppColors.purpleSurface,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Center(
@@ -349,7 +300,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
-                        color: _purple,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
@@ -364,7 +315,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
-                          color: _slate900,
+                          color: AppColors.textDark,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -373,7 +324,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                         subtitle,
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
-                          color: _slate500,
+                          color: AppColors.textSlate,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -386,7 +337,7 @@ class CompletedPaymentsTab extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
-                    color: _purple,
+                    color: AppColors.primary,
                   ),
                 ),
               ],
@@ -397,19 +348,19 @@ class CompletedPaymentsTab extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.calendar_today_rounded,
-                    size: 12.sp, color: _slate500),
+                    size: 12.sp, color: AppColors.textSlate),
                 SizedBox(width: 4.w),
                 Expanded(
                   child: Text(
                     formattedDate,
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                     ),
                   ),
                 ),
                 Icon(Icons.chevron_right_rounded,
-                    color: _slate300, size: 18.sp),
+                    color: AppColors.slate300, size: 18.sp),
               ],
             ),
           ],

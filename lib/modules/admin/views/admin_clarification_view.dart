@@ -3,26 +3,21 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/widgets/app_gradient_header.dart';
 import '../../../../utils/app_text.dart';
 import '../controllers/admin_request_details_controller.dart';
 
 class AdminClarificationView extends GetView<AdminRequestDetailsController> {
-  const AdminClarificationView({Key? key}) : super(key: key);
+  const AdminClarificationView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
-          _buildHeader(context),
+          AppGradientHeader(title: AppText.askClarificationTitle),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
@@ -49,50 +44,6 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
   }
 
   // ── Header ───────────────────────────────────────────────────────────
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            AppText.askClarificationTitle,
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ── Request Summary Card ─────────────────────────────────────────────
   Widget _buildRequestCard() {
     return Container(
@@ -102,7 +53,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -127,7 +78,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
                         style: GoogleFonts.inter(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
-                          color: _slate900,
+                          color: AppColors.textDark,
                         ),
                       );
                     }),
@@ -141,7 +92,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
                         title,
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
-                          color: _slate500,
+                          color: AppColors.textSlate,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -186,11 +137,11 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
                   height: 72.h,
                   width: 72.w,
                   decoration: BoxDecoration(
-                    color: _purpleLight,
+                    color: AppColors.purpleSurface,
                     borderRadius: BorderRadius.circular(14.r),
                   ),
                   child: Icon(Icons.receipt_long_rounded,
-                      color: _purple, size: 28.sp),
+                      color: AppColors.primary, size: 28.sp),
                 );
               }),
             ],
@@ -205,20 +156,20 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: _purpleLight,
+                color: AppColors.purpleSurface,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
                 children: [
                   Icon(Icons.currency_rupee_rounded,
-                      color: _purple, size: 16.sp),
+                      color: AppColors.primary, size: 16.sp),
                   SizedBox(width: 6.w),
                   Text(
                     'Amount',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
-                      color: _purple,
+                      color: AppColors.primary,
                     ),
                   ),
                   const Spacer(),
@@ -227,7 +178,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w800,
-                      color: _purple,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -248,7 +199,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -262,11 +213,11 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(Icons.help_outline_rounded,
-                    color: _purple, size: 18.sp),
+                    color: AppColors.primary, size: 18.sp),
               ),
               SizedBox(width: 12.w),
               Text(
@@ -274,7 +225,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -283,19 +234,19 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: _bg,
+              color: AppColors.backgroundAlt,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: TextField(
               controller: controller.clarificationController,
               maxLines: 6,
-              style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+              style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
               decoration: InputDecoration(
                 hintText: AppText.clarificationHint,
                 hintStyle: GoogleFonts.inter(
                   fontSize: 14.sp,
-                  color: _slate300,
+                  color: AppColors.slate300,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(vertical: 8.h),
@@ -311,13 +262,13 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: _purpleLight.withOpacity(0.4),
+        color: AppColors.purpleSurface.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         children: [
           Icon(Icons.tips_and_updates_rounded,
-              color: _purple, size: 16.sp),
+              color: AppColors.primary, size: 16.sp),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
@@ -325,7 +276,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
               style: GoogleFonts.inter(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w500,
-                color: _purple,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -341,7 +292,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10.r,
             offset: Offset(0, -4.h),
           ),
@@ -362,7 +313,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _purple,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -383,7 +334,7 @@ class AdminClarificationView extends GetView<AdminRequestDetailsController> {
         style: GoogleFonts.inter(
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
-          color: _slate500,
+          color: AppColors.textSlate,
           letterSpacing: 1.2,
         ),
       ),

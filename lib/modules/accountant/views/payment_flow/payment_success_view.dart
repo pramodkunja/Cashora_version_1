@@ -10,13 +10,6 @@ import '../../controllers/payment_flow_controller.dart';
 class PaymentSuccessView extends GetView<PaymentFlowController> {
   const PaymentSuccessView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +31,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
     }
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
@@ -56,13 +49,13 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 8.r,
                         ),
                       ],
                     ),
                     child: Icon(Icons.close_rounded,
-                        color: _slate900, size: 20.sp),
+                        color: AppColors.textDark, size: 20.sp),
                   ),
                 ),
               ),
@@ -73,17 +66,17 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                 width: 110.w,
                 height: 110.w,
                 decoration: BoxDecoration(
-                  color: _greenBg,
+                  color: AppColors.mintBg,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: _green.withOpacity(0.2),
+                      color: AppColors.successGreen.withValues(alpha: 0.2),
                       blurRadius: 30.r,
                       spreadRadius: 4.r,
                     ),
                   ],
                 ),
-                child: Icon(Icons.check_rounded, color: _green, size: 60.sp),
+                child: Icon(Icons.check_rounded, color: AppColors.successGreen, size: 60.sp),
               ),
               SizedBox(height: 24.h),
               Text(
@@ -91,7 +84,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                 style: GoogleFonts.inter(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w800,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
               SizedBox(height: 10.h),
@@ -99,7 +92,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                 AppText.fundsTransferred,
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
-                  color: _slate500,
+                  color: AppColors.textSlate,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -116,7 +109,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                   borderRadius: BorderRadius.circular(20.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 16.r,
                       offset: Offset(0, 4.h),
                     ),
@@ -129,7 +122,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                       style: GoogleFonts.inter(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
-                        color: _slate500,
+                        color: AppColors.textSlate,
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -139,7 +132,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                       style: GoogleFonts.inter(
                         fontSize: 34.sp,
                         fontWeight: FontWeight.w800,
-                        color: _slate900,
+                        color: AppColors.textDark,
                       ),
                     ),
                     SizedBox(height: 18.h),
@@ -148,13 +141,13 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
 
                     _row(AppText.transactionId, txnId,
                         trailing: Icon(Icons.copy_rounded,
-                            size: 14.sp, color: _slate500)),
+                            size: 14.sp, color: AppColors.textSlate)),
                     if (utr != null && utr != 'N/A')
                       Padding(
                         padding: EdgeInsets.only(top: 14.h),
                         child: _row('UTR Number', utr,
                             trailing: Icon(Icons.copy_rounded,
-                                size: 14.sp, color: _slate500)),
+                                size: 14.sp, color: AppColors.textSlate)),
                       ),
                     SizedBox(height: 14.h),
                     _row(AppText.paymentDate, displayDate),
@@ -162,7 +155,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                     _row(
                       AppText.paymentSource,
                       paymentSource,
-                      valueColor: _green,
+                      valueColor: AppColors.successGreen,
                       isStatus: true,
                     ),
                     SizedBox(height: 14.h),
@@ -188,7 +181,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _purple,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -205,7 +198,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: _slate500,
+                    color: AppColors.textSlate,
                   ),
                 ),
               ),
@@ -226,7 +219,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
             label,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: _slate500,
+              color: AppColors.textSlate,
             ),
           ),
         ),
@@ -248,7 +241,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
             style: GoogleFonts.inter(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: valueColor ?? _slate900,
+              color: valueColor ?? AppColors.textDark,
             ),
           ),
         ),
@@ -266,19 +259,19 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
             label,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: _slate500,
+              color: AppColors.textSlate,
             ),
           ),
         ),
         CircleAvatar(
           radius: 12.r,
-          backgroundColor: _purpleLight,
+          backgroundColor: AppColors.purpleSurface,
           child: Text(
             initials,
             style: GoogleFonts.inter(
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
-              color: _purple,
+              color: AppColors.primary,
             ),
           ),
         ),
@@ -289,7 +282,7 @@ class PaymentSuccessView extends GetView<PaymentFlowController> {
             style: GoogleFonts.inter(
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
-              color: _slate900,
+              color: AppColors.textDark,
             ),
             overflow: TextOverflow.ellipsis,
           ),

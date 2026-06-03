@@ -6,53 +6,38 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/widgets/app_loader.dart';
+import '../../../../utils/widgets/skeletons/page_skeletons.dart';
 import '../../../../data/models/accountant_reports_model.dart';
 import '../../controllers/accountant_analytics_controller.dart';
 
 class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
   const SpendAnalyticsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
           _buildHeader(context),
           Expanded(
             child: Obx(() {
-              if (controller.isSpendLoading.value &&
-                  controller.spendAnalytics.value == null) {
-                return const AppLoader();
-              }
-              if (controller.errorMessage.isNotEmpty &&
-                  controller.spendAnalytics.value == null) {
-                return Center(
-                  child: Text(
-                    controller.errorMessage.value,
-                    style: GoogleFonts.inter(fontSize: 13.sp, color: _red),
-                  ),
-                );
-              }
               final data = controller.spendAnalytics.value;
+
+              // No data yet AND no error → we're either before the
+              // post-frame `loadIfNeeded` fires, or mid-fetch. Either
+              // way, show the skeleton instead of an empty "no data"
+              // state. This is what was missing before.
+              if (data == null && controller.errorMessage.isEmpty) {
+                return const SpendAnalyticsSkeleton();
+              }
+
               if (data == null) {
                 return Center(
                   child: Text(
-                    'No data available',
-                    style: GoogleFonts.inter(
-                        fontSize: 14.sp, color: _slate500),
+                    controller.errorMessage.value,
+                    style: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.errorRed),
                   ),
                 );
               }
@@ -66,11 +51,12 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
+        24.w,
+        MediaQuery.of(context).padding.top + 18.h,
+        24.w,
+        26.h,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -82,26 +68,63 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              AppText.spendAnalytics,
-              style: GoogleFonts.inter(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
+            child: Icon(Icons.insights_rounded,
+                color: Colors.white, size: 20.sp),
           ),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.tune_rounded,
-                  color: Colors.white, size: 20.sp),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppText.spendAnalytics,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.2,
+                    height: 1.15,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Obx(() {
+                  final tr = controller.selectedTimeRange.value;
+                  final subtitle = tr.isNotEmpty &&
+                          tr.toLowerCase() != 'time range'
+                      ? '$tr · Spending insights'
+                      : 'Insights into your spending';
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.bar_chart_rounded,
+                          size: 11.sp,
+                          color: Colors.white.withValues(alpha: 0.75)),
+                      SizedBox(width: 6.w),
+                      Flexible(
+                        child: Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: Colors.white.withValues(alpha: 0.75),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ],
             ),
           ),
         ],
@@ -110,20 +133,54 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
   }
 
   Widget _buildContent(SpendAnalyticsModel data) {
-    final timeRanges = data.filters.timeRanges.isNotEmpty
-        ? data.filters.timeRanges
-        : ['This Month', 'Last Month'];
-    final departments = data.filters.departments.isNotEmpty
-        ? data.filters.departments
-        : ['Department'];
-    final categories = data.filters.categories.isNotEmpty
-        ? data.filters.categories
-        : ['Category'];
+    // ── Comprehensive filter options ────────────────────────────────
+    // Time range: backend accepts {30d / 90d / 180d / 1y} via the
+    // _mapTimeRange helper in AccountantRepository. We always show all
+    // four — the values are well known and don't depend on data.
+    const timeRanges = <String>[
+      'Last 30 days',
+      'Last 3 months',
+      'Last 6 months',
+      'Last year',
+    ];
+
+    // Departments: start with "All Departments", then merge anything the
+    // backend reports so org-specific names show up too.
+    final departments = <String>[
+      'All Departments',
+      ...data.filters.departments
+          .cast<String>()
+          .where((d) => d.trim().isNotEmpty &&
+              d.toLowerCase() != 'department' &&
+              d.toLowerCase() != 'all departments'),
+    ];
+
+    // Categories: known enum set + anything extra the backend ships.
+    const knownCategoryKeys = <String>[
+      'office_supplies',
+      'travel',
+      'meals',
+      'software',
+      'hardware',
+      'transport',
+      'accommodation',
+      'entertainment',
+      'fuel',
+    ];
+    final categoryKeys = <String>{
+      'All Categories',
+      ...knownCategoryKeys,
+      ...data.filters.categories
+          .cast<String>()
+          .where((c) => c.trim().isNotEmpty &&
+              c.toLowerCase() != 'category' &&
+              c.toLowerCase() != 'all categories'),
+    }.toList();
 
     final colors = [
-      _purple,
+      AppColors.primary,
       AppColors.indigo,
-      _green,
+      AppColors.successGreen,
       Colors.orange,
       Colors.pink,
       Colors.teal,
@@ -134,21 +191,24 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Filters
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _filter(controller.selectedTimeRange, timeRanges.cast<String>(),
-                    controller.onTimeRangeChanged),
-                SizedBox(width: 8.w),
-                _filter(controller.selectedDepartment,
-                    departments.cast<String>(), controller.onDepartmentChanged),
-                SizedBox(width: 8.w),
-                _filter(controller.selectedCategory, categories.cast<String>(),
-                    controller.onCategoryChanged),
-              ],
+          // ── Filters ─────────────────────────────────────────────────
+          Text(
+            'FILTERS',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSlate,
+              letterSpacing: 1.0,
             ),
+          ),
+          SizedBox(height: 10.h),
+          // Three inline dropdowns in one card, separated by thin
+          // dividers. Always visible, all three on a single row, no
+          // bottom sheet needed.
+          _buildFilterCard(
+            timeRanges: timeRanges,
+            departments: departments,
+            categoryKeys: categoryKeys,
           ),
 
           SizedBox(height: 20.h),
@@ -190,7 +250,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
               padding:
                   EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
               decoration: BoxDecoration(
-                color: data.monthlyTrend.isPositiveTrend ? _greenBg : _redBg,
+                color: data.monthlyTrend.isPositiveTrend ? AppColors.mintBg : AppColors.redBg,
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
@@ -198,83 +258,13 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                 style: GoogleFonts.inter(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
-                  color: data.monthlyTrend.isPositiveTrend ? _green : _red,
+                  color: data.monthlyTrend.isPositiveTrend ? AppColors.successGreen : AppColors.errorRed,
                 ),
               ),
             ),
             child: SizedBox(
               height: 180.h,
-              child: data.monthlyTrend.graphData.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No graph data',
-                        style: GoogleFonts.inter(
-                            fontSize: 12.sp, color: _slate500),
-                      ),
-                    )
-                  : LineChart(
-                      LineChartData(
-                        gridData: const FlGridData(show: false),
-                        titlesData: FlTitlesData(
-                          leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              interval: 1,
-                              getTitlesWidget: (value, meta) {
-                                final idx = value.toInt();
-                                if (idx >= 0 &&
-                                    idx < data.monthlyTrend.graphData.length) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(top: 6.h),
-                                    child: Text(
-                                      data.monthlyTrend.graphData[idx]
-                                          .weekOrDay,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 10.sp,
-                                        color: _slate500,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            ),
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: data.monthlyTrend.graphData
-                                .asMap()
-                                .entries
-                                .map((e) => FlSpot(
-                                    e.key.toDouble(), e.value.amount))
-                                .toList(),
-                            isCurved: true,
-                            color: _purple,
-                            barWidth: 3,
-                            dotData: const FlDotData(show: false),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              gradient: LinearGradient(
-                                colors: [
-                                  _purple.withOpacity(0.25),
-                                  _purple.withOpacity(0.02),
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              child: _buildTrendChart(data.monthlyTrend),
             ),
           ),
 
@@ -290,7 +280,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                     child: Text(
                       'No category data',
                       style: GoogleFonts.inter(
-                          fontSize: 12.sp, color: _slate500),
+                          fontSize: 12.sp, color: AppColors.textSlate),
                     ),
                   )
                 : Row(
@@ -323,7 +313,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                               style: GoogleFonts.inter(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,
-                                color: _slate500,
+                                color: AppColors.textSlate,
                               ),
                             ),
                           ],
@@ -361,7 +351,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                     child: Text(
                       'No department data',
                       style: GoogleFonts.inter(
-                          fontSize: 12.sp, color: _slate500),
+                          fontSize: 12.sp, color: AppColors.textSlate),
                     ),
                   )
                 : Column(
@@ -397,7 +387,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
-                    color: _purple.withOpacity(0.22),
+                    color: AppColors.primary.withValues(alpha: 0.22),
                     blurRadius: 16.r,
                     offset: Offset(0, 6.h),
                   ),
@@ -408,7 +398,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                   Container(
                     padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(Icons.description_rounded,
@@ -432,7 +422,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                           AppText.generateExportInsights,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -449,39 +439,165 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
     );
   }
 
-  Widget _filter(RxString value, List<String> items,
-      Function(String?) onChanged) {
+  /// Convert raw enum keys (`office_supplies`) to display labels
+  /// (`Office Supplies`). Pass-through for non-snake_case strings.
+  String _prettifyEnumKey(String raw) {
+    if (raw.isEmpty || raw.toLowerCase() == 'all categories') return raw;
+    return raw
+        .split(RegExp(r'[_\s]+'))
+        .where((w) => w.isNotEmpty)
+        .map((w) => '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+        .join(' ');
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // FILTER CARD — three inline dropdowns in one white card, separated
+  // by thin vertical dividers. Each column has a small caps label on
+  // top and the dropdown value below. Three Expanded columns share
+  // width equally so it fits any phone width without scrolling.
+  // ════════════════════════════════════════════════════════════════════
+  Widget _buildFilterCard({
+    required List<String> timeRanges,
+    required List<String> departments,
+    required List<String> categoryKeys,
+  }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: Obx(
-          () => DropdownButton<String>(
-            value: items.contains(value.value) ? value.value : items.first,
-            items: items
-                .map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(
-                        e,
-                        style: GoogleFonts.inter(
-                            fontSize: 12.sp, color: _slate900),
-                      ),
-                    ))
-                .toList(),
-            onChanged: onChanged,
-            icon: Icon(Icons.keyboard_arrow_down_rounded,
-                size: 16.sp, color: _slate500),
-            isDense: true,
-            dropdownColor: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
           ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _filterColumn(
+                label: 'PERIOD',
+                value: controller.selectedTimeRange,
+                items: timeRanges,
+                onChanged: controller.onTimeRangeChanged,
+              ),
+            ),
+            _columnDivider(),
+            Expanded(
+              child: _filterColumn(
+                label: 'DEPT',
+                value: controller.selectedDepartment,
+                items: departments,
+                onChanged: controller.onDepartmentChanged,
+              ),
+            ),
+            _columnDivider(),
+            Expanded(
+              child: _filterColumn(
+                label: 'CATEGORY',
+                value: controller.selectedCategory,
+                items: categoryKeys,
+                onChanged: controller.onCategoryChanged,
+                prettifyLabels: true,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  Widget _columnDivider() {
+    return Container(
+      width: 1,
+      margin: EdgeInsets.symmetric(vertical: 12.h),
+      color: const Color(0xFFF1F5F9),
+    );
+  }
+
+  Widget _filterColumn({
+    required String label,
+    required RxString value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    bool prettifyLabels = false,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 9.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSlate,
+              letterSpacing: 0.8,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          DropdownButtonHideUnderline(
+            child: Obx(() {
+              final current =
+                  items.contains(value.value) ? value.value : items.first;
+              String display(String raw) =>
+                  prettifyLabels ? _prettifyEnumKey(raw) : raw;
+              return DropdownButton<String>(
+                value: current,
+                items: items
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(
+                          display(e),
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                selectedItemBuilder: (_) => items
+                    .map(
+                      (e) => Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          display(e),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: onChanged,
+                icon: Icon(Icons.keyboard_arrow_down_rounded,
+                    size: 16.sp, color: AppColors.textSlate),
+                isExpanded: true,
+                isDense: true,
+                menuMaxHeight: 320.h,
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(14.r),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _scoreCard({
     required String title,
@@ -497,7 +613,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10.r,
             offset: Offset(0, 2.h),
           ),
@@ -512,16 +628,16 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
               Container(
                 padding: EdgeInsets.all(7.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(icon, color: _purple, size: 14.sp),
+                child: Icon(icon, color: AppColors.primary, size: 14.sp),
               ),
               Container(
                 padding:
                     EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: isUp ? _greenBg : _redBg,
+                  color: isUp ? AppColors.mintBg : AppColors.redBg,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Row(
@@ -532,7 +648,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                           ? Icons.trending_up_rounded
                           : Icons.trending_down_rounded,
                       size: 10.sp,
-                      color: isUp ? _green : _red,
+                      color: isUp ? AppColors.successGreen : AppColors.errorRed,
                     ),
                     SizedBox(width: 2.w),
                     Text(
@@ -540,7 +656,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                       style: GoogleFonts.inter(
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w700,
-                        color: isUp ? _green : _red,
+                        color: isUp ? AppColors.successGreen : AppColors.errorRed,
                       ),
                     ),
                   ],
@@ -551,7 +667,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
           SizedBox(height: 14.h),
           Text(
             title,
-            style: GoogleFonts.inter(fontSize: 11.sp, color: _slate500),
+            style: GoogleFonts.inter(fontSize: 11.sp, color: AppColors.textSlate),
           ),
           SizedBox(height: 2.h),
           FittedBox(
@@ -562,7 +678,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
               style: GoogleFonts.inter(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
-                color: _slate900,
+                color: AppColors.textDark,
               ),
             ),
           ),
@@ -585,7 +701,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -599,10 +715,10 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 16.sp),
+                child: Icon(icon, color: AppColors.primary, size: 16.sp),
               ),
               SizedBox(width: 10.w),
               Expanded(
@@ -611,7 +727,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
               ),
@@ -639,7 +755,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
             label,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: _slate900,
+              color: AppColors.textDark,
               fontWeight: FontWeight.w500,
             ),
             overflow: TextOverflow.ellipsis,
@@ -650,7 +766,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
           style: GoogleFonts.inter(
             fontSize: 12.sp,
             fontWeight: FontWeight.w700,
-            color: _slate900,
+            color: AppColors.textDark,
           ),
         ),
       ],
@@ -670,7 +786,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -681,7 +797,7 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
-                color: _slate900,
+                color: AppColors.textDark,
               ),
             ),
           ],
@@ -697,6 +813,108 @@ class SpendAnalyticsView extends GetView<AccountantAnalyticsController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTrendChart(MonthlyTrend trend) {
+    final points = trend.graphData;
+
+    if (points.isEmpty) {
+      return Center(
+        child: Text(
+          'No graph data',
+          style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSlate),
+        ),
+      );
+    }
+
+    final maxAmount = points
+        .map((p) => p.amount)
+        .fold<double>(0, (m, v) => v > m ? v : m);
+
+    debugPrint(
+      '[Analytics] trend points=${points.length} max=$maxAmount '
+      'values=${points.map((p) => "${p.weekOrDay}:${p.amount}").join(", ")}',
+    );
+
+    if (maxAmount <= 0) {
+      return Center(
+        child: Text(
+          'No spend in this range yet',
+          style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSlate),
+        ),
+      );
+    }
+
+    final isSingle = points.length == 1;
+    final spots = <FlSpot>[
+      for (var i = 0; i < points.length; i++)
+        FlSpot(i.toDouble(), points[i].amount),
+      if (isSingle) FlSpot(1, points[0].amount),
+    ];
+    final lastX = (spots.length - 1).toDouble();
+    final maxY = maxAmount * 1.15;
+
+    return LineChart(
+      LineChartData(
+        minX: 0,
+        maxX: lastX,
+        minY: 0,
+        maxY: maxY,
+        gridData: const FlGridData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 1,
+              reservedSize: 24,
+              getTitlesWidget: (value, meta) {
+                final idx = value.toInt();
+                if (idx >= 0 && idx < points.length) {
+                  return Padding(
+                    padding: EdgeInsets.only(top: 6.h),
+                    child: Text(
+                      points[idx].weekOrDay,
+                      style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        color: AppColors.textSlate,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: !isSingle,
+            color: AppColors.primary,
+            barWidth: 3,
+            dotData: FlDotData(show: isSingle),
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.25),
+                  AppColors.primary.withValues(alpha: 0.02),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

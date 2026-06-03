@@ -32,7 +32,8 @@ class MyRequestsController extends GetxController {
 
   @override
   void onClose() {
-    scrollController.dispose();
+    // Do not dispose ScrollControllers here to prevent "used after disposed" exceptions
+    // scrollController.dispose();
     super.onClose();
   }
 
@@ -78,7 +79,7 @@ class MyRequestsController extends GetxController {
         final category = req['category'] as String? ?? 'General';
         req['icon'] = _getCategoryIcon(category);
         req['iconColor'] = AppColors.primaryBlue;
-        req['iconBg'] = AppColors.primaryBlue.withOpacity(0.1);
+        req['iconBg'] = AppColors.primaryBlue.withValues(alpha: 0.1);
         // Backend shape: { date: ISO string }. Fallback to created_at for legacy.
         req['date'] = DateHelper.formatDate(req['date'] ?? req['created_at']);
         req['title'] = req['purpose'] ?? req['title'] ?? 'Request';
@@ -147,15 +148,18 @@ class MyRequestsController extends GetxController {
 
   IconData _getCategoryIcon(String category) {
     final cat = category.toLowerCase();
-    if (cat.contains('food') || cat.contains('meal') || cat.contains('lunch'))
+    if (cat.contains('food') || cat.contains('meal') || cat.contains('lunch')) {
       return Icons.restaurant;
+    }
     if (cat.contains('travel') || cat.contains('flight')) return Icons.flight;
     if (cat.contains('transport') ||
         cat.contains('taxi') ||
-        cat.contains('uber'))
+        cat.contains('uber')) {
       return Icons.directions_car;
-    if (cat.contains('office') || cat.contains('supplies'))
+    }
+    if (cat.contains('office') || cat.contains('supplies')) {
       return Icons.shopping_bag; // Changed from shopping_cart for variety
+    }
     if (cat.contains('hotel') || cat.contains('lodging')) return Icons.hotel;
     return Icons.category;
   }

@@ -36,7 +36,7 @@ class AppTextStyles {
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
     color:
-        Get.theme.textTheme.bodyMedium?.color?.withOpacity(0.7) ??
+        Get.theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7) ??
         AppColors.textSlate,
   );
 

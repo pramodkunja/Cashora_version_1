@@ -26,7 +26,6 @@ class AppTheme {
       colorScheme: ColorScheme.fromSwatch().copyWith(
         primary: AppColors.primary,
         secondary: AppColors.primaryLight,
-        background: Colors.white,
         surface: AppColors.cardBackground,
       ),
       appBarTheme: const AppBarTheme(
@@ -67,7 +66,6 @@ class AppTheme {
       colorScheme: ColorScheme.fromSwatch(brightness: Brightness.dark).copyWith(
         primary: AppColors.primary,
         secondary: AppColors.primaryLight,
-        background: AppColors.primaryDark,
         surface: const Color(0xFF1E293B), // Slate 800
       ),
       appBarTheme: const AppBarTheme(

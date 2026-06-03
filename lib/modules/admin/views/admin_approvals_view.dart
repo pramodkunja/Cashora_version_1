@@ -4,55 +4,80 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/mappers/request_status_visuals.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../routes/app_routes.dart';
 import '../utils/request_mapper.dart';
 import '../controllers/admin_approvals_controller.dart';
 
-class AdminApprovalsView extends GetView<AdminApprovalsController> {
-  const AdminApprovalsView({Key? key}) : super(key: key);
+class AdminApprovalsView extends StatefulWidget {
+  const AdminApprovalsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
-  static const _amber = AppColors.warningOrange;
-  static const _amberBg = Color(0xFFFFFBEB);
+  @override
+  State<AdminApprovalsView> createState() => _AdminApprovalsViewState();
+}
+
+class _AdminApprovalsViewState extends State<AdminApprovalsView>
+    with SingleTickerProviderStateMixin {
+  late final AdminApprovalsController controller;
+  late final TabController _tabController;
+  late final Worker _initialTabWorker;
+
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<AdminApprovalsController>();
+    _tabController = TabController(
+      length: 5,
+      vsync: this,
+      initialIndex: controller.initialTabIndex.value.clamp(0, 4),
+    );
+    // Listen for external requests from the dashboard's stat tiles. When
+    // `initialTabIndex` is updated, animate the local TabController to
+    // match. Using an explicit controller + worker avoids the brittle
+    // DefaultTabController + ValueKey rebuild dance that was sometimes
+    // ignored by Flutter's element tree (leading to taps from the
+    // dashboard landing on the wrong sub-tab).
+    _initialTabWorker = ever<int>(controller.initialTabIndex, (idx) {
+      final target = idx.clamp(0, 4);
+      if (_tabController.index != target) {
+        _tabController.animateTo(target);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _initialTabWorker.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 5,
-      child: Scaffold(
-        backgroundColor: _bg,
-        body: Column(
-          children: [
-            _buildHeader(context),
-            _buildTabBar(),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildTab(controller.pendingRequests,
-                      controller.pendingScroll),
-                  _buildTab(controller.approvedRequests,
-                      controller.approvedScroll),
-                  _buildTab(controller.unpaidRequests,
-                      controller.unpaidScroll),
-                  _buildTab(controller.clarificationRequests,
-                      controller.clarificationScroll),
-                  _buildTab(controller.rejectedRequests,
-                      controller.rejectedScroll),
-                ],
-              ),
+    return Scaffold(
+      backgroundColor: AppColors.backgroundAlt,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          _buildTabBar(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildTab(controller.pendingRequests, controller.pendingScroll),
+                _buildTab(
+                    controller.approvedRequests, controller.approvedScroll),
+                _buildTab(controller.unpaidRequests, controller.unpaidScroll),
+                _buildTab(controller.clarificationRequests,
+                    controller.clarificationScroll),
+                _buildTab(
+                    controller.rejectedRequests, controller.rejectedScroll),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -89,7 +114,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
             child: Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.notifications_none_rounded,
@@ -101,42 +126,75 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
     );
   }
 
+  /// Horizontally-scrollable chip rail. Replaces the stock Material
+  /// TabBar so we can show a live count next to each label and have full
+  /// control of the visual treatment (filled purple pill when active,
+  /// white border-card when idle). Designed to never overflow on any
+  /// phone width — chips size to their content and scroll horizontally.
   Widget _buildTabBar() {
-    return Container(
-      margin: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 12.h),
-      height: 38.h,
-      child: TabBar(
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        padding: EdgeInsets.zero,
-        indicatorSize: TabBarIndicatorSize.label,
-        indicator: BoxDecoration(
-          color: _purple,
+    final labels = [
+      AppText.tabPending,
+      AppText.tabApproved,
+      AppText.unpaid,
+      AppText.clarification,
+      AppText.tabRejected,
+    ];
+    return SizedBox(
+      height: 56.h,
+      child: AnimatedBuilder(
+        animation: _tabController,
+        builder: (_, _) {
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 6.h),
+            itemCount: labels.length,
+            separatorBuilder: (_, _) => SizedBox(width: 10.w),
+            itemBuilder: (_, i) => _statusChip(
+              label: labels[i],
+              selected: _tabController.index == i,
+              onTap: () => _tabController.animateTo(i),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _statusChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 11.h),
+        decoration: BoxDecoration(
+          // Inactive: solid slate-200 so chips pop against the slate-50
+          // page bg. Active: brand purple.
+          color: selected ? AppColors.primary : const Color(0xFFE2E8F0),
           borderRadius: BorderRadius.circular(100.r),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.32),
+                    blurRadius: 14.r,
+                    offset: Offset(0, 5.h),
+                  ),
+                ]
+              : null,
         ),
-        indicatorPadding:
-            EdgeInsets.symmetric(horizontal: -14.w, vertical: 4.h),
-        dividerColor: Colors.transparent,
-        labelColor: Colors.white,
-        unselectedLabelColor: _slate500,
-        labelStyle: GoogleFonts.inter(
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w600,
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : const Color(0xFF0F172A),
+            letterSpacing: 0.2,
+          ),
         ),
-        unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w500,
-        ),
-        labelPadding: EdgeInsets.symmetric(horizontal: 18.w),
-        overlayColor:
-            WidgetStateProperty.all(_purple.withOpacity(0.06)),
-        tabs: [
-          Tab(text: AppText.tabPending),
-          Tab(text: AppText.tabApproved),
-          Tab(text: AppText.unpaid),
-          Tab(text: AppText.clarification),
-          Tab(text: AppText.tabRejected),
-        ],
       ),
     );
   }
@@ -149,13 +207,13 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
       }
       if (list.isEmpty) return _buildEmptyState();
       return RefreshIndicator(
-        color: _purple,
+        color: AppColors.primary,
         onRefresh: controller.fetchAllRequests,
         child: ListView.separated(
           controller: scroll,
           padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
           itemCount: list.length,
-          separatorBuilder: (_, __) => SizedBox(height: 10.h),
+          separatorBuilder: (_, _) => SizedBox(height: 10.h),
           itemBuilder: (_, i) => _buildCard(list[i]),
         ),
       );
@@ -173,9 +231,18 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
     final rawStatus = (item['status'] ?? 'pending').toString().toLowerCase();
     final dateStr = RequestMapper.formatDate(item['date'] ?? item['created_at']);
 
-    final statusColor = _colorForStatus(rawStatus);
-    final statusBg = _bgForStatus(rawStatus);
-    final statusLabel = _statusLabel(rawStatus);
+    final statusColor = RequestStatusVisuals.colorFor(rawStatus);
+    final statusBg = RequestStatusVisuals.bgFor(rawStatus);
+    final statusLabel = RequestStatusVisuals.labelFor(rawStatus);
+
+    // Show an UNPAID tag when an approved request still has the payment
+    // outstanding (status=approved/auto_approved AND payment_status=pending).
+    final paymentStatus =
+        item['payment_status']?.toString().toLowerCase() ?? '';
+    final isApprovedStatus =
+        rawStatus == 'approved' || rawStatus == 'auto_approved';
+    final showUnpaidTag =
+        isApprovedStatus && paymentStatus == 'pending';
 
     return GestureDetector(
       onTap: () => controller.navigateToDetails(item),
@@ -186,7 +253,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 12.r,
               offset: Offset(0, 3.h),
             ),
@@ -201,11 +268,11 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                   width: 44.w,
                   height: 44.w,
                   decoration: BoxDecoration(
-                    color: _purpleLight,
+                    color: AppColors.purpleSurface,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Icon(Icons.receipt_long_rounded,
-                      color: _purple, size: 22.sp),
+                      color: AppColors.primary, size: 22.sp),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
@@ -217,7 +284,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: _slate900,
+                          color: AppColors.textDark,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -226,14 +293,14 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                       Row(
                         children: [
                           Icon(Icons.apartment_rounded,
-                              size: 11.sp, color: _slate500),
+                              size: 11.sp, color: AppColors.textSlate),
                           SizedBox(width: 4.w),
                           Flexible(
                             child: Text(
                               department,
                               style: GoogleFonts.inter(
                                 fontSize: 11.sp,
-                                color: _slate500,
+                                color: AppColors.textSlate,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -264,13 +331,45 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                         ),
                       ),
                     ),
+                    if (showUnpaidTag) ...[
+                      SizedBox(height: 4.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.w, vertical: 3.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.amberBg,
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(
+                            color: AppColors.warningOrange.withValues(alpha: 0.35),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.payments_outlined,
+                                size: 9.sp, color: AppColors.warningOrange),
+                            SizedBox(width: 3.w),
+                            Text(
+                              'UNPAID',
+                              style: GoogleFonts.inter(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.warningOrange,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     SizedBox(height: 4.h),
                     Text(
                       dateStr,
                       style: GoogleFonts.inter(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w500,
-                        color: _slate500,
+                        color: AppColors.textSlate,
                       ),
                     ),
                   ],
@@ -284,13 +383,13 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
               children: [
                 CircleAvatar(
                   radius: 14.r,
-                  backgroundColor: _purpleLight,
+                  backgroundColor: AppColors.purpleSurface,
                   child: Text(
                     RequestMapper.getInitials(user),
                     style: GoogleFonts.inter(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
-                      color: _purple,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -303,7 +402,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                         'Requested by',
                         style: GoogleFonts.inter(
                           fontSize: 10.sp,
-                          color: _slate500,
+                          color: AppColors.textSlate,
                         ),
                       ),
                       SizedBox(height: 1.h),
@@ -312,7 +411,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: _slate900,
+                          color: AppColors.textDark,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -326,7 +425,7 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
               ],
@@ -342,14 +441,14 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_rounded, size: 56.sp, color: _slate300),
+          Icon(Icons.inbox_rounded, size: 56.sp, color: AppColors.slate300),
           SizedBox(height: 14.h),
           Text(
             AppText.noRequests,
             style: GoogleFonts.inter(
               fontSize: 15.sp,
               fontWeight: FontWeight.w600,
-              color: _slate500,
+              color: AppColors.textSlate,
             ),
           ),
         ],
@@ -357,23 +456,6 @@ class AdminApprovalsView extends GetView<AdminApprovalsController> {
     );
   }
 
-  Color _colorForStatus(String status) {
-    if (status.contains('approved') || status.contains('paid')) return _green;
-    if (status.contains('rejected')) return _red;
-    if (status.contains('clarification')) return _purple;
-    return _amber;
-  }
 
-  Color _bgForStatus(String status) {
-    if (status.contains('approved') || status.contains('paid')) return _greenBg;
-    if (status.contains('rejected')) return _redBg;
-    if (status.contains('clarification')) return _purpleLight;
-    return _amberBg;
-  }
 
-  String _statusLabel(String status) {
-    if (status == 'auto_approved') return 'APPROVED';
-    if (status.contains('clarification')) return 'CLARIFICATION';
-    return status.toUpperCase();
-  }
 }

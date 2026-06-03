@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../data/models/user_model.dart';
+import '../../../../data/models/user_update_request.dart';
 import '../../../../data/repositories/user_repository.dart';
 
 class ProfileController extends GetxController {
@@ -120,13 +121,15 @@ class ProfileController extends GetxController {
         return;
       }
 
-      final data = {
-        'first_name': firstNameController.text.trim(),
-        'last_name': lastNameController.text.trim(),
-        'phone_number': phoneController.text.trim(),
-      };
+      // Email intentionally excluded — backend does not accept email changes
+      // through PATCH /users/update/{id}. The UI's email field is read-only.
+      final request = UserUpdateRequest(
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        phoneNumber: phoneController.text.trim(),
+      );
 
-      final updatedUser = await _userRepository.updateUser(userId, data);
+      final updatedUser = await _userRepository.updateUser(userId, request);
 
       if (updatedUser != null) {
         _updateLocalState(updatedUser);

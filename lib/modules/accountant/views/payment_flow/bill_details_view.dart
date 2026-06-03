@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart'; // Added
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/app_loader.dart';
 import '../../controllers/payment_flow_controller.dart'; // Correct relative import
 
 class BillDetailsView extends GetView<PaymentFlowController> {
@@ -66,7 +65,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
                     borderRadius: BorderRadius.circular(12.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         blurRadius: 20.r,
                       ),
                     ],
@@ -398,7 +397,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
                     'Copied',
                     '$label copied to clipboard',
                     snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.successGreen.withOpacity(0.9),
+                    backgroundColor: AppColors.successGreen.withValues(alpha: 0.9),
                     colorText: Colors.white,
                     margin: EdgeInsets.all(16.w),
                   );
@@ -424,7 +423,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
             'Permission Denied',
             'Cannot save image without gallery access',
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.warningOrange.withOpacity(0.9),
+            backgroundColor: AppColors.warningOrange.withValues(alpha: 0.9),
             colorText: Colors.white,
             margin: EdgeInsets.all(16.w),
           );
@@ -433,7 +432,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
       }
 
       Get.dialog(
-        const AppLoader(),
+        const Center(child: CircularProgressIndicator(strokeWidth: 3)),
         barrierDismissible: false,
       );
 
@@ -451,7 +450,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
         'Success',
         'Image saved to gallery successfully',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.successGreen.withOpacity(0.9),
+        backgroundColor: AppColors.successGreen.withValues(alpha: 0.9),
         colorText: Colors.white,
         margin: EdgeInsets.all(16.w),
       );
@@ -464,7 +463,7 @@ class BillDetailsView extends GetView<PaymentFlowController> {
         'Error',
         'Failed to save image',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warningOrange.withOpacity(0.9),
+        backgroundColor: AppColors.warningOrange.withValues(alpha: 0.9),
         colorText: Colors.white,
         margin: EdgeInsets.all(16.w),
       );
@@ -523,7 +522,7 @@ class ScannerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.green.withOpacity(0.5)
+      ..color = Colors.green.withValues(alpha: 0.5)
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 
@@ -541,7 +540,7 @@ class ScannerPainter extends CustomPainter {
     final gradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Colors.green.withOpacity(0.3), Colors.transparent],
+      colors: [Colors.green.withValues(alpha: 0.3), Colors.transparent],
     );
 
     final glowPaint = Paint()..shader = gradient.createShader(gradientRect);

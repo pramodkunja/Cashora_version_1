@@ -9,10 +9,10 @@ class WelcomeMessage extends StatefulWidget {
   final RxBool showWelcome;
 
   const WelcomeMessage({
-    Key? key,
+    super.key,
     required this.name,
     required this.showWelcome,
-  }) : super(key: key);
+  });
 
   @override
   State<WelcomeMessage> createState() => _WelcomeMessageState();
@@ -92,7 +92,7 @@ class _WelcomeMessageState extends State<WelcomeMessage>
                 decoration: BoxDecoration(
                   border: Border(
                     left: BorderSide(
-                      color: AppColors.primaryBlue.withOpacity(0.5),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.5),
                       width: 4.w, // Responsive
                     ),
                   ),

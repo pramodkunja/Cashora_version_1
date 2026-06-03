@@ -25,7 +25,8 @@ class AdminHistoryController extends GetxController {
 
   @override
   void onClose() {
-    scrollController.dispose();
+    // Do not dispose ScrollControllers here to prevent "used after disposed" exceptions
+    // scrollController.dispose();
     super.onClose();
   }
 

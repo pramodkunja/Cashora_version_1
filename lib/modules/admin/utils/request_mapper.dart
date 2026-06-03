@@ -6,11 +6,13 @@ class RequestMapper {
   /// Extracts the Department Name from various nested possibilities
   static String getDepartment(Map<String, dynamic> item) {
     // 1. Check top-level
-    if (item['department'] != null && item['department'].toString().isNotEmpty)
+    if (item['department'] != null && item['department'].toString().isNotEmpty) {
       return item['department'].toString();
+    }
     if (item['department_name'] != null &&
-        item['department_name'].toString().isNotEmpty)
+        item['department_name'].toString().isNotEmpty) {
       return item['department_name'].toString();
+    }
 
     // 2. Check nested 'requestor'
     if (item['requestor'] != null && item['requestor'] is Map) {
@@ -31,11 +33,13 @@ class RequestMapper {
   /// Extracts the User Name from various nested possibilities
   static String getUserName(Map<String, dynamic> item) {
     // Check specific keys first
-    if (item['user_name'] != null && item['user_name'].toString().isNotEmpty)
+    if (item['user_name'] != null && item['user_name'].toString().isNotEmpty) {
       return item['user_name'].toString();
+    }
     if (item['employee_name'] != null &&
-        item['employee_name'].toString().isNotEmpty)
+        item['employee_name'].toString().isNotEmpty) {
       return item['employee_name'].toString();
+    }
 
     // Check nested 'requestor' object (Primary)
     if (item['requestor'] != null) {
@@ -51,8 +55,9 @@ class RequestMapper {
     }
 
     if (item['requestor_name'] != null &&
-        item['requestor_name'].toString().isNotEmpty)
+        item['requestor_name'].toString().isNotEmpty) {
       return item['requestor_name'].toString();
+    }
 
     // Check nested 'user' object
     if (item['user'] != null) {
@@ -60,8 +65,9 @@ class RequestMapper {
         final u = item['user'];
         if (u['name'] != null) return u['name'].toString();
         if (u['full_name'] != null) return u['full_name'].toString();
-        if (u['first_name'] != null)
+        if (u['first_name'] != null) {
           return "${u['first_name']} ${u['last_name'] ?? ''}".trim();
+        }
         if (u['email'] != null) return u['email'].toString().split('@').first;
       } else if (item['user'] is String) {
         return item['user'];

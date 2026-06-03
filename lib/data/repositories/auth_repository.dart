@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../../core/services/network_service.dart';
 import '../models/user_model.dart';
+import '../models/user_update_request.dart';
 
 class AuthRepository {
   final NetworkService _networkService;
@@ -24,8 +26,10 @@ class AuthRepository {
           user = User.fromJson(data);
         }
 
-        // Extract token from various possible keys
-        token = data['token'] ?? data['access_token'] ?? data['auth_token'];
+        token = data['access_token'] as String?;
+        if (token == null && kDebugMode) {
+          token = (data['token'] ?? data['auth_token']) as String?;
+        }
       } else {
         throw Exception('Invalid response format');
       }
@@ -95,8 +99,13 @@ class AuthRepository {
     }
   }
 
+  /// POST /auth/logout
+  ///
+  /// TODO(backend): endpoint may 404 until the server-side logout route
+  /// ships. Caller (AuthService.logout) must always clear local state
+  /// regardless of what this returns or throws.
   Future<void> logout() async {
-    // await _networkService.post('/auth/logout');
+    await _networkService.post('/auth/logout');
   }
 
   Future<List<Map<String, dynamic>>> getUsers() async {
@@ -148,55 +157,68 @@ class AuthRepository {
     }
   }
 
+  /// PATCH /users/update/{userId}
+  ///
+  /// Backend does **not** support email updates through this endpoint, so
+  /// `email` is intentionally absent from [UserUpdateRequest]. Only the
+  /// fields the caller actually wants to change are sent — non-null fields
+  /// in the request are included; everything else is omitted to avoid
+  /// overwriting unrelated columns with null.
+  Future<Map<String, dynamic>> patchUser({
+    required String userId,
+    required UserUpdateRequest request,
+  }) async {
+    final body = request.toJson();
+    if (body.isEmpty) {
+      throw ArgumentError('UserUpdateRequest is empty — nothing to update.');
+    }
+    final response = await _networkService.patch(
+      '/users/update/$userId',
+      data: body,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> updateUser({
     required String userId,
     required String firstName,
     required String lastName,
-    required String email,
     required String phone,
     required String role,
     required bool isActive,
     int? departmentId,
-  }) async {
-    try {
-      final data = <String, dynamic>{
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'phone_number': phone,
-        'role': role,
-        'is_active': isActive,
-      };
-      if (departmentId != null) data['department_id'] = departmentId;
-
-      final response = await _networkService.patch(
-        '/users/update/$userId',
-        data: data,
-      );
-
-      return response.data as Map<String, dynamic>;
-    } catch (e) {
-      rethrow;
-    }
+  }) {
+    return patchUser(
+      userId: userId,
+      request: UserUpdateRequest(
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: phone,
+        role: role,
+        isActive: isActive,
+        departmentId: departmentId,
+      ),
+    );
   }
 
-  Future<Map<String, dynamic>> deactivateUser({required String userId}) async {
-    try {
-      final response = await _networkService.patch(
-        '/users/update/$userId',
-        data: {'is_active': false},
-      );
+  Future<Map<String, dynamic>> deactivateUser({required String userId}) {
+    return patchUser(
+      userId: userId,
+      request: const UserUpdateRequest(isActive: false),
+    );
+  }
 
-      return response.data as Map<String, dynamic>;
-    } catch (e) {
-      rethrow;
-    }
+  Future<Map<String, dynamic>> activateUser({required String userId}) {
+    return patchUser(
+      userId: userId,
+      request: const UserUpdateRequest(isActive: true),
+    );
   }
 
   Future<User?> getCurrentUser() async {
     try {
-      final response = await _networkService.get('/auth/me');
-      
+      final response = await _networkService.get('/users/me');
+
       final data = response.data;
       if (data != null) {
          if (data is Map<String, dynamic>) {

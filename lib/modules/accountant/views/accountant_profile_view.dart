@@ -2,29 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/widgets/app_loader.dart';
-import '../../../../routes/app_routes.dart';
+import '../../../../utils/widgets/skeletons/page_skeletons.dart';
 import '../controllers/accountant_profile_controller.dart';
 
 class AccountantProfileView extends GetView<AccountantProfileController> {
-  const AccountantProfileView({Key? key}) : super(key: key);
+  const AccountantProfileView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoader();
+          return const ProfilePageSkeleton();
         }
         return CustomScrollView(
           slivers: [
@@ -36,6 +30,10 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
                   _buildSectionLabel('PERSONAL INFO'),
                   SizedBox(height: 10.h),
                   _buildInfoCard(),
+                  SizedBox(height: 20.h),
+                  _buildSectionLabel('CASH MANAGEMENT'),
+                  SizedBox(height: 10.h),
+                  _buildCashManagementCard(),
                   SizedBox(height: 20.h),
                   _buildSectionLabel('SETTINGS'),
                   SizedBox(height: 10.h),
@@ -91,7 +89,7 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
+                    color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
@@ -114,11 +112,11 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                  color: Colors.white.withOpacity(0.4), width: 2.5.w),
+                  color: Colors.white.withValues(alpha: 0.4), width: 2.5.w),
             ),
             child: CircleAvatar(
               radius: 42.r,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               child: Obx(
                 () => Text(
                   _initials(controller.rxName.value),
@@ -154,7 +152,7 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
@@ -201,6 +199,17 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
               controller.rxDepartmentName.value),
       ]),
     );
+  }
+
+  // ── Cash Management Card ─────────────────────────────────────────────
+  Widget _buildCashManagementCard() {
+    return _card([
+      _actionRow(
+        Icons.account_balance_wallet_rounded,
+        'Opening & Closing Balances',
+        () => Get.toNamed(AppRoutes.ACCOUNTANT_MANAGE_BALANCES),
+      ),
+    ]);
   }
 
   // ── Settings Card ────────────────────────────────────────────────────
@@ -253,7 +262,7 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
         style: GoogleFonts.inter(
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
-          color: _slate500,
+          color: AppColors.textSlate,
           letterSpacing: 1.2,
         ),
       ),
@@ -267,7 +276,7 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -293,10 +302,10 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
           Container(
             padding: EdgeInsets.all(9.w),
             decoration: BoxDecoration(
-              color: _purpleLight,
+              color: AppColors.purpleSurface,
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: _purple, size: 18.sp),
+            child: Icon(icon, color: AppColors.primary, size: 18.sp),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -308,7 +317,7 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
-                    color: _slate500,
+                    color: AppColors.textSlate,
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -317,7 +326,7 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
               ],
@@ -339,10 +348,10 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
             Container(
               padding: EdgeInsets.all(9.w),
               decoration: BoxDecoration(
-                color: _purpleLight,
+                color: AppColors.purpleSurface,
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(icon, color: _purple, size: 18.sp),
+              child: Icon(icon, color: AppColors.primary, size: 18.sp),
             ),
             SizedBox(width: 14.w),
             Expanded(
@@ -351,11 +360,11 @@ class AccountantProfileView extends GetView<AccountantProfileController> {
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: _slate300, size: 22.sp),
+            Icon(Icons.chevron_right_rounded, color: AppColors.slate300, size: 22.sp),
           ],
         ),
       ),

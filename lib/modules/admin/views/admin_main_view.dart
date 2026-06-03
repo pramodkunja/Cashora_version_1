@@ -8,7 +8,7 @@ import '../../profile/views/profile_view.dart';
 import 'widgets/admin_bottom_bar.dart';
 
 class AdminMainView extends GetView<AdminDashboardController> {
-  const AdminMainView({Key? key}) : super(key: key);
+  const AdminMainView({super.key});
 
   @override
   Widget build(BuildContext context) {

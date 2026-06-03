@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart'; // Added for TabController
 import '../../../../routes/app_routes.dart';
-import '../../../../utils/app_text.dart';
 import '../../../../data/repositories/admin_repository.dart';
 import '../../../../core/services/network_service.dart';
 
@@ -16,6 +15,17 @@ class AdminApprovalsController extends GetxController {
   final rejectedRequests = <Map<String, dynamic>>[].obs;
 
   final isLoading = true.obs;
+
+  /// Reactive initial tab index for the approvals sub-tabs. The dashboard
+  /// can pre-select e.g. "Clarification" before navigating here.
+  /// Order: 0 Pending • 1 Approved • 2 Unpaid • 3 Clarification • 4 Rejected.
+  final RxInt initialTabIndex = 0.obs;
+
+  /// Called from outside (typically the dashboard's stat-tile taps) to
+  /// pre-select a tab before the user lands on the approvals screen.
+  void setInitialTab(int idx) {
+    if (idx >= 0 && idx <= 4) initialTabIndex.value = idx;
+  }
 
   // One scroll controller per tab
   final pendingScroll = ScrollController();
@@ -32,11 +42,12 @@ class AdminApprovalsController extends GetxController {
 
   @override
   void onClose() {
-    pendingScroll.dispose();
-    approvedScroll.dispose();
-    unpaidScroll.dispose();
-    clarificationScroll.dispose();
-    rejectedScroll.dispose();
+    // Do not dispose ScrollControllers here to prevent "used after disposed" exceptions
+    // pendingScroll.dispose();
+    // approvedScroll.dispose();
+    // unpaidScroll.dispose();
+    // clarificationScroll.dispose();
+    // rejectedScroll.dispose();
     super.onClose();
   }
 

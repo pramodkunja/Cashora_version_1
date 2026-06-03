@@ -12,7 +12,7 @@ class CustomListTile extends StatelessWidget {
   final bool showDivider;
 
   const CustomListTile({
-    Key? key,
+    super.key,
     required this.title,
     this.icon,
     this.leadingIconWidget,
@@ -20,7 +20,7 @@ class CustomListTile extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.showDivider = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

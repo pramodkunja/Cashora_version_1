@@ -16,7 +16,7 @@ class SecondaryButton extends StatelessWidget {
   final BorderSide? border;
 
   const SecondaryButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.icon,
@@ -25,7 +25,7 @@ class SecondaryButton extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.border,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

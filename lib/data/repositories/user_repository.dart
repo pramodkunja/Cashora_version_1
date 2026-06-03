@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../../core/services/network_service.dart';
 import '../../data/models/user_model.dart';
+import '../../data/models/user_update_request.dart';
 import '../../core/services/auth_service.dart';
 
 class UserRepository {
@@ -34,16 +34,22 @@ class UserRepository {
     }
   }
 
-  // Update user profile
-  Future<User?> updateUser(String userId, Map<String, dynamic> data) async {
+  // Update user profile.
+  //
+  // Accepts a typed [UserUpdateRequest] so only non-null fields go on the
+  // wire — this prevents unrelated columns from being nulled out by a
+  // partial profile edit. The PATCH endpoint does not accept email changes.
+  Future<User?> updateUser(String userId, UserUpdateRequest request) async {
     try {
+      final body = request.toJson();
+      if (body.isEmpty) return getMe();
+
       final response = await _networkService.patch(
         '/users/update/$userId',
-        data: data,
+        data: body,
       );
 
       if (response.statusCode == 200) {
-        // Refetch profile to be sure we have latest state
         return await getMe();
       }
       return null;

@@ -14,10 +14,8 @@ class PaymentResponse {
   });
 
   factory PaymentResponse.fromJson(Map<String, dynamic> json) {
-    // API returns 'items' (paginated response), fall back to 'payments' for
-    // any legacy endpoints.
-    final rawList =
-        (json['items'] as List?) ?? (json['payments'] as List?) ?? [];
+    // Canonical envelope from the backend: `items[]` with pagination metadata.
+    final rawList = (json['items'] as List?) ?? const [];
     return PaymentResponse(
       total: json['total'] as int? ?? 0,
       page: json['page'] as int? ?? 1,

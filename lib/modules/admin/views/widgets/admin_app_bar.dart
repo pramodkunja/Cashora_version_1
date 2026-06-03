@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text_styles.dart';
 
 class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -13,14 +12,14 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPressed;
 
   const AdminAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.showBack = true,
     this.bottom,
     this.height,
     this.actions,
     this.onBackPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

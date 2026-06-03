@@ -6,28 +6,18 @@ import '../../../../routes/app_routes.dart';
 import '../controllers/my_requests_controller.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/mappers/request_status_visuals.dart';
+import 'package:cash/utils/mappers/expense_category_visuals.dart';
 import '../../../utils/widgets/skeletons/skeleton_loader.dart';
 
 class MyRequestsView extends GetView<MyRequestsController> {
-  const MyRequestsView({Key? key}) : super(key: key);
+  const MyRequestsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
-  static const _amber = AppColors.warningOrange;
-  static const _amberBg = Color(0xFFFFFBEB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
           _buildHeader(context),
@@ -47,7 +37,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
                 controller: controller.scrollController,
                 padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 100.h),
                 itemCount: controller.filteredRequests.length,
-                separatorBuilder: (_, __) => SizedBox(height: 10.h),
+                separatorBuilder: (_, _) => SizedBox(height: 10.h),
                 itemBuilder: (_, i) {
                   final req = controller.filteredRequests[i];
                   return _buildRequestCard(req);
@@ -59,7 +49,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Get.toNamed(AppRoutes.CREATE_REQUEST_TYPE),
-        backgroundColor: _purple,
+        backgroundColor: AppColors.primary,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14.r),
@@ -112,7 +102,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
               padding:
                   EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
@@ -142,7 +132,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10.r,
               offset: Offset(0, 2.h),
             ),
@@ -150,12 +140,12 @@ class MyRequestsView extends GetView<MyRequestsController> {
         ),
         child: TextField(
           onChanged: controller.searchRequests,
-          style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
           decoration: InputDecoration(
             hintText: AppText.searchRequests,
-            hintStyle: GoogleFonts.inter(fontSize: 14.sp, color: _slate300),
+            hintStyle: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.slate300),
             prefixIcon:
-                Icon(Icons.search_rounded, color: _slate500, size: 20.sp),
+                Icon(Icons.search_rounded, color: AppColors.textSlate, size: 20.sp),
             border: InputBorder.none,
             contentPadding:
                 EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -200,10 +190,10 @@ class MyRequestsView extends GetView<MyRequestsController> {
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 9.h),
         decoration: BoxDecoration(
-          color: selected ? _purple : Colors.white,
+          color: selected ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: selected ? _purple : const Color(0xFFE2E8F0),
+            color: selected ? AppColors.primary : const Color(0xFFE2E8F0),
           ),
         ),
         child: Text(
@@ -211,7 +201,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
           style: GoogleFonts.inter(
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : _slate500,
+            color: selected ? Colors.white : AppColors.textSlate,
           ),
         ),
       ),
@@ -230,10 +220,11 @@ class MyRequestsView extends GetView<MyRequestsController> {
         (req['category'] ?? _inferCategory(purpose)).toString();
     final amount = (req['amount'] as num?)?.toDouble() ?? 0.0;
 
-    final statusColor = _colorForStatus(status);
-    final statusBg = _bgForStatus(status);
-    final statusText = _statusLabel(status);
-    final iconData = _iconForCategory(purpose);
+    final statusColor = RequestStatusVisuals.colorFor(status);
+    final statusBg = RequestStatusVisuals.bgFor(status);
+    final statusText = RequestStatusVisuals.labelFor(status);
+    final iconData = ExpenseCategoryVisuals.iconFor(purpose);
+    final showUnpaidTag = _isApprovedUnpaid(req);
 
     return GestureDetector(
       onTap: () => controller.viewDetails(req),
@@ -244,7 +235,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 12.r,
               offset: Offset(0, 3.h),
             ),
@@ -260,10 +251,10 @@ class MyRequestsView extends GetView<MyRequestsController> {
                   width: 44.w,
                   height: 44.w,
                   decoration: BoxDecoration(
-                    color: _purpleLight,
+                    color: AppColors.purpleSurface,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
-                  child: Icon(iconData, color: _purple, size: 22.sp),
+                  child: Icon(iconData, color: AppColors.primary, size: 22.sp),
                 ),
                 SizedBox(width: 12.w),
                 // Info
@@ -276,7 +267,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: _slate900,
+                          color: AppColors.textDark,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -285,14 +276,14 @@ class MyRequestsView extends GetView<MyRequestsController> {
                       Row(
                         children: [
                           Icon(Icons.calendar_today_rounded,
-                              size: 11.sp, color: _slate500),
+                              size: 11.sp, color: AppColors.textSlate),
                           SizedBox(width: 4.w),
                           Flexible(
                             child: Text(
                               '$date • $category',
                               style: GoogleFonts.inter(
                                 fontSize: 11.sp,
-                                color: _slate500,
+                                color: AppColors.textSlate,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -312,7 +303,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w800,
-                        color: _slate900,
+                        color: AppColors.textDark,
                       ),
                     ),
                     SizedBox(height: 5.h),
@@ -333,6 +324,35 @@ class MyRequestsView extends GetView<MyRequestsController> {
                         ),
                       ),
                     ),
+                    if (showUnpaidTag) ...[
+                      SizedBox(height: 4.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.w, vertical: 3.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.amberBg,
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(color: AppColors.warningOrange.withValues(alpha: 0.35)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.schedule_rounded,
+                                size: 10.sp, color: AppColors.warningOrange),
+                            SizedBox(width: 3.w),
+                            Text(
+                              'UNPAID',
+                              style: GoogleFonts.inter(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.warningOrange,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -346,13 +366,13 @@ class MyRequestsView extends GetView<MyRequestsController> {
                 padding:
                     EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: _redBg,
+                  color: AppColors.redBg,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.error_outline_rounded,
-                        color: _red, size: 14.sp),
+                        color: AppColors.errorRed, size: 14.sp),
                     SizedBox(width: 6.w),
                     Expanded(
                       child: Text(
@@ -362,7 +382,7 @@ class MyRequestsView extends GetView<MyRequestsController> {
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w500,
-                          color: _red,
+                          color: AppColors.errorRed,
                         ),
                       ),
                     ),
@@ -384,20 +404,20 @@ class MyRequestsView extends GetView<MyRequestsController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_rounded, size: 56.sp, color: _slate300),
+          Icon(Icons.inbox_rounded, size: 56.sp, color: AppColors.slate300),
           SizedBox(height: 14.h),
           Text(
             'No requests found',
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: _slate500,
+              color: AppColors.textSlate,
             ),
           ),
           SizedBox(height: 6.h),
           Text(
             'Tap the + button to create one',
-            style: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+            style: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.slate300),
           ),
         ],
       ),
@@ -407,20 +427,6 @@ class MyRequestsView extends GetView<MyRequestsController> {
   // ════════════════════════════════════════════════════════════════════════
   // HELPERS
   // ════════════════════════════════════════════════════════════════════════
-  IconData _iconForCategory(String purpose) {
-    final p = purpose.toLowerCase();
-    if (p.contains('food') || p.contains('lunch') || p.contains('dinner'))
-      return Icons.restaurant_rounded;
-    if (p.contains('taxi') || p.contains('transport') || p.contains('uber'))
-      return Icons.directions_car_rounded;
-    if (p.contains('flight') ||
-        p.contains('trip') ||
-        p.contains('travel'))
-      return Icons.flight_rounded;
-    if (p.contains('supplies') || p.contains('inventory'))
-      return Icons.shopping_bag_rounded;
-    return Icons.receipt_long_rounded;
-  }
 
   String _inferCategory(String purpose) {
     final p = purpose.toLowerCase();
@@ -430,44 +436,39 @@ class MyRequestsView extends GetView<MyRequestsController> {
     return 'General';
   }
 
-  Color _colorForStatus(String status) {
-    switch (status) {
-      case 'approved':
-      case 'auto_approved':
-      case 'paid':
-        return _green;
-      case 'rejected':
-        return _red;
-      case 'clarification':
-        return _purple;
-      default:
-        return _amber;
-    }
-  }
 
-  Color _bgForStatus(String status) {
-    switch (status) {
-      case 'approved':
-      case 'auto_approved':
-      case 'paid':
-        return _greenBg;
-      case 'rejected':
-        return _redBg;
-      case 'clarification':
-        return _purpleLight;
-      default:
-        return _amberBg;
-    }
-  }
 
-  String _statusLabel(String status) {
-    switch (status) {
-      case 'auto_approved':
-        return 'APPROVED';
-      case 'clarification':
-        return 'CLARIFICATION';
-      default:
-        return status.toUpperCase();
+
+  /// True when the request is approved but the accountant has not yet
+  /// settled payment — used to render the secondary "UNPAID" badge so the
+  /// requestor can tell at a glance which approved items are still pending
+  /// payout.
+  ///
+  /// Signals (any one is enough):
+  ///   - `payment_status == 'unpaid' | 'pending'`
+  ///   - status is `approved`/`auto_approved` AND no `payment_method` set
+  bool _isApprovedUnpaid(Map<String, dynamic> req) {
+    final status = (req['status'] ?? '').toString().toLowerCase();
+    final paymentStatus =
+        (req['payment_status'] ?? '').toString().toLowerCase();
+    final paymentMethod =
+        (req['payment_method'] ?? '').toString().trim().toLowerCase();
+    final txnRef = (req['transaction_reference'] ?? '').toString().trim();
+
+    // Don't show on non-approved states (rejected/pending/clarification).
+    final isApprovedState =
+        status == 'approved' || status == 'auto_approved' || status == 'unpaid';
+    if (!isApprovedState) return false;
+
+    // Already paid → hide.
+    if (status == 'paid' ||
+        paymentStatus == 'paid' ||
+        paymentMethod.isNotEmpty ||
+        txnRef.isNotEmpty) {
+      return false;
     }
+
+    // Approved + no payment trail → unpaid.
+    return true;
   }
 }

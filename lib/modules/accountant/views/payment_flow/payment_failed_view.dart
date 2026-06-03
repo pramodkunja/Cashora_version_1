@@ -3,18 +3,12 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/widgets/app_gradient_header.dart';
 import '../../../../utils/app_text.dart';
 
 class PaymentFailedView extends StatelessWidget {
   const PaymentFailedView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +27,10 @@ class PaymentFailedView extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
-          _buildHeader(context),
+          AppGradientHeader(title: AppText.paymentStatus),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
@@ -47,18 +41,18 @@ class PaymentFailedView extends StatelessWidget {
                     width: 110.w,
                     height: 110.w,
                     decoration: BoxDecoration(
-                      color: _redBg,
+                      color: AppColors.redBg,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: _red.withOpacity(0.2),
+                          color: AppColors.errorRed.withValues(alpha: 0.2),
                           blurRadius: 30.r,
                           spreadRadius: 4.r,
                         ),
                       ],
                     ),
                     child: Icon(Icons.error_outline_rounded,
-                        color: _red, size: 60.sp),
+                        color: AppColors.errorRed, size: 60.sp),
                   ),
                   SizedBox(height: 24.h),
                   Text(
@@ -66,7 +60,7 @@ class PaymentFailedView extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 26.sp,
                       fontWeight: FontWeight.w800,
-                      color: _slate900,
+                      color: AppColors.textDark,
                     ),
                   ),
                   SizedBox(height: 10.h),
@@ -75,7 +69,7 @@ class PaymentFailedView extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                       height: 1.5,
                     ),
                   ),
@@ -87,15 +81,15 @@ class PaymentFailedView extends StatelessWidget {
                       width: double.infinity,
                       padding: EdgeInsets.all(14.w),
                       decoration: BoxDecoration(
-                        color: _redBg,
+                        color: AppColors.redBg,
                         borderRadius: BorderRadius.circular(14.r),
-                        border: Border.all(color: _red.withOpacity(0.2)),
+                        border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(Icons.info_outline_rounded,
-                              color: _red, size: 18.sp),
+                              color: AppColors.errorRed, size: 18.sp),
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Column(
@@ -106,7 +100,7 @@ class PaymentFailedView extends StatelessWidget {
                                   style: GoogleFonts.inter(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: _red,
+                                    color: AppColors.errorRed,
                                   ),
                                 ),
                                 SizedBox(height: 3.h),
@@ -114,7 +108,7 @@ class PaymentFailedView extends StatelessWidget {
                                   error,
                                   style: GoogleFonts.inter(
                                     fontSize: 12.sp,
-                                    color: _red.withOpacity(0.9),
+                                    color: AppColors.errorRed.withValues(alpha: 0.9),
                                   ),
                                 ),
                               ],
@@ -135,7 +129,7 @@ class PaymentFailedView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withValues(alpha: 0.03),
                           blurRadius: 12.r,
                           offset: Offset(0, 3.h),
                         ),
@@ -150,11 +144,11 @@ class PaymentFailedView extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.all(8.w),
                                 decoration: BoxDecoration(
-                                  color: _purpleLight,
+                                  color: AppColors.purpleSurface,
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                                 child: Icon(Icons.receipt_long_rounded,
-                                    color: _purple, size: 16.sp),
+                                    color: AppColors.primary, size: 16.sp),
                               ),
                               SizedBox(width: 10.w),
                               Text(
@@ -162,7 +156,7 @@ class PaymentFailedView extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: _slate900,
+                                  color: AppColors.textDark,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -197,7 +191,7 @@ class PaymentFailedView extends StatelessWidget {
                                 AppText.totalAmount,
                                 style: GoogleFonts.inter(
                                   fontSize: 13.sp,
-                                  color: _slate500,
+                                  color: AppColors.textSlate,
                                 ),
                               ),
                               Text(
@@ -205,7 +199,7 @@ class PaymentFailedView extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w800,
-                                  color: _slate900,
+                                  color: AppColors.textDark,
                                 ),
                               ),
                             ],
@@ -231,7 +225,7 @@ class PaymentFailedView extends StatelessWidget {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _purple,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -257,7 +251,7 @@ class PaymentFailedView extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: _slate900,
+                          color: AppColors.textDark,
                         ),
                       ),
                     ),
@@ -268,63 +262,19 @@ class PaymentFailedView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.headset_mic_outlined,
-                          size: 14.sp, color: _slate500),
+                          size: 14.sp, color: AppColors.textSlate),
                       SizedBox(width: 6.w),
                       Text(
                         AppText.needHelpContactSupport,
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
-                          color: _slate500,
+                          color: AppColors.textSlate,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            AppText.paymentStatus,
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
             ),
           ),
         ],
@@ -343,20 +293,20 @@ class PaymentFailedView extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
-                color: _slate500,
+                color: AppColors.textSlate,
               ),
             ),
           ),
           if (isPayee) ...[
             CircleAvatar(
               radius: 10.r,
-              backgroundColor: _purpleLight,
+              backgroundColor: AppColors.purpleSurface,
               child: Text(
                 _initials(value),
                 style: GoogleFonts.inter(
                   fontSize: 9.sp,
                   fontWeight: FontWeight.w700,
-                  color: _purple,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -368,14 +318,14 @@ class PaymentFailedView extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
-                color: _slate900,
+                color: AppColors.textDark,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           if (showCopy) ...[
             SizedBox(width: 6.w),
-            Icon(Icons.copy_rounded, size: 14.sp, color: _slate500),
+            Icon(Icons.copy_rounded, size: 14.sp, color: AppColors.textSlate),
           ],
         ],
       ),

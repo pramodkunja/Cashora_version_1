@@ -3,282 +3,122 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/formatters/currency_formatter.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_text_styles.dart';
+import '../../../../utils/date_helper.dart';
+import '../../../../utils/widgets/attachment_card.dart';
 import '../../../../utils/widgets/buttons/primary_button.dart';
 import '../controllers/admin_clarification_status_controller.dart';
-import 'widgets/admin_app_bar.dart';
 
 class AdminClarificationStatusView
     extends GetView<AdminClarificationStatusController> {
-  const AdminClarificationStatusView({Key? key}) : super(key: key);
+  const AdminClarificationStatusView({super.key});
+
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AdminAppBar(
-        title: AppText.reviewClarification,
-        onBackPressed: () {
-          if (controller.state.value == ClarificationState.askingAgain) {
-            controller.state.value = ClarificationState.responded;
-          } else {
-            Get.back();
-          }
-        },
-      ),
-      body: SafeArea(
-        child: Obx(() {
-          if (controller.state.value == ClarificationState.askingAgain) {
-            return _buildAskAgainBody(context);
-          }
-          return _buildStatusBody(context);
-        }),
-      ),
-      bottomNavigationBar: Obx(() {
-        Widget? bottomBar;
-        if (controller.state.value == ClarificationState.responded) {
-          bottomBar = Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-            height: 110.h, // Explicit fixed height to prevent expansion
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: controller.reject,
-                      child: Container(
-                        height: 56.h, // Fixed button height
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(30.r),
-                          border: Border.all(color: const Color(0xFFEF4444)),
-                        ),
-                        child: Center(
-                          child: Text(
-                            AppText.reject,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFFEF4444),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: InkWell(
-                      onTap: controller.approve,
-                      child: Container(
-                        height: 56.h, // Fixed button height
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0EA5E9), // Light Blue
-                          borderRadius: BorderRadius.circular(30.r),
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 20.sp,
-                              ),
-                              SizedBox(width: 8.w),
-                              Text(
-                                AppText.approve,
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (controller.state.value == ClarificationState.askingAgain) {
-          bottomBar = Container(
-            padding: EdgeInsets.all(24.r),
-            color: Theme.of(context).cardColor,
-            child: SafeArea(
-              child: PrimaryButton(
-                text: AppText.sendClarificationRequest,
-                onPressed: controller.submitAskAgain,
-                icon: Icon(
-                  Icons.send_rounded,
-                  color: Colors.white,
-                  size: 20.sp,
-                ),
-              ),
-            ),
-          );
-        }
-
-        return bottomBar ?? const SizedBox.shrink();
-      }),
+      backgroundColor: AppColors.backgroundAlt,
+      body: Obx(() => _buildBody(context)),
+      bottomNavigationBar: Obx(() => _buildBottomBar(context)),
     );
   }
 
-  Widget _buildStatusBody(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  // ════════════════════════════════════════════════════════════════════════
+  // Body — same shell across all clarification states. State only changes
+  // the gradient pill (Awaiting/Responded), whether the ask-again textarea
+  // is shown, and the bottom bar.
+  // ════════════════════════════════════════════════════════════════════════
 
+  Widget _buildBody(BuildContext context) {
     try {
-      return SingleChildScrollView(
-        padding: EdgeInsets.all(20.r),
+      final req = controller.request;
+      final amount = (req['amount'] as num?)?.toDouble() ?? 0.0;
+      final requestId =
+          (req['request_id'] ?? req['id'] ?? '---').toString();
+      final purpose =
+          (req['purpose'] ?? req['title'] ?? 'Untitled request').toString();
+      final description = (req['description'] ?? '').toString().trim();
+      final category = _prettyCategory((req['category'] ?? '').toString());
+      final requestType =
+          _prettyCategory((req['request_type'] ?? '').toString());
+      final createdAt = req['created_at']?.toString() ?? '';
+      final updatedAt = req['updated_at']?.toString() ?? createdAt;
+      final userName = _getUserName(req);
+      final department = _getDepartment(req);
+      final state = controller.state.value;
+      final isResponded = state == ClarificationState.responded;
+      final isAsking = state == ClarificationState.askingAgain;
+
+      return SafeArea(
+        bottom: false,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Banner
-            Container(
-              margin: EdgeInsets.only(bottom: 24.h),
-              padding: EdgeInsets.all(16.r),
-              decoration: BoxDecoration(
-                color: controller.state.value == ClarificationState.responded
-                    ? (isDark
-                          ? const Color(0xFF064E3B).withOpacity(0.3)
-                          : const Color(0xFFECFDF5)) // Green bg
-                    : (isDark
-                          ? const Color(0xFF7C2D12).withOpacity(0.3)
-                          : const Color(0xFFFFF7ED)), // Orange bg
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color: controller.state.value == ClarificationState.responded
-                      ? (isDark
-                            ? const Color(0xFF065F46)
-                            : const Color(0xFFD1FAE5))
-                      : (isDark
-                            ? const Color(0xFF9A3412)
-                            : const Color(0xFFFFEDD5)),
+            _buildHero(
+              context,
+              isResponded: isResponded,
+              amount: amount,
+              requestId: requestId,
+              category: category,
+              requestType: requestType,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 28.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionLabel('REQUESTOR'),
+                    SizedBox(height: 10.h),
+                    _buildRequestorCard(
+                      userName: userName,
+                      department: department,
+                    ),
+                    SizedBox(height: 16.h),
+
+                    _sectionLabel('DETAILS'),
+                    SizedBox(height: 10.h),
+                    _buildDetailsCard(
+                      purpose: purpose,
+                      description: description,
+                      submittedAt: createdAt,
+                      updatedAt: updatedAt != createdAt ? updatedAt : null,
+                    ),
+                    SizedBox(height: 16.h),
+
+                    _sectionLabel('ATTACHMENTS'),
+                    SizedBox(height: 10.h),
+                    _buildAttachmentsCard(req),
+                    SizedBox(height: 16.h),
+
+                    _sectionLabel('CLARIFICATION HISTORY'),
+                    SizedBox(height: 10.h),
+                    Obx(() => _buildConversationCard(context)),
+
+                    if (isAsking) ...[
+                      SizedBox(height: 16.h),
+                      _sectionLabel('NEW QUESTION'),
+                      SizedBox(height: 10.h),
+                      _buildAskAgainField(context),
+                    ],
+                  ],
                 ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.r),
-                    decoration: BoxDecoration(
-                      color:
-                          controller.state.value == ClarificationState.responded
-                          ? const Color(0xFF10B981)
-                          : const Color(0xFFF97316),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      controller.state.value == ClarificationState.responded
-                          ? Icons.check
-                          : Icons.hourglass_top_rounded,
-                      size: 16.sp,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          controller.state.value == ClarificationState.responded
-                              ? AppText.responseReceived
-                              : AppText.waitingForResponse,
-                          style: AppTextStyles.h3.copyWith(
-                            fontSize: 16.sp,
-                            color:
-                                controller.state.value ==
-                                    ClarificationState.responded
-                                ? (isDark
-                                      ? const Color(0xFF34D399)
-                                      : const Color(0xFF065F46))
-                                : (isDark
-                                      ? const Color(0xFFFB923C)
-                                      : const Color(0xFF9A3412)),
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          controller.state.value == ClarificationState.responded
-                              ? AppText.requestorUpdatedDetails
-                              : AppText.pendingUserResponse,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color:
-                                controller.state.value ==
-                                    ClarificationState.responded
-                                ? (isDark
-                                      ? const Color(0xFF6EE7B7)
-                                      : const Color(0xFF047857))
-                                : (isDark
-                                      ? const Color(0xFFFDBA74)
-                                      : const Color(0xFFC2410C)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Text(
-              AppText.requestDetails,
-              style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
-            ),
-            SizedBox(height: 12.h),
-            _buildRequestDetailCard(context),
-            SizedBox(height: 24.h),
-
-            Text(
-              AppText.clarificationHistory,
-              style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
-            ),
-            SizedBox(height: 12.h),
-
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: Theme.of(context).dividerColor,
-                    width: 2,
-                  ),
-                ),
-              ),
-              margin: EdgeInsets.only(left: 12.w),
-              padding: EdgeInsets.only(left: 24.w),
-              child: _buildConversationHistory(context),
             ),
           ],
         ),
       );
     } catch (e, stack) {
       if (kDebugMode) {
-        debugPrint("ERROR rendering Admin Status Body: $e");
+        debugPrint('ERROR rendering Clarification view: $e');
         debugPrint(stack.toString());
       }
       return Center(
         child: Padding(
-          padding: EdgeInsets.all(24.0.r),
+          padding: EdgeInsets.all(24.w),
           child: Text(
-            "${AppText.errorDisplayingDetails}\n\n$e",
+            '${AppText.errorDisplayingDetails}\n\n$e',
             style: const TextStyle(color: Colors.red),
             textAlign: TextAlign.center,
           ),
@@ -287,76 +127,166 @@ class AdminClarificationStatusView
     }
   }
 
-  Widget _buildAskAgainBody(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(20.r),
+  // ── Hero ─────────────────────────────────────────────────────────────
+  Widget _buildHero(
+    BuildContext context, {
+    required bool isResponded,
+    required double amount,
+    required String requestId,
+    required String category,
+    required String requestType,
+  }) {
+    final start =
+        isResponded ? const Color(0xFF10B981) : const Color(0xFF7C68D4);
+    final end = isResponded ? const Color(0xFF047857) : const Color(0xFF5B45B0);
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        MediaQuery.of(context).padding.top + 12.h,
+        20.w,
+        22.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [start, end],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28.r)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppText.requestDetails,
-            style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
-          ),
-          SizedBox(height: 12.h),
-          _buildRequestDetailCard(context),
-          SizedBox(height: 24.h),
-
-          Text(
-            AppText.clarificationHistory,
-            style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
-          ),
-          SizedBox(height: 12.h),
-          _buildConversationHistory(context),
-
-          SizedBox(height: 24.h),
-          Text(
-            AppText.furtherClarificationNeeded,
-            style: AppTextStyles.h3.copyWith(fontSize: 16.sp),
-          ),
-          SizedBox(height: 12.h),
-
-          Container(
-            padding: EdgeInsets.all(20.r),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(24.r),
-              border: Border.all(color: Theme.of(context).dividerColor),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (controller.state.value == ClarificationState.askingAgain) {
+                    controller.state.value = ClarificationState.responded;
+                  } else {
+                    Get.back();
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.arrow_back_rounded,
+                      color: Colors.white, size: 20.sp),
                 ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  AppText.reviewClarification,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.h3.copyWith(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isResponded
+                          ? Icons.check_circle_rounded
+                          : Icons.hourglass_top_rounded,
+                      color: Colors.white,
+                      size: 13.sp,
+                    ),
+                    SizedBox(width: 5.w),
+                    Text(
+                      isResponded ? 'RESPONDED' : 'AWAITING',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Colors.white,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 22.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '₹${CurrencyFormatter.inr(amount)}',
+              maxLines: 1,
+              style: AppTextStyles.h1.copyWith(
+                color: Colors.white,
+                fontSize: 40.sp,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'REQUEST ID #$requestId',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontWeight: FontWeight.w600,
+              fontSize: 11.sp,
+              letterSpacing: 0.5,
+            ),
+          ),
+          if (category.isNotEmpty || requestType.isNotEmpty) ...[
+            SizedBox(height: 14.h),
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 6.h,
+              children: [
+                if (category.isNotEmpty)
+                  _heroChip(label: category, icon: Icons.label_outline_rounded),
+                if (requestType.isNotEmpty)
+                  _heroChip(
+                    label: requestType,
+                    icon: Icons.assignment_outlined,
+                  ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: controller.reasonController,
-                  maxLines: 5,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: AppText.explainWhy, // Reusing explainWhy
-                    hintStyle: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSlate.withOpacity(0.7),
-                    ),
-                    border: InputBorder.none,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    AppText.makeItClear,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontSize: 12.sp,
-                      color: AppColors.textSlate,
-                    ),
-                  ),
-                ),
-              ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _heroChip({required String label, required IconData icon}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 12.sp),
+          SizedBox(width: 5.w),
+          Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white,
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -364,383 +294,643 @@ class AdminClarificationStatusView
     );
   }
 
-  Widget _buildRequestDetailCard(BuildContext context) {
-    final request = controller.request;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  // ── Section primitives ─────────────────────────────────────────────────
+  Widget _sectionLabel(String text) {
+    return Padding(
+      padding: EdgeInsets.only(left: 4.w),
+      child: Text(
+        text,
+        style: AppTextStyles.bodyMedium.copyWith(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textSlate,
+          letterSpacing: 1.1,
+        ),
+      ),
+    );
+  }
 
-    // Robust name mapping - Try deeper fallbacks
-    final String userName = _getUserName(request);
-
-    final String category =
-        request['category'] ?? request['title'] ?? 'General Expense';
-    final String amount = request['amount']?.toString() ?? '0.00';
-    final String? receiptUrl = request['receipt_url'];
-
+  Widget _whiteCard({required Widget child, EdgeInsets? padding}) {
     return Container(
-      padding: EdgeInsets.all(20.r),
+      width: double.infinity,
+      padding: padding ?? EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24.r),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12.r,
+            offset: Offset(0, 3.h),
           ),
         ],
       ),
+      child: child,
+    );
+  }
+
+  Widget _buildRequestorCard({
+    required String userName,
+    required String department,
+  }) {
+    final initials = _initialsFor(userName);
+    return _whiteCard(
       child: Row(
         children: [
+          CircleAvatar(
+            radius: 20.r,
+            backgroundColor: const Color(0xFFE0F2FE),
+            child: Text(
+              initials,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryBlue,
+              ),
+            ),
+          ),
+          SizedBox(width: 14.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   userName,
-                  style: AppTextStyles.h3.copyWith(fontSize: 18.sp),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  // Explicit colour — AppTextStyles.h3 inherits from
+                  // Get.theme.textTheme which can resolve to null in
+                  // this context, making the name invisible.
+                  style: AppTextStyles.h3.copyWith(
+                    fontSize: 14.sp,
+                    color: AppColors.textDark,
+                  ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 2.h),
                 Text(
-                  category,
+                  department,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSlate,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF075985).withOpacity(0.3)
-                        : const Color(0xFFE0F2FE),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    "₹$amount",
-                    style: AppTextStyles.h3.copyWith(
-                      fontSize: 14.sp,
-                      color: const Color(0xFF0EA5E9),
-                      fontWeight: FontWeight.bold,
-                    ),
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
             ),
-          ),
-          // Bill Image
-          Container(
-            height: 80.h,
-            width: 80.w,
-            decoration: BoxDecoration(
-              color: isDark ? Colors.black26 : const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(16.r),
-              image: receiptUrl != null && receiptUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(receiptUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: receiptUrl == null || receiptUrl.isEmpty
-                ? const Icon(
-                    Icons.receipt_long_rounded,
-                    color: AppColors.textSlate,
-                  )
-                : null,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildConversationHistory(BuildContext context) {
-    // Safely extract clarifications — handle all possible runtime types
-    final raw = controller.request['clarifications'];
-    final List<Map<String, dynamic>> clarifications = [];
-    if (raw is List) {
-      for (final item in raw) {
-        if (item is Map) {
-          clarifications.add(Map<String, dynamic>.from(item));
+  Widget _buildDetailsCard({
+    required String purpose,
+    required String description,
+    required String submittedAt,
+    required String? updatedAt,
+  }) {
+    return _whiteCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _kvRow('Purpose', purpose, multiline: true),
+          if (description.isNotEmpty && description != purpose) ...[
+            _divider(),
+            _kvRow('Description', description, multiline: true),
+          ],
+          _divider(),
+          _kvRow(
+            'Submitted',
+            DateHelper.formatDateTime(submittedAt, fallback: '—'),
+          ),
+          if (updatedAt != null) ...[
+            _divider(),
+            _kvRow(
+              'Last update',
+              DateHelper.formatDateTime(updatedAt, fallback: '—'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _kvRow(String label, String value, {bool multiline = false}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100.w,
+            child: Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontSize: 12.sp,
+                color: AppColors.textSlate,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: multiline ? null : 2,
+              overflow: multiline ? null : TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textDark,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _divider() => Container(height: 1, color: const Color(0xFFF1F5F9));
+
+  // ── Attachments ────────────────────────────────────────────────────────
+  Widget _buildAttachmentsCard(Map<dynamic, dynamic> req) {
+    final items = _collectAttachments(req);
+    if (items.isEmpty) {
+      return _whiteCard(
+        padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+        child: Center(
+          child: Text(
+            'No attachments',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSlate,
+            ),
+          ),
+        ),
+      );
+    }
+    return _whiteCard(
+      padding: EdgeInsets.all(12.w),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => SizedBox(height: 10.h),
+        itemBuilder: (_, i) => AttachmentCard(attachment: items[i], index: i),
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _collectAttachments(Map<dynamic, dynamic> req) {
+    final out = <Map<String, dynamic>>[];
+    final seen = <String>{};
+    void add(String name, dynamic url) {
+      if (url == null) return;
+      final s = url.toString();
+      if (s.isEmpty || !seen.add(s)) return;
+      out.add({'name': name, 'url': s, 'file': s});
+    }
+
+    if (req['attachments'] is List) {
+      for (final raw in (req['attachments'] as List)) {
+        if (raw is Map) {
+          final url = raw['url'] ?? raw['file'];
+          add(raw['name']?.toString() ?? 'Attachment', url);
         }
       }
     }
+    add('Receipt', req['receipt_url']);
+    add('QR Code', req['payment_qr_url'] ?? req['qr_url']);
+    if (req['bill_urls'] is List) {
+      final bills = req['bill_urls'] as List;
+      for (int i = 0; i < bills.length; i++) {
+        add(bills.length > 1 ? 'Bill ${i + 1}' : 'Bill', bills[i]);
+      }
+    }
+    return out;
+  }
 
+  // ── Conversation thread ────────────────────────────────────────────────
+  Widget _buildConversationCard(BuildContext context) {
+    final clarifications = controller.clarifications.toList();
+    if (kDebugMode) {
+      debugPrint('[Clarification][view] rxList size = ${clarifications.length}');
+    }
     if (clarifications.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        child: Text(
-          'No clarification history available',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSlate),
+      return _whiteCard(
+        padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+        child: Center(
+          child: Text(
+            'No clarification history yet',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSlate,
+            ),
+          ),
         ),
       );
     }
 
-    final String requestorName = _getUserName(controller.request);
-    String initials = "U";
-    if (requestorName.isNotEmpty) {
-      final parts = requestorName.trim().split(" ");
-      if (parts.length > 1 && parts[1].isNotEmpty) {
-        initials = "${parts[0][0]}${parts[1][0]}".toUpperCase();
-      } else {
-        initials = requestorName[0].toUpperCase();
-      }
-    }
+    final requestorName = _getUserName(controller.request);
 
-    return Column(
-      children: clarifications.map((item) {
-        final String question = item['question']?.toString() ?? '';
-        final String response = item['response']?.toString() ?? '';
-        final String askedAt = _formatDate(item['asked_at']?.toString() ?? '');
-        final String respondedAt =
-            _formatDate(item['responded_at']?.toString() ?? '');
+    return _whiteCard(
+      padding: EdgeInsets.all(14.w),
+      child: Column(
+        children: clarifications.asMap().entries.map((entry) {
+          final idx = entry.key;
+          final item = entry.value;
+          final question = item['question']?.toString() ?? '';
+          final response = item['response']?.toString() ?? '';
+          final askedAt = item['asked_at']?.toString() ?? '';
+          final respondedAtRaw = item['responded_at']?.toString() ?? '';
+          final hasResponse =
+              response.isNotEmpty && respondedAtRaw.isNotEmpty;
 
-        return _buildTimelineItem(
-          context,
-          question: question,
-          response: response,
-          askedAt: askedAt,
-          respondedAt: respondedAt,
-          requestorName: requestorName,
-          initials: initials,
-        );
-      }).toList(),
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: idx == clarifications.length - 1 ? 0 : 16.h,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (question.isNotEmpty)
+                  _msg(
+                    fromApprover: true,
+                    text: question,
+                    time: DateHelper.formatDateTime(askedAt,
+                        fallback: AppText.recently),
+                  ),
+                if (hasResponse) ...[
+                  SizedBox(height: 10.h),
+                  _msg(
+                    fromApprover: false,
+                    text: response,
+                    time: DateHelper.formatDateTime(respondedAtRaw,
+                        fallback: AppText.recently),
+                    label: requestorName,
+                  ),
+                ] else if (response.isEmpty) ...[
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 10.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFBEB),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(color: const Color(0xFFFEF3C7)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.hourglass_top_rounded,
+                                size: 10.sp, color: const Color(0xFFB45309)),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'Waiting for response',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFB45309),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
-  Widget _buildTimelineItem(
-    BuildContext context, {
-    required String question,
-    required String response,
-    required String askedAt,
-    required String respondedAt,
-    required String requestorName,
-    required String initials,
+  Widget _msg({
+    required bool fromApprover,
+    required String text,
+    required String time,
+    String? label,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = fromApprover ? AppColors.purpleSurface : AppColors.mintBg;
+    final accent = fromApprover ? AppColors.primary : AppColors.successGreen;
+    final headLabel = fromApprover ? AppText.youApprover : (label ?? 'Requestor');
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment:
+          fromApprover ? MainAxisAlignment.start : MainAxisAlignment.end,
       children: [
-        // 1. Admin Question Node
-        if (question.isNotEmpty)
-          Stack(
-            clipBehavior: Clip.none,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: fromApprover
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end,
             children: [
-              Positioned(
-                left: -31.w, // Align with left border
-                top: 0,
-                child: Container(
-                  width: 14.w,
-                  height: 14.w,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).dividerColor,
-                    shape: BoxShape.circle,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    headLabel,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w800,
+                      color: accent,
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    time,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontSize: 10.sp,
+                      color: AppColors.textSlate,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 4.h),
+              Container(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(fromApprover ? 4.r : 14.r),
+                    topRight: Radius.circular(fromApprover ? 14.r : 4.r),
+                    bottomLeft: Radius.circular(14.r),
+                    bottomRight: Radius.circular(14.r),
                   ),
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 24.h),
-                padding: EdgeInsets.all(20.r),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Theme.of(context).dividerColor),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(6.r),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E3A8A).withOpacity(0.5)
-                                : const Color(0xFFDBEAFE),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.person,
-                            size: 14.sp,
-                            color: const Color(0xFF2563EB),
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          AppText.youApprover,
-                          style: AppTextStyles.h3.copyWith(fontSize: 14.sp),
-                        ),
-                        const Spacer(),
-                        Text(
-                          askedAt,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontSize: 12.sp,
-                            color: AppColors.textSlate,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    Text(question, style: AppTextStyles.bodyMedium),
-                  ],
+                child: Text(
+                  text,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textDark,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
           ),
-
-        // 2. Requestor Response Node
-        if (response.isNotEmpty)
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                left: -31.w, // Align with left border
-                top: 0,
-                child: Container(
-                  width: 14.w,
-                  height: 14.w,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF10B981), // Green dot
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 24.h),
-                padding: EdgeInsets.all(20.r),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF064E3B).withOpacity(0.3)
-                      : const Color(0xFFF0FDF4), // Light green bg
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: isDark
-                        ? const Color(0xFF065F46)
-                        : const Color(0xFFBBF7D0),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 28.h,
-                          width: 28.w,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF064E3B)
-                                : const Color(0xFFDCFCE7),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF15803D),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Text(
-                            requestorName,
-                            style: AppTextStyles.h3.copyWith(fontSize: 14.sp),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          respondedAt,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontSize: 12.sp,
-                            color: AppColors.textSlate,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    Text(response, style: AppTextStyles.bodyMedium),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        ),
       ],
     );
   }
 
-  String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return AppText.recently;
-    try {
-      final dt = DateTime.parse(dateStr);
-      // minimalistic format
-      return "${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
-    } catch (_) {
-      return AppText.recently;
+  // ── Ask-again textarea (inline when state == askingAgain) ──────────────
+  Widget _buildAskAgainField(BuildContext context) {
+    return _whiteCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: controller.reasonController,
+            maxLines: 5,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textDark,
+            ),
+            decoration: InputDecoration(
+              hintText: AppText.explainWhy,
+              hintStyle: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSlate.withValues(alpha: 0.7),
+              ),
+              border: InputBorder.none,
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              AppText.makeItClear,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontSize: 12.sp,
+                color: AppColors.textSlate,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // Bottom bar — state-driven (responded / pending / askingAgain).
+  // ════════════════════════════════════════════════════════════════════════
+
+  Widget _buildBottomBar(BuildContext context) {
+    final state = controller.state.value;
+
+    if (state == ClarificationState.responded) {
+      return _bottomShell(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 48.h,
+              child: OutlinedButton.icon(
+                onPressed: controller.startAskAgain,
+                icon: Icon(Icons.help_outline_rounded,
+                    color: AppColors.primaryBlue, size: 18.sp),
+                label: Text(
+                  AppText.askClarification,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(
+                      color: AppColors.primaryBlue, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.r),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 52.h,
+                    child: OutlinedButton(
+                      onPressed: controller.reject,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFEE2E2),
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                      ),
+                      child: Text(
+                        AppText.reject,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFB91C1C),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: SizedBox(
+                    height: 52.h,
+                    child: ElevatedButton.icon(
+                      onPressed: controller.approve,
+                      icon: Icon(Icons.check, color: Colors.white, size: 18.sp),
+                      label: Text(
+                        AppText.approve,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0EA5E9),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
     }
+
+    if (state == ClarificationState.askingAgain) {
+      return _bottomShell(
+        PrimaryButton(
+          text: AppText.sendClarificationRequest,
+          onPressed: controller.submitAskAgain,
+          icon: Icon(Icons.send_rounded, color: Colors.white, size: 18.sp),
+        ),
+      );
+    }
+
+    // pending — admin may want to add a follow-up question while waiting.
+    return _bottomShell(
+      SizedBox(
+        width: double.infinity,
+        height: 52.h,
+        child: OutlinedButton.icon(
+          onPressed: controller.startAskAgain,
+          icon: Icon(Icons.help_outline_rounded,
+              color: AppColors.primaryBlue, size: 18.sp),
+          label: Text(
+            'Ask Another Question',
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryBlue,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.r),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _bottomShell(Widget child) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 14.r,
+            offset: Offset(0, -3.h),
+          ),
+        ],
+      ),
+      child: SafeArea(top: false, child: child),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // Helpers (formatting + nested-field readers).
+  // ════════════════════════════════════════════════════════════════════════
+
+  String _prettyCategory(String raw) {
+    if (raw.isEmpty) return '';
+    return raw
+        .split(RegExp(r'[_\s]+'))
+        .where((w) => w.isNotEmpty)
+        .map((w) => '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+        .join(' ');
+  }
+
+
+  String _initialsFor(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    if (parts.isEmpty) return 'U';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return (parts.first[0] + parts.elementAt(1)[0]).toUpperCase();
+  }
+
+  String _getDepartment(Map<dynamic, dynamic> item) {
+    final direct = item['department'] ?? item['department_name'];
+    if (direct != null && direct.toString().isNotEmpty) return direct.toString();
+    if (item['requestor'] is Map) {
+      final r = item['requestor'];
+      final v = r['department'] ?? r['department_name'];
+      if (v != null && v.toString().isNotEmpty) return v.toString();
+    }
+    if (item['user'] is Map) {
+      final u = item['user'];
+      if (u['department'] != null) return u['department'].toString();
+    }
+    return 'General';
   }
 
   String _getUserName(Map<dynamic, dynamic> item) {
-    // Check specific keys first
-    if (item['user_name'] != null && item['user_name'].toString().isNotEmpty)
+    if (item['user_name'] != null &&
+        item['user_name'].toString().isNotEmpty) {
       return item['user_name'].toString();
+    }
     if (item['employee_name'] != null &&
-        item['employee_name'].toString().isNotEmpty)
+        item['employee_name'].toString().isNotEmpty) {
       return item['employee_name'].toString();
-
-    // Check nested 'requestor' object (Primary)
-    if (item['requestor'] != null) {
-      if (item['requestor'] is Map) {
-        final r = item['requestor'];
-        final String firstName = r['first_name']?.toString() ?? '';
-        final String lastName = r['last_name']?.toString() ?? '';
-        if (firstName.isNotEmpty) {
-          return "$firstName $lastName".trim();
-        }
-        if (r['email'] != null) return r['email'].toString().split('@').first;
-      }
     }
-
+    if (item['requestor'] is Map) {
+      final r = item['requestor'];
+      final fn = r['first_name']?.toString() ?? '';
+      final ln = r['last_name']?.toString() ?? '';
+      if (fn.isNotEmpty) return '$fn $ln'.trim();
+      if (r['email'] != null) return r['email'].toString().split('@').first;
+    }
     if (item['requestor_name'] != null &&
-        item['requestor_name'].toString().isNotEmpty)
+        item['requestor_name'].toString().isNotEmpty) {
       return item['requestor_name'].toString();
-
-    // Check nested 'user' object
-    if (item['user'] != null) {
-      if (item['user'] is Map) {
-        final u = item['user'];
-        if (u['name'] != null) return u['name'].toString();
-        if (u['full_name'] != null) return u['full_name'].toString();
-        if (u['first_name'] != null)
-          return "${u['first_name']} ${u['last_name'] ?? ''}".trim();
-        if (u['email'] != null) return u['email'].toString().split('@').first;
-      } else if (item['user'] is String) {
-        return item['user'];
-      }
     }
-
-    // Check nested 'employee' object
-    if (item['employee'] != null) {
-      if (item['employee'] is Map) {
-        return item['employee']['name']?.toString() ??
-            item['employee']['first_name']?.toString() ??
-            'Unknown';
-      } else if (item['employee'] is String) {
-        return item['employee'];
+    if (item['user'] is Map) {
+      final u = item['user'];
+      if (u['name'] != null) return u['name'].toString();
+      if (u['full_name'] != null) return u['full_name'].toString();
+      if (u['first_name'] != null) {
+        return '${u['first_name']} ${u['last_name'] ?? ''}'.trim();
       }
+      if (u['email'] != null) return u['email'].toString().split('@').first;
     }
-
-    // Fallback aliases
-    if (item['created_by_name'] != null)
-      return item['created_by_name'].toString();
-
     return AppText.unknownUser;
   }
 }

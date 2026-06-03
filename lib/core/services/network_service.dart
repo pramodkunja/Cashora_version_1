@@ -12,9 +12,11 @@ class NetworkService extends GetxService {
   final Logger _logger = Logger();
 
   Future<NetworkService> init() async {
+    final baseUrl = AppConfig.apiBaseUrl;
+    _logger.i('[NetworkService] env=${AppConfig.environment} baseUrl=$baseUrl');
     _dio = Dio(
       BaseOptions(
-        baseUrl: AppConfig.apiBaseUrl,
+        baseUrl: baseUrl,
         connectTimeout: const Duration(milliseconds: AppConfig.connectTimeout),
         receiveTimeout: const Duration(milliseconds: AppConfig.receiveTimeout),
         responseType: ResponseType.json,
@@ -38,11 +40,20 @@ class NetworkService extends GetxService {
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          // 1. Handle 401 Unauthorized globally
-          if (e.response?.statusCode == 401) {
-            _logger.w('401 Unauthorized - Triggering auto-logout');
-            // Prevent circular dependency issues by fetching AuthService lazily if needed
-            // But usually Find is safe here if initialized
+          // 1. Handle 401 Unauthorized globally — but ONLY for in-app
+          // requests, NOT for pre-login auth endpoints.
+          //
+          // The login/forgot-password/verify-otp/reset-password endpoints
+          // legitimately return 401 when the user enters bad credentials
+          // or a wrong OTP. Treating those as "session expired" triggers
+          // a global logout → which calls /auth/logout (another 401) →
+          // which schedules another logout → which calls Get.offAllNamed
+          // to LOGIN while LOGIN is already on screen, replaying entrance
+          // animations and zigzagging the UI in a loop.
+          final path = e.requestOptions.path;
+          final isAuthEndpoint = path.startsWith('/auth/');
+          if (e.response?.statusCode == 401 && !isAuthEndpoint) {
+            _logger.w('401 Unauthorized on $path — triggering auto-logout');
             if (Get.isRegistered<AuthService>()) {
               // Execute strictly in callback to avoid interfering with current stack
               WidgetsBinding.instance.addPostFrameCallback((_) async {

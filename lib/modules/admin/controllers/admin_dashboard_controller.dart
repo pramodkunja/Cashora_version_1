@@ -6,6 +6,7 @@ import '../../../../data/repositories/admin_repository.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 import 'admin_approvals_controller.dart';
+import 'admin_history_controller.dart';
 
 class AdminDashboardController extends GetxController {
   late final AdminRepository _adminRepository;
@@ -18,10 +19,17 @@ class AdminDashboardController extends GetxController {
   // Dashboard data from GET /admin/dashboard
   final dashboardShortName = ''.obs;
   final pendingRequestsCount = 0.obs;
+  final inClarificationCount = 0.obs;
   final approvedAmount = 0.0.obs;
   final totalDepartments = 0.obs;
   final activeDepartments = 0.obs;
   final unassignedUsers = 0.obs;
+
+  // Approver-specific stats from GET /approver/dashboard-stats.
+  // Shown as summary cards at the top of the approver dashboard.
+  final approverPendingCount = 0.obs;
+  final approverApprovedAmount = 0.0.obs;
+  final hasApproverStats = false.obs;
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
@@ -57,6 +65,21 @@ class AdminDashboardController extends GetxController {
       showWelcome.value = false;
     });
     fetchDashboard();
+    fetchApproverStats();
+  }
+
+  Future<void> fetchApproverStats() async {
+    try {
+      final data = await _adminRepository.getApproverDashboardStats();
+      approverPendingCount.value =
+          (data['pending_count'] as num?)?.toInt() ?? 0;
+      approverApprovedAmount.value =
+          (data['total_approved_amount'] as num?)?.toDouble() ?? 0.0;
+      hasApproverStats.value = data.isNotEmpty;
+    } catch (_) {
+      // Non-blocking: dashboard still renders without the summary cards.
+      hasApproverStats.value = false;
+    }
   }
 
   Future<void> fetchDashboard() async {
@@ -74,6 +97,13 @@ class AdminDashboardController extends GetxController {
       if (overview is Map) {
         pendingRequestsCount.value =
             (overview['pendingRequestsCount'] as num?)?.toInt() ?? 0;
+        // Backend may emit camelCase (`inClarificationCount`) or snake_case
+        // (`in_clarification_count`) depending on serializer config.
+        inClarificationCount.value =
+            ((overview['inClarificationCount'] ??
+                        overview['in_clarification_count']) as num?)
+                    ?.toInt() ??
+                0;
         approvedAmount.value =
             (overview['approvedAmount'] as num?)?.toDouble() ?? 0.0;
       }
@@ -99,11 +129,19 @@ class AdminDashboardController extends GetxController {
     currentIndex.value = index;
     if (index == 0) {
       fetchDashboard();
+      fetchApproverStats();
     } else if (index == 1) {
       if (Get.isRegistered<AdminApprovalsController>()) {
         final ctrl = Get.find<AdminApprovalsController>();
         ctrl.fetchAllRequests();
         ctrl.resetTab();
+      }
+    } else if (index == 2) {
+      // History tab — refetch /admin/history every time the tab is opened
+      // so newly-approved/rejected/clarified items appear without the user
+      // having to drill into a record first.
+      if (Get.isRegistered<AdminHistoryController>()) {
+        Get.find<AdminHistoryController>().fetchHistory();
       }
     } else if (index == 3) {
       if (Get.isRegistered<ProfileController>()) {

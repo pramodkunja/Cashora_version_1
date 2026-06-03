@@ -4,30 +4,25 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/widgets/app_loader.dart';
+import 'package:cash/utils/widgets/app_gradient_header.dart';
+import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
 import '../../controllers/payment_flow_controller.dart';
 
 class ConfirmPaymentView extends GetView<PaymentFlowController> {
   const ConfirmPaymentView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoader();
+          return const SkeletonListView();
         }
         return Column(
           children: [
-            _buildHeader(context),
+            AppGradientHeader(title: 'Confirm Payment'),
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
@@ -47,7 +42,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                         borderRadius: BorderRadius.circular(20.r),
                         boxShadow: [
                           BoxShadow(
-                            color: _purple.withOpacity(0.22),
+                            color: AppColors.primary.withValues(alpha: 0.22),
                             blurRadius: 20.r,
                             offset: Offset(0, 8.h),
                           ),
@@ -60,7 +55,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                             style: GoogleFonts.inter(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withValues(alpha: 0.85),
                               letterSpacing: 1.2,
                             ),
                           ),
@@ -192,13 +187,13 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                     Container(
                       padding: EdgeInsets.all(14.w),
                       decoration: BoxDecoration(
-                        color: _purpleLight,
+                        color: AppColors.purpleSurface,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Row(
                         children: [
                           Icon(Icons.shield_rounded,
-                              color: _purple, size: 18.sp),
+                              color: AppColors.primary, size: 18.sp),
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Text(
@@ -206,7 +201,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                               style: GoogleFonts.inter(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w500,
-                                color: _purple,
+                                color: AppColors.primary,
                                 height: 1.4,
                               ),
                             ),
@@ -225,50 +220,6 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            'Confirm Payment',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
@@ -276,7 +227,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10.r,
             offset: Offset(0, -4.h),
           ),
@@ -297,7 +248,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _purple,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -323,7 +274,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -337,10 +288,10 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 16.sp),
+                child: Icon(icon, color: AppColors.primary, size: 16.sp),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -348,7 +299,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -375,10 +326,10 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: isSelected ? _purpleLight.withOpacity(0.5) : _bg,
+          color: isSelected ? AppColors.purpleSurface.withValues(alpha: 0.5) : AppColors.backgroundAlt,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
-            color: isSelected ? _purple : const Color(0xFFE2E8F0),
+            color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -387,10 +338,10 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
             Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: _purpleLight,
+                color: AppColors.purpleSurface,
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(icon, color: _purple, size: 20.sp),
+              child: Icon(icon, color: AppColors.primary, size: 20.sp),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -402,7 +353,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
-                      color: _slate900,
+                      color: AppColors.textDark,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -410,7 +361,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                     ),
                   ),
                 ],
@@ -422,7 +373,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? _purple : _slate300,
+                  color: isSelected ? AppColors.primary : AppColors.slate300,
                   width: 2.w,
                 ),
               ),
@@ -432,7 +383,7 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
                         width: 10.w,
                         height: 10.w,
                         decoration: const BoxDecoration(
-                          color: _purple,
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -464,14 +415,14 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
             style: GoogleFonts.inter(
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
-              color: _slate500,
+              color: AppColors.textSlate,
             ),
           ),
           SizedBox(height: 6.h),
         ],
         Container(
           decoration: BoxDecoration(
-            color: _bg,
+            color: AppColors.backgroundAlt,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
@@ -481,11 +432,11 @@ class ConfirmPaymentView extends GetView<PaymentFlowController> {
             textCapitalization: textCapitalization,
             inputFormatters: inputFormatters,
             maxLength: maxLength,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
-              prefixIcon: Icon(icon, color: _slate500, size: 18.sp),
+              hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.slate300),
+              prefixIcon: Icon(icon, color: AppColors.textSlate, size: 18.sp),
               border: InputBorder.none,
               counterText: '',
               contentPadding:

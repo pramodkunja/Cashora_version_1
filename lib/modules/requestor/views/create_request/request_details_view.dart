@@ -10,23 +10,13 @@ import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 
 class RequestDetailsView extends GetView<CreateRequestController> {
-  const RequestDetailsView({Key? key}) : super(key: key);
+  const RequestDetailsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _amber = AppColors.warningOrange;
-  static const _amberBg = Color(0xFFFFFBEB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
           _buildHeader(context),
@@ -45,45 +35,51 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: _bg,
+                            color: AppColors.backgroundAlt,
                             borderRadius: BorderRadius.circular(12.r),
-                            border:
-                                Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
                           child: TextField(
                             controller: controller.amountController,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
+                              FilteringTextInputFormatter.digitsOnly,
                             ],
                             style: GoogleFonts.inter(
                               fontSize: 28.sp,
                               fontWeight: FontWeight.w800,
-                              color: _slate900,
+                              color: AppColors.textDark,
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
                               hintStyle: GoogleFonts.inter(
                                 fontSize: 28.sp,
                                 fontWeight: FontWeight.w800,
-                                color: _slate300,
+                                color: AppColors.slate300,
                               ),
                               prefixIcon: Padding(
-                                padding: EdgeInsets.only(left: 20.w, right: 8.w),
+                                padding: EdgeInsets.only(
+                                  left: 20.w,
+                                  right: 8.w,
+                                ),
                                 child: Text(
                                   '₹',
                                   style: GoogleFonts.inter(
                                     fontSize: 24.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: _slate500,
+                                    color: AppColors.textSlate,
                                   ),
                                 ),
                               ),
-                              prefixIconConstraints:
-                                  const BoxConstraints(minWidth: 0, minHeight: 0),
+                              prefixIconConstraints: const BoxConstraints(
+                                minWidth: 0,
+                                minHeight: 0,
+                              ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 8.w, vertical: 16.h),
+                                horizontal: 8.w,
+                                vertical: 16.h,
+                              ),
                             ),
                           ),
                         ),
@@ -96,9 +92,11 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                               controller.category.value == 'Approval Required';
                           return Container(
                             padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 10.h),
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
                             decoration: BoxDecoration(
-                              color: needsApproval ? _amberBg : _greenBg,
+                              color: needsApproval ? AppColors.amberBg : AppColors.mintBg,
                               borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: Row(
@@ -107,7 +105,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                                   needsApproval
                                       ? Icons.warning_amber_rounded
                                       : Icons.check_circle_rounded,
-                                  color: needsApproval ? _amber : _green,
+                                  color: needsApproval ? AppColors.warningOrange : AppColors.successGreen,
                                   size: 16.sp,
                                 ),
                                 SizedBox(width: 8.w),
@@ -119,8 +117,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                                     style: GoogleFonts.inter(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
-                                      color:
-                                          needsApproval ? _amber : _green,
+                                      color: needsApproval ? AppColors.warningOrange : AppColors.successGreen,
                                     ),
                                   ),
                                 ),
@@ -135,70 +132,187 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                   SizedBox(height: 14.h),
 
                   // ── Category Card ──
-                  _buildSectionCard(
-                    icon: Icons.category_rounded,
-                    title: AppText.category,
-                    child: Obx(() {
-                      return Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        decoration: BoxDecoration(
-                          color: _bg,
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Map<String, dynamic>>(
-                            value: controller.selectedExpenseCategory.value,
-                            hint: Text(
-                              AppText.selectCategory,
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                color: _slate300,
-                              ),
-                            ),
-                            isExpanded: true,
-                            icon: Icon(Icons.keyboard_arrow_down_rounded,
-                                color: _slate500, size: 22.sp),
-                            dropdownColor: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            items: controller.expenseCategories.map((cat) {
-                              return DropdownMenuItem<Map<String, dynamic>>(
-                                value: cat,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(6.w),
-                                      decoration: BoxDecoration(
-                                        color: _purpleLight,
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
-                                      ),
-                                      child: Icon(
-                                        cat['icon'],
-                                        color: _purple,
-                                        size: 16.sp,
-                                      ),
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Text(
-                                      cat['name'],
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: _slate900,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) =>
-                                controller.selectedExpenseCategory.value = val,
+                  GetBuilder<CreateRequestController>(
+                    id: 'category_grid',
+                    builder: (_) {
+                      final bool isExpanded = controller
+                          .expenseCategories
+                          .isNotEmpty; // Can add toggle logic later if needed
+
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 12.r,
+                            offset: Offset(0, 3.h),
                           ),
-                        ),
-                      );
-                    }),
-                  ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Select Category',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              Icon(
+                                isExpanded
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
+                                color: AppColors.textSlate,
+                                size: 24.sp,
+                              ),
+                            ],
+                          ),
+                          if (isExpanded) ...[
+                            SizedBox(height: 6.h),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 8.w,
+                                    mainAxisSpacing: 8.h,
+                                    childAspectRatio: 1.15, // Aspect ratio makes it completely fluid and responsive
+                                  ),
+                              itemCount: controller.expenseCategories.length,
+                              itemBuilder: (context, index) {
+                                final cat = controller.expenseCategories[index];
+                                final isSelected = controller.selectedExpenseCategory.value != null &&
+                                    controller.selectedExpenseCategory.value!['id'] == cat['id'];
+
+                                final borderColors = [
+                                  const Color(0xFFEF4444), // Red
+                                  const Color(0xFFEF4444),
+                                  const Color(0xFF10B981), // Green
+                                  const Color(0xFF10B981),
+                                  const Color(0xFFEF4444),
+                                  const Color(0xFF10B981),
+                                  const Color(0xFF10B981),
+                                  const Color(0xFFEF4444),
+                                  const Color(0xFF10B981),
+                                  const Color(0xFF10B981),
+                                  const Color(0xFF10B981),
+                                  const Color(0xFFEF4444),
+                                ];
+
+                                final iconColors = [
+                                  const Color(0xFF3B82F6), // Blue
+                                  const Color(0xFFEC4899), // Pink
+                                  const Color(0xFF3B82F6), // Blue
+                                  const Color(0xFFF59E0B), // Orange
+                                  const Color(0xFF8B5CF6), // Purple
+                                  const Color(0xFF10B981), // Green
+                                  const Color(0xFFEF4444), // Red
+                                  const Color(0xFF06B6D4), // Cyan
+                                  const Color(0xFF3B82F6), // Blue
+                                  const Color(0xFF8B5CF6), // Purple
+                                  const Color(0xFF10B981), // Green
+                                  const Color(0xFFEC4899), // Pink
+                                ];
+
+                                final borderColor =
+                                    borderColors[index % borderColors.length];
+                                final iconColor =
+                                    iconColors[index % iconColors.length];
+                                final iconBgColor = iconColor.withValues(alpha: 0.1);
+
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      if (isSelected) {
+                                        controller
+                                                .selectedExpenseCategory
+                                                .value =
+                                            null;
+                                      } else {
+                                        controller
+                                                .selectedExpenseCategory
+                                                .value =
+                                            cat;
+                                      }
+                                      controller.update(['category_grid']); // Force foolproof UI rebuild
+                                    },
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? AppColors.purpleSurface
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : borderColor,
+                                          width: isSelected ? 2 : 1,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(10.w),
+                                            decoration: BoxDecoration(
+                                              color: iconBgColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.r),
+                                            ),
+                                            child: Icon(
+                                              cat['icon'] as IconData,
+                                              color: iconColor,
+                                              size: 24.sp,
+                                            ),
+                                          ),
+                                          SizedBox(height: 6.h),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 4.w,
+                                            ),
+                                            child: Text(
+                                              cat['name'],
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 10
+                                                    .sp, // Slightly smaller text to prevent clipping
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w600,
+                                                color: isSelected
+                                                    ? AppColors.primary
+                                                    : AppColors.textDark,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }),
 
                   SizedBox(height: 14.h),
 
@@ -252,7 +366,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                             'Please select a request type first',
                             style: GoogleFonts.inter(
                               fontSize: 12.sp,
-                              color: _slate500,
+                              color: AppColors.textSlate,
                             ),
                           ),
                         );
@@ -269,7 +383,9 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                                   icon: Icons.qr_code_scanner_rounded,
                                   label: 'Upload QR',
                                   onTap: () => _showAttachmentOptions(
-                                      Get.context!, isQr: true),
+                                    Get.context!,
+                                    isQr: true,
+                                  ),
                                 ),
                               if (controller.requestType.value ==
                                       'Post-approved' &&
@@ -278,36 +394,44 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                                   icon: Icons.receipt_long_rounded,
                                   label: 'Upload Receipt',
                                   onTap: () => _showAttachmentOptions(
-                                      Get.context!,
-                                      isQr: false,
-                                      isReceipt: true),
+                                    Get.context!,
+                                    isQr: false,
+                                    isReceipt: true,
+                                  ),
                                 ),
                               _uploadChip(
                                 icon: Icons.upload_file_rounded,
                                 label: AppText.uploadBill,
                                 onTap: () => _showAttachmentOptions(
-                                    Get.context!, isQr: false),
+                                  Get.context!,
+                                  isQr: false,
+                                ),
                               ),
                             ],
                           ),
                           SizedBox(height: 12.h),
                           if (controller.qrFile.value != null)
-                            _fileItem('QR Code', Icons.qr_code_2_rounded,
-                                () => controller.removeQr()),
+                            _fileItem(
+                              'QR Code',
+                              Icons.qr_code_2_rounded,
+                              () => controller.removeQr(),
+                            ),
                           if (controller.requestType.value == 'Post-approved' &&
                               controller.receiptFile.value != null)
-                            _fileItem('Receipt Uploaded',
-                                Icons.receipt_long_rounded,
-                                () => controller.removeReceipt()),
+                            _fileItem(
+                              'Receipt Uploaded',
+                              Icons.receipt_long_rounded,
+                              () => controller.removeReceipt(),
+                            ),
                           if (controller.requestType.value == 'Pre-approved')
-                            ...controller.attachedFiles
-                                .asMap()
-                                .entries
-                                .map((entry) {
+                            ...controller.attachedFiles.asMap().entries.map((
+                              entry,
+                            ) {
                               return _fileItem(
-                                  entry.value.name,
-                                  Icons.description_rounded,
-                                  () => controller.removeFile(entry.key));
+                                entry.value.name,
+                                Icons.description_rounded,
+                                () => controller.removeFile(entry.key),
+                              );
                             }),
                         ],
                       );
@@ -347,11 +471,14 @@ class RequestDetailsView extends GetView<CreateRequestController> {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
+              child: Icon(
+                Icons.arrow_back_rounded,
+                color: Colors.white,
+                size: 20.sp,
+              ),
             ),
           ),
           SizedBox(width: 12.w),
@@ -376,7 +503,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10.r,
             offset: Offset(0, -4.h),
           ),
@@ -401,7 +528,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _purple,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -427,7 +554,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -441,10 +568,10 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 16.sp),
+                child: Icon(icon, color: AppColors.primary, size: 16.sp),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -452,7 +579,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -471,20 +598,22 @@ class RequestDetailsView extends GetView<CreateRequestController> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: _bg,
+        color: AppColors.backgroundAlt,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+        style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+          hintStyle: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.slate300),
           border: InputBorder.none,
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 14.w,
+            vertical: 12.h,
+          ),
         ),
       ),
     );
@@ -500,21 +629,21 @@ class RequestDetailsView extends GetView<CreateRequestController> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
         decoration: BoxDecoration(
-          color: _purpleLight,
+          color: AppColors.purpleSurface,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: _purple.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: _purple, size: 16.sp),
+            Icon(icon, color: AppColors.primary, size: 16.sp),
             SizedBox(width: 6.w),
             Text(
               label,
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: _purple,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -528,13 +657,13 @@ class RequestDetailsView extends GetView<CreateRequestController> {
       margin: EdgeInsets.only(bottom: 8.h),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: _greenBg,
+        color: AppColors.mintBg,
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: _green.withOpacity(0.3)),
+        border: Border.all(color: AppColors.successGreen.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: _green, size: 16.sp),
+          Icon(icon, color: AppColors.successGreen, size: 16.sp),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
@@ -542,15 +671,18 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: _green,
+                color: AppColors.successGreen,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(Icons.close_rounded,
-                color: AppColors.errorRed, size: 16.sp),
+            child: Icon(
+              Icons.close_rounded,
+              color: AppColors.errorRed,
+              size: 16.sp,
+            ),
           ),
         ],
       ),
@@ -579,7 +711,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: _slate300,
+                color: AppColors.slate300,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -589,7 +721,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                color: _slate900,
+                color: AppColors.textDark,
               ),
             ),
             SizedBox(height: 20.h),
@@ -598,8 +730,11 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               label: 'Capture Image',
               onTap: () {
                 Get.back();
-                controller.pickImage(ImageSource.camera,
-                    isQr: isQr, isReceipt: isReceipt);
+                controller.pickImage(
+                  ImageSource.camera,
+                  isQr: isQr,
+                  isReceipt: isReceipt,
+                );
               },
             ),
             SizedBox(height: 10.h),
@@ -608,8 +743,11 @@ class RequestDetailsView extends GetView<CreateRequestController> {
               label: 'Upload from Gallery',
               onTap: () {
                 Get.back();
-                controller.pickImage(ImageSource.gallery,
-                    isQr: isQr, isReceipt: isReceipt);
+                controller.pickImage(
+                  ImageSource.gallery,
+                  isQr: isQr,
+                  isReceipt: isReceipt,
+                );
               },
             ),
             SizedBox(height: 20.h),
@@ -630,7 +768,7 @@ class RequestDetailsView extends GetView<CreateRequestController> {
       child: Container(
         padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
-          color: _bg,
+          color: AppColors.backgroundAlt,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
@@ -638,10 +776,10 @@ class RequestDetailsView extends GetView<CreateRequestController> {
             Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: _purpleLight,
+                color: AppColors.purpleSurface,
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(icon, color: _purple, size: 20.sp),
+              child: Icon(icon, color: AppColors.primary, size: 20.sp),
             ),
             SizedBox(width: 14.w),
             Expanded(
@@ -650,11 +788,11 @@ class RequestDetailsView extends GetView<CreateRequestController> {
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: _slate300, size: 20.sp),
+            Icon(Icons.chevron_right_rounded, color: AppColors.slate300, size: 20.sp),
           ],
         ),
       ),

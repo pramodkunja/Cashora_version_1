@@ -5,24 +5,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/accountant_reports_model.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/mappers/expense_category_visuals.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/widgets/app_loader.dart';
+import '../../../../utils/widgets/skeletons/page_skeletons.dart';
 import '../../controllers/accountant_analytics_controller.dart';
 
 class FinancialReportsView extends GetView<AccountantAnalyticsController> {
   const FinancialReportsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
           _buildHeader(context),
@@ -69,7 +64,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.arrow_back_rounded,
@@ -90,7 +85,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
           Container(
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.history_rounded,
@@ -137,38 +132,56 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
             style: GoogleFonts.inter(
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
-              color: _slate500,
+              color: AppColors.textSlate,
               letterSpacing: 1,
             ),
           ),
           SizedBox(height: 8.h),
           Obx(() {
-            final filters = controller.reportSummary.value?.filters.categories ??
-                ['All Categories'];
+            // "All Categories" is always present as the first option so
+            // users can clear the filter. Backend categories follow.
+            final backendCats =
+                controller.reportSummary.value?.filters.categories ??
+                    const <String>[];
+            final items = <String>['All Categories', ...backendCats];
+
+            // If the controller's current value isn't in the list (e.g.
+            // backend hasn't loaded yet, or returned a different set on
+            // refresh), fall back to "All Categories" so the dropdown
+            // never shows a phantom selection.
+            final currentValue = items.contains(controller.reportCategory.value)
+                ? controller.reportCategory.value
+                : 'All Categories';
+
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
-                color: _bg,
+                color: AppColors.backgroundAlt,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
-                  value: filters.contains(controller.reportCategory.value)
-                      ? controller.reportCategory.value
-                      : (filters.isNotEmpty
-                          ? filters.first
-                          : 'All Categories'),
+                  value: currentValue,
                   isExpanded: true,
                   icon: Icon(Icons.keyboard_arrow_down_rounded,
-                      size: 20.sp, color: _slate500),
-                  style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+                      size: 20.sp, color: AppColors.textSlate),
+                  style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
                   dropdownColor: Colors.white,
-                  items: filters
-                      .map((e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e),
-                          ))
+                  items: items
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(
+                            e == 'All Categories' ? e : _prettyCategory(e),
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: controller.onReportCategoryChanged,
                 ),
@@ -191,7 +204,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _purple,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -214,7 +227,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
           style: GoogleFonts.inter(
             fontSize: 10.sp,
             fontWeight: FontWeight.w700,
-            color: _slate500,
+            color: AppColors.textSlate,
             letterSpacing: 1,
           ),
         ),
@@ -223,7 +236,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
           () => Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: _bg,
+              color: AppColors.backgroundAlt,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
@@ -235,11 +248,11 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
                 Icon(Icons.calendar_today_rounded,
-                    size: 14.sp, color: _slate500),
+                    size: 14.sp, color: AppColors.textSlate),
               ],
             ),
           ),
@@ -252,14 +265,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
     return Obx(() {
       if (controller.isReportLoading.value &&
           controller.reportSummary.value == null) {
-        return Container(
-          padding: EdgeInsets.all(32.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: const AppLoader(),
-        );
+        return const ReportsPreviewSkeleton();
       }
       if (controller.errorMessage.isNotEmpty &&
           controller.reportSummary.value == null) {
@@ -290,12 +296,12 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
             child: Column(
               children: [
                 Icon(Icons.analytics_outlined,
-                    size: 40.sp, color: _slate300),
+                    size: 40.sp, color: AppColors.slate300),
                 SizedBox(height: 10.h),
                 Text(
                   'Generate preview to see results',
                   style: GoogleFonts.inter(
-                      fontSize: 13.sp, color: _slate500),
+                      fontSize: 13.sp, color: AppColors.textSlate),
                 ),
               ],
             ),
@@ -341,7 +347,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: _purple.withOpacity(0.25),
+                color: AppColors.primary.withValues(alpha: 0.25),
                 blurRadius: 20.r,
                 offset: Offset(0, 8.h),
               ),
@@ -355,7 +361,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                   Container(
                     padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Icon(Icons.account_balance_wallet_rounded,
@@ -367,7 +373,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -377,7 +383,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.18),
+                        color: Colors.white.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
@@ -419,7 +425,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                   Container(
                       width: 1,
                       height: 36.h,
-                      color: Colors.white.withOpacity(0.2)),
+                      color: Colors.white.withValues(alpha: 0.2)),
                   Expanded(
                     child: _heroStat(
                       label: 'Average',
@@ -430,7 +436,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                   Container(
                       width: 1,
                       height: 36.h,
-                      color: Colors.white.withOpacity(0.2)),
+                      color: Colors.white.withValues(alpha: 0.2)),
                   Expanded(
                     child: _heroStat(
                       label: 'Categories',
@@ -455,7 +461,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
               '${topCategories.length} of ${byCategory.length}',
               style: GoogleFonts.inter(
                 fontSize: 11.sp,
-                color: _slate500,
+                color: AppColors.textSlate,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -488,19 +494,29 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                           Expanded(
                             child: Text(
                               _prettyCategory(c.key),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
-                                color: _slate900,
+                                color: AppColors.textDark,
                               ),
                             ),
                           ),
-                          Text(
-                            '₹${_formatMoney(c.value)}',
-                            style: GoogleFonts.inter(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: _slate900,
+                          SizedBox(width: 6.w),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '₹${_formatMoney(c.value)}',
+                                maxLines: 1,
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
                             ),
                           ),
                           SizedBox(width: 6.w),
@@ -508,11 +524,12 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 6.w, vertical: 2.h),
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.12),
+                              color: color.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
                               '${(share * 100).toStringAsFixed(0)}%',
+                              maxLines: 1,
                               style: GoogleFonts.inter(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w700,
@@ -548,7 +565,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
           trailing: Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
             decoration: BoxDecoration(
-              color: _purpleLight,
+              color: AppColors.purpleSurface,
               borderRadius: BorderRadius.circular(20.r),
             ),
             child: Text(
@@ -556,7 +573,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
               style: GoogleFonts.inter(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w700,
-                color: _purple,
+                color: AppColors.primary,
               ),
             ),
           ),
@@ -567,13 +584,13 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                     child: Column(
                       children: [
                         Icon(Icons.inbox_rounded,
-                            size: 36.sp, color: _slate300),
+                            size: 36.sp, color: AppColors.slate300),
                         SizedBox(height: 8.h),
                         Text(
                           'No transactions in this period',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: _slate500,
+                            color: AppColors.textSlate,
                           ),
                         ),
                       ],
@@ -602,18 +619,24 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 12.sp, color: Colors.white.withOpacity(0.8)),
+            Icon(icon, size: 12.sp, color: Colors.white.withValues(alpha: 0.8)),
             SizedBox(width: 5.w),
-            Text(
-              label.toUpperCase(),
-              style: GoogleFonts.inter(
-                fontSize: 9.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white.withOpacity(0.8),
-                letterSpacing: 0.6,
+            Flexible(
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withValues(alpha: 0.8),
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
           ],
@@ -624,6 +647,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
           alignment: Alignment.centerLeft,
           child: Text(
             value,
+            maxLines: 1,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,
@@ -641,7 +665,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
       child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: _bg,
+          color: AppColors.backgroundAlt,
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
@@ -650,11 +674,11 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
               width: 38.w,
               height: 38.w,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Icon(
-                _iconForCategory(t.category),
+                ExpenseCategoryVisuals.iconFor(t.category),
                 color: color,
                 size: 18.sp,
               ),
@@ -663,33 +687,45 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     _prettyCategory(t.category),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
-                      color: _slate900,
+                      color: AppColors.textDark,
                     ),
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     _formatReadableDate(t.date),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                     ),
                   ),
                 ],
               ),
             ),
             SizedBox(width: 10.w),
-            Text(
-              '₹${_formatMoney(t.amount)}',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w800,
-                color: _slate900,
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '₹${_formatMoney(t.amount)}',
+                  maxLines: 1,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textDark,
+                  ),
+                ),
               ),
             ),
           ],
@@ -708,25 +744,6 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
     Color(0xFF64748B),
   ];
 
-  IconData _iconForCategory(String raw) {
-    final c = raw.toLowerCase();
-    if (c.contains('travel')) return Icons.flight_rounded;
-    if (c.contains('meal') || c.contains('food')) {
-      return Icons.restaurant_rounded;
-    }
-    if (c.contains('software') || c.contains('saas')) {
-      return Icons.computer_rounded;
-    }
-    if (c.contains('hardware')) return Icons.memory_rounded;
-    if (c.contains('office')) return Icons.shopping_bag_rounded;
-    if (c.contains('transport')) return Icons.directions_car_rounded;
-    if (c.contains('accommod') || c.contains('hotel')) {
-      return Icons.hotel_rounded;
-    }
-    if (c.contains('entertain')) return Icons.movie_rounded;
-    if (c.contains('fuel')) return Icons.local_gas_station_rounded;
-    return Icons.receipt_rounded;
-  }
 
   String _prettyCategory(String raw) {
     if (raw.isEmpty) return 'Uncategorised';
@@ -753,60 +770,70 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
   }
 
   Widget _exportButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: 48.h,
-            child: OutlinedButton.icon(
-              onPressed: controller.exportCsv,
-              icon: Icon(Icons.table_chart_rounded,
-                  color: _purple, size: 16.sp),
-              label: Text(
-                AppText.exportCsv,
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _purple,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: _purple.withOpacity(0.3)),
-                backgroundColor: _purpleLight.withOpacity(0.4),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: SizedBox(
-            height: 48.h,
-            child: ElevatedButton.icon(
-              onPressed: controller.exportPdf,
-              icon: Icon(Icons.picture_as_pdf_rounded, size: 16.sp),
-              label: Text(
-                AppText.exportPdf,
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _purple,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
+    return Obx(() {
+      final enabled = controller.exportsAvailable.value;
+      const disabledTooltip = 'Export is coming soon';
+      return Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 48.h,
+              child: Tooltip(
+                message: enabled ? '' : disabledTooltip,
+                child: OutlinedButton.icon(
+                  onPressed: enabled ? controller.exportCsv : null,
+                  icon: Icon(Icons.table_chart_rounded,
+                      color: enabled ? AppColors.primary : Colors.grey, size: 16.sp),
+                  label: Text(
+                    AppText.exportCsv,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: enabled ? AppColors.primary : Colors.grey,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+                    backgroundColor: AppColors.purpleSurface.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+          SizedBox(width: 12.w),
+          Expanded(
+            child: SizedBox(
+              height: 48.h,
+              child: Tooltip(
+                message: enabled ? '' : disabledTooltip,
+                child: ElevatedButton.icon(
+                  onPressed: enabled ? controller.exportPdf : null,
+                  icon: Icon(Icons.picture_as_pdf_rounded, size: 16.sp),
+                  label: Text(
+                    AppText.exportPdf,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _card({
@@ -823,7 +850,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -837,10 +864,10 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: _purpleLight,
+                  color: AppColors.purpleSurface,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: _purple, size: 16.sp),
+                child: Icon(icon, color: AppColors.primary, size: 16.sp),
               ),
               SizedBox(width: 10.w),
               Expanded(
@@ -849,7 +876,7 @@ class FinancialReportsView extends GetView<AccountantAnalyticsController> {
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
               ),

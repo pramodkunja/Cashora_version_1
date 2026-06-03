@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository.dart';
+import 'fcm_service.dart';
 import 'storage_service.dart';
 import '../../routes/app_routes.dart'; // Added import
 
@@ -33,8 +34,10 @@ class AuthService extends GetxService {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
         currentUser.value = user;
-        // Do NOT set isSessionVerified to true automatically on init
-        // It must be verified via Biometric or Login
+        // Register FCM token on app start if logged in
+        if (Get.isRegistered<FCMService>()) {
+          Get.find<FCMService>().registerToken();
+        }
       } else {
         await logout();
       }
@@ -59,9 +62,19 @@ class AuthService extends GetxService {
     currentUser.value = user;
     verifySession(); // Login explicitly verifies session
     await _storageService.write('auth_token', token);
+
+    // Register FCM token after successful login
+    if (Get.isRegistered<FCMService>()) {
+      await Get.find<FCMService>().registerToken();
+    }
   }
 
   Future<void> logout() async {
+    // Best-effort: unregister FCM token before clearing auth state
+    if (Get.isRegistered<FCMService>()) {
+      await Get.find<FCMService>().unregisterToken();
+    }
+
     try {
       await _authRepository.logout();
     } catch (e) {
@@ -72,8 +85,11 @@ class AuthService extends GetxService {
     isSessionVerified.value = false;
     await _storageService.delete('auth_token');
 
-    // Force clear all GetX controllers and state
-    if (Get.context != null) {
+    // Force clear all GetX controllers and state. Skip the navigation
+    // if we're already on the login route — calling Get.offAllNamed
+    // repeatedly to the same route causes the screen to rebuild and
+    // replay its entrance animations (visible as a zigzag flash).
+    if (Get.context != null && Get.currentRoute != AppRoutes.LOGIN) {
       Get.offAllNamed(AppRoutes.LOGIN);
     }
   }

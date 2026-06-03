@@ -29,6 +29,14 @@ class AppColors {
 
   // Borders & Dividers
   static const Color borderLight = Color(0xFFE2E8F0); // Slate 200
+  static const Color slate100 = Color(0xFFF1F5F9); // Slate 100 — light dividers
+  static const Color slate300 = Color(0xFFCBD5E1); // Slate 300 — placeholder text / muted icons
+
+  // Soft purple surface used as icon-tile background / inactive chip
+  static const Color purpleSurface = Color(0xFFF0EDFF);
+
+  // Lighter red background for soft warning surfaces (≠ errorBg)
+  static const Color redBg = Color(0xFFFEF2F2);
 
   // Status Colors
   static const Color successGreen = Color(0xFF15803D); // Green 700

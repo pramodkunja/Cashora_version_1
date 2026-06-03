@@ -1,17 +1,23 @@
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/services/network_service.dart';
 import '../../../../data/repositories/accountant_repository.dart';
 
+/// Backs the "Today's Transactions" view-all screen on the accountant
+/// home. Calls `GET /accountant/transactions/today` (the new endpoint
+/// requested in MISSING_FIELDS.md Appendix A).
 class CashFlowHistoryController extends GetxController {
   late final AccountantRepository _repository;
 
-  // 0: This Month, 1: Last 3 Months, 2: Custom
-  final selectedFilter = 0.obs;
-
   final transactions = <Map<String, dynamic>>[].obs;
-  final totalExpenses = 0.0.obs;
-  final monthYear = ''.obs;
+
+  final date = ''.obs;
+  final totalIn = 0.0.obs;
+  final totalOut = 0.0.obs;
+  final net = 0.0.obs;
+  final count = 0.obs;
+
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
@@ -22,58 +28,31 @@ class CashFlowHistoryController extends GetxController {
     fetch();
   }
 
-  void changeFilter(int index) {
-    selectedFilter.value = index;
-    fetch();
-  }
-
   Future<void> fetch() async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final now = DateTime.now();
-      int? month;
-      int? year;
+      final data = await _repository.getTodayTransactions();
 
-      switch (selectedFilter.value) {
-        case 0: // This Month
-          month = now.month;
-          year = now.year;
-          break;
-        case 1: // Last 3 Months — backend supports single month, default to last month
-          final last = DateTime(now.year, now.month - 1, 1);
-          month = last.month;
-          year = last.year;
-          break;
-        case 2: // Custom — leave unset; backend defaults to current month
-          break;
-      }
+      date.value = data['date']?.toString() ?? '';
+      totalIn.value = (data['total_in'] as num?)?.toDouble() ?? 0.0;
+      totalOut.value = (data['total_out'] as num?)?.toDouble() ?? 0.0;
+      net.value = (data['net'] as num?)?.toDouble() ??
+          (totalIn.value - totalOut.value);
+      count.value = (data['count'] as num?)?.toInt() ?? 0;
 
-      final data = await _repository.getReportsSummary(
-        month: month,
-        year: year,
-      );
-
-      final summary = data['previewSummary'];
-      if (summary is Map) {
-        monthYear.value = (summary['monthYear'] ?? '').toString();
-        totalExpenses.value =
-            (summary['totalExpenses'] as num?)?.toDouble() ?? 0.0;
-        final tx = summary['transactions'];
-        if (tx is List) {
-          transactions.assignAll(
-            tx.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
-          );
-        } else {
-          transactions.clear();
-        }
+      final rows = data['transactions'];
+      if (rows is List) {
+        transactions.assignAll(
+          rows.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+        );
       } else {
         transactions.clear();
-        totalExpenses.value = 0.0;
       }
     } catch (e) {
       errorMessage.value =
-          _extractErrorMessage(e, fallback: 'Failed to load history');
+          _extractErrorMessage(e, fallback: 'Failed to load transactions');
+      if (kDebugMode) debugPrint('[cash_flow_history] fetch error: $e');
     } finally {
       isLoading.value = false;
     }
@@ -82,12 +61,16 @@ class CashFlowHistoryController extends GetxController {
   static String _extractErrorMessage(Object e, {required String fallback}) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['detail'] != null) return data['detail'].toString();
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['detail'] != null) {
+        return data['detail'].toString();
+      }
+      if (data is Map && data['message'] != null) {
+        return data['message'].toString();
+      }
       final code = e.response?.statusCode;
       if (code == 401) return 'Session expired. Please log in again.';
       if (code == 403) return 'You do not have accountant access.';
-      if (code == 400) return 'Invalid filter values.';
+      if (code == 404) return 'Today\'s transactions endpoint not available yet.';
     }
     return fallback;
   }

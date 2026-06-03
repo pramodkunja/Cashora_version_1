@@ -30,6 +30,7 @@ class AppLifecycleManager extends GetxService with WidgetsBindingObserver {
     */
   }
 
+  // ignore: unused_element
   Future<void> _checkAndLock() async {
     // 1. Check if user is logged in
     if (!_authService.isLoggedIn) return;

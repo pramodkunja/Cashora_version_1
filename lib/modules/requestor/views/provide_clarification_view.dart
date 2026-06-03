@@ -3,77 +3,23 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
+import 'package:cash/utils/widgets/app_gradient_header.dart';
 import '../../../../utils/app_text.dart';
+import '../../../../utils/date_helper.dart';
 import '../controllers/provide_clarification_controller.dart';
 
 class ProvideClarificationView extends GetView<ProvideClarificationController> {
-  const ProvideClarificationView({Key? key}) : super(key: key);
+  const ProvideClarificationView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _amber = AppColors.warningOrange;
-  static const _amberBg = Color(0xFFFFFBEB);
-  static const _red = AppColors.errorRed;
-  static const _redBg = Color(0xFFFEF2F2);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: Column(
         children: [
-          _buildHeader(context),
+          AppGradientHeader(title: AppText.provideClarificationTitle),
           Expanded(child: Obx(() => _buildBody(context))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            AppText.provideClarificationTitle,
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
         ],
       ),
     );
@@ -82,11 +28,15 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
   Widget _buildBody(BuildContext context) {
     final request = controller.request;
     final status = request['status'] as String? ?? '';
-    final isPendingMyResponse = status == 'clarification' ||
-        status == 'clarification_requested' ||
-        status == 'clarification_required';
     final isApproved = status == 'approved' || status == 'auto_approved';
     final isRejected = status == 'rejected';
+
+    // Show the response form only when the LATEST clarification has an
+    // outstanding question (response is empty). After the requestor
+    // submits, the local optimistic update marks the response as set, so
+    // the form hides automatically until the admin asks again.
+    final isPendingMyResponse =
+        _hasOutstandingClarification(request) && !isApproved && !isRejected;
 
     return Column(
       children: [
@@ -140,26 +90,26 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
     late String title, subtitle;
 
     if (isPending) {
-      bg = _amberBg;
-      color = _amber;
+      bg = AppColors.amberBg;
+      color = AppColors.warningOrange;
       icon = Icons.priority_high_rounded;
       title = AppText.actionRequired;
       subtitle = AppText.approverRequestedClarification;
     } else if (isApproved) {
-      bg = _greenBg;
-      color = _green;
+      bg = AppColors.mintBg;
+      color = AppColors.successGreen;
       icon = Icons.check_circle_rounded;
       title = AppText.approved;
       subtitle = AppText.requestApproved;
     } else if (isRejected) {
-      bg = _redBg;
-      color = _red;
+      bg = AppColors.redBg;
+      color = AppColors.errorRed;
       icon = Icons.cancel_rounded;
       title = AppText.rejected;
       subtitle = AppText.rejected;
     } else {
-      bg = _purpleLight;
-      color = _purple;
+      bg = AppColors.purpleSurface;
+      color = AppColors.primary;
       icon = Icons.mark_email_read_rounded;
       title = AppText.responseSent;
       subtitle = AppText.clarificationSubmittedWait;
@@ -246,7 +196,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -263,7 +213,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                   style: GoogleFonts.inter(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
                 SizedBox(height: 3.h),
@@ -271,7 +221,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                   category,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: _slate500,
+                    color: AppColors.textSlate,
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -279,7 +229,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                   decoration: BoxDecoration(
-                    color: _purpleLight,
+                    color: AppColors.purpleSurface,
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
@@ -287,7 +237,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
-                      color: _purple,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -299,7 +249,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
             width: 72.w,
             height: 72.w,
             decoration: BoxDecoration(
-              color: _purpleLight,
+              color: AppColors.purpleSurface,
               borderRadius: BorderRadius.circular(14.r),
               image: receiptUrl != null && receiptUrl.isNotEmpty
                   ? DecorationImage(
@@ -310,7 +260,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
             ),
             child: (receiptUrl == null || receiptUrl.isEmpty)
                 ? Icon(Icons.receipt_long_rounded,
-                    color: _purple, size: 28.sp)
+                    color: AppColors.primary, size: 28.sp)
                 : null,
           ),
         ],
@@ -339,7 +289,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
             borderRadius: BorderRadius.circular(14.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10.r,
                 offset: Offset(0, 3.h),
               ),
@@ -361,7 +311,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
         child: Center(
           child: Text(
             'No clarification history yet',
-            style: GoogleFonts.inter(fontSize: 12.sp, color: _slate500),
+            style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSlate),
           ),
         ),
       );
@@ -374,7 +324,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
         borderRadius: BorderRadius.circular(14.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10.r,
             offset: Offset(0, 3.h),
           ),
@@ -408,8 +358,8 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
     required String text,
     required String time,
   }) {
-    final bg = isApprover ? _purpleLight : _greenBg;
-    final color = isApprover ? _purple : _green;
+    final bg = isApprover ? AppColors.purpleSurface : AppColors.mintBg;
+    final color = isApprover ? AppColors.primary : AppColors.successGreen;
     final label = isApprover ? AppText.approver : 'You';
     final icon = isApprover ? Icons.support_agent_rounded : Icons.person_rounded;
 
@@ -441,7 +391,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                     time,
                     style: GoogleFonts.inter(
                       fontSize: 10.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                     ),
                   ),
                 ],
@@ -463,7 +413,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                   text,
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
-                    color: _slate900,
+                    color: AppColors.textDark,
                     height: 1.4,
                   ),
                 ),
@@ -495,7 +445,7 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -506,18 +456,18 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: _bg,
+              color: AppColors.backgroundAlt,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: TextField(
               controller: controller.responseController,
               maxLines: 5,
-              style: GoogleFonts.inter(fontSize: 14.sp, color: _slate900),
+              style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textDark),
               decoration: InputDecoration(
                 hintText: AppText.typeYourExplanation,
                 hintStyle:
-                    GoogleFonts.inter(fontSize: 13.sp, color: _slate300),
+                    GoogleFonts.inter(fontSize: 13.sp, color: AppColors.slate300),
                 border: InputBorder.none,
                 contentPadding:
                     EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -551,9 +501,9 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _purple,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: _purple.withOpacity(0.5),
+                  disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14.r),
@@ -575,20 +525,27 @@ class ProvideClarificationView extends GetView<ProvideClarificationController> {
         style: GoogleFonts.inter(
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
-          color: _slate500,
+          color: AppColors.textSlate,
           letterSpacing: 1.2,
         ),
       ),
     );
   }
 
-  String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return AppText.recently;
-    try {
-      final dt = DateTime.parse(dateStr);
-      return '${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
-    } catch (_) {
-      return AppText.recently;
-    }
+  String _formatDate(String dateStr) =>
+      DateHelper.formatDateTime(dateStr, fallback: AppText.recently);
+
+  /// Returns true when the latest clarification has a question but no
+  /// response yet. That's the only state where the requestor needs to type
+  /// and submit — after responding, this returns false until the admin
+  /// asks again (which appends a new clarification with an empty response).
+  bool _hasOutstandingClarification(Map request) {
+    final raw = request['clarifications'];
+    if (raw is! List || raw.isEmpty) return false;
+    final last = raw.last;
+    if (last is! Map) return false;
+    final question = last['question']?.toString().trim() ?? '';
+    final response = last['response']?.toString().trim() ?? '';
+    return question.isNotEmpty && response.isEmpty;
   }
 }

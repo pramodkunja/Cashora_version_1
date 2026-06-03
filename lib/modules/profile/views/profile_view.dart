@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/widgets/app_loader.dart';
+import '../../../../utils/widgets/skeletons/page_skeletons.dart';
 import '../../../../routes/app_routes.dart';
 import '../controllers/profile_controller.dart';
 import '../../admin/views/widgets/admin_bottom_bar.dart';
@@ -13,25 +13,17 @@ import '../../../../core/services/auth_service.dart';
 
 class ProfileView extends GetView<ProfileController> {
   final bool isTab;
-  const ProfileView({Key? key, this.isTab = false}) : super(key: key);
+  const ProfileView({super.key, this.isTab = false});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
-  static const _green = Color(0xFF16A34A);
-  static const _greenBg = Color(0xFFF0FDF4);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       bottomNavigationBar: isTab ? null : _buildBottomBar(),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const AppLoader();
+          return const ProfilePageSkeleton();
         }
         return CustomScrollView(
           slivers: [
@@ -106,7 +98,7 @@ class ProfileView extends GetView<ProfileController> {
                   child: Container(
                     padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.arrow_back_rounded,
@@ -131,7 +123,7 @@ class ProfileView extends GetView<ProfileController> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
+                    color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
@@ -154,11 +146,11 @@ class ProfileView extends GetView<ProfileController> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                  color: Colors.white.withOpacity(0.4), width: 2.5.w),
+                  color: Colors.white.withValues(alpha: 0.4), width: 2.5.w),
             ),
             child: CircleAvatar(
               radius: 42.r,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               child: Obx(
                 () => Text(
                   _initials(controller.rxName.value),
@@ -198,7 +190,7 @@ class ProfileView extends GetView<ProfileController> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
@@ -256,7 +248,7 @@ class ProfileView extends GetView<ProfileController> {
     return _card([
       _actionRow(Icons.people_outline_rounded, AppText.manageUsers,
           controller.navigateToManageUsers,
-          accent: _green, accentBg: _greenBg),
+          accent: AppColors.successGreen, accentBg: AppColors.mintBg),
       _actionRow(Icons.business_rounded, 'Manage Departments',
           () => Get.toNamed(AppRoutes.ADMIN_DEPARTMENTS)),
       _actionRow(Icons.tune_rounded, 'Set Approval Limits',
@@ -320,7 +312,7 @@ class ProfileView extends GetView<ProfileController> {
         style: GoogleFonts.inter(
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
-          color: _slate500,
+          color: AppColors.textSlate,
           letterSpacing: 1.2,
         ),
       ),
@@ -334,7 +326,7 @@ class ProfileView extends GetView<ProfileController> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12.r,
             offset: Offset(0, 3.h),
           ),
@@ -360,10 +352,10 @@ class ProfileView extends GetView<ProfileController> {
           Container(
             padding: EdgeInsets.all(9.w),
             decoration: BoxDecoration(
-              color: _purpleLight,
+              color: AppColors.purpleSurface,
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: _purple, size: 18.sp),
+            child: Icon(icon, color: AppColors.primary, size: 18.sp),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -375,7 +367,7 @@ class ProfileView extends GetView<ProfileController> {
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
-                    color: _slate500,
+                    color: AppColors.textSlate,
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -384,7 +376,7 @@ class ProfileView extends GetView<ProfileController> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: _slate900,
+                    color: AppColors.textDark,
                   ),
                 ),
               ],
@@ -397,8 +389,8 @@ class ProfileView extends GetView<ProfileController> {
 
   Widget _actionRow(IconData icon, String title, VoidCallback onTap,
       {Color? accent, Color? accentBg}) {
-    final color = accent ?? _purple;
-    final bg = accentBg ?? _purpleLight;
+    final color = accent ?? AppColors.primary;
+    final bg = accentBg ?? AppColors.purpleSurface;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
@@ -421,11 +413,11 @@ class ProfileView extends GetView<ProfileController> {
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: _slate300, size: 22.sp),
+            Icon(Icons.chevron_right_rounded, color: AppColors.slate300, size: 22.sp),
           ],
         ),
       ),

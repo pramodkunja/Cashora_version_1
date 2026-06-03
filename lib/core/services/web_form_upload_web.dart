@@ -49,8 +49,10 @@ Future<Map<String, dynamic>> webMultipartPost({
     // Blob with explicit MIME type — FastAPI validates this
     final blob = html.Blob([bytes], mime);
     nativeFormData.appendBlob(fieldKey, blob, filename);
-    if (kDebugMode) debugPrint('Appended file: key=$fieldKey, filename=$filename, '
+    if (kDebugMode) {
+      debugPrint('Appended file: key=$fieldKey, filename=$filename, '
         'bytes=${bytes.length}, mime=$mime');
+    }
   }
 
   final completer = Completer<Map<String, dynamic>>();
@@ -82,8 +84,10 @@ Future<Map<String, dynamic>> webMultipartPost({
     completer.completeError(Exception('XHR network error during upload'));
   });
 
-  if (kDebugMode) debugPrint('Sending XHR to $url with ${fields.length} fields, '
+  if (kDebugMode) {
+    debugPrint('Sending XHR to $url with ${fields.length} fields, '
       '${files.length} files...');
+  }
   xhr.send(nativeFormData);
   return completer.future;
 }

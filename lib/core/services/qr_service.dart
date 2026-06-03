@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'dart:typed_data';
 
 /// Service to handle QR code scanning and processing
 class QRService extends GetxService {
@@ -11,7 +10,7 @@ class QRService extends GetxService {
   Future<String?> scanQRFromFile(XFile file) async {
     try {
       // Read file as bytes
-      final Uint8List bytes = await file.readAsBytes();
+      final _ = await file.readAsBytes();
       
       // Create a mobile scanner controller
       final controller = MobileScannerController();

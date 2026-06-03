@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../utils/widgets/lazy_indexed_stack.dart';
 import '../controllers/accountant_dashboard_controller.dart';
 import 'widgets/accountant_bottom_bar.dart';
 import 'accountant_home_view.dart';
@@ -8,19 +9,22 @@ import 'accountant_profile_view.dart';
 import 'analytics/spend_analytics_view.dart';
 
 class AccountantDashboardView extends GetView<AccountantDashboardController> {
-  const AccountantDashboardView({Key? key}) : super(key: key);
+  const AccountantDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // LazyIndexedStack only builds a tab the first time it's shown. This
+    // avoids the after-login lag from constructing all 4 tab subtrees
+    // (and their Obx wirings + initial fetches) up front.
     return Scaffold(
       body: Obx(
-        () => IndexedStack(
+        () => LazyIndexedStack(
           index: controller.rxIndex.value,
-          children: const [
-            AccountantHomeView(),
-            AccountantPaymentsView(),
-            SpendAnalyticsView(),
-            AccountantProfileView(),
+          builders: const [
+            _buildHome,
+            _buildPayments,
+            _buildAnalytics,
+            _buildProfile,
           ],
         ),
       ),
@@ -33,3 +37,8 @@ class AccountantDashboardView extends GetView<AccountantDashboardController> {
     );
   }
 }
+
+Widget _buildHome(BuildContext _) => const AccountantHomeView();
+Widget _buildPayments(BuildContext _) => const AccountantPaymentsView();
+Widget _buildAnalytics(BuildContext _) => const SpendAnalyticsView();
+Widget _buildProfile(BuildContext _) => const AccountantProfileView();

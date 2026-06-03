@@ -3,12 +3,11 @@ import 'package:get/get.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/buttons/primary_button.dart';
 import '../../controllers/admin_user_controller.dart';
 import '../widgets/admin_app_bar.dart';
 
 class AdminDeactivateUserView extends GetView<AdminUserController> {
-  const AdminDeactivateUserView({Key? key}) : super(key: key);
+  const AdminDeactivateUserView({super.key});
 
   @override
   @override
@@ -19,7 +18,7 @@ class AdminDeactivateUserView extends GetView<AdminUserController> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Obx(() {
-          final user = controller.rxSelectedUser.value;
+          final user = Map<String, dynamic>.from(controller.rxSelectedUser);
           final name =
               user['full_name'] ??
               user['name'] ??
@@ -100,7 +99,7 @@ class AdminDeactivateUserView extends GetView<AdminUserController> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -141,8 +140,8 @@ class AdminDeactivateUserView extends GetView<AdminUserController> {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: isCurrentlyActive
-                            ? Colors.red.withOpacity(0.1)
-                            : Colors.green.withOpacity(0.1),
+                            ? Colors.red.withValues(alpha: 0.1)
+                            : Colors.green.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

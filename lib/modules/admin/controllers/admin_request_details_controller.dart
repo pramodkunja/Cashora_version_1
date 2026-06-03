@@ -5,7 +5,6 @@ import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/admin_repository.dart';
 import '../../../../core/services/network_service.dart';
 import '../views/widgets/admin_rejection_dialog.dart';
-import '../../../../utils/widgets/app_loader.dart';
 
 class AdminRequestDetailsController extends GetxController {
   late final AdminRepository _adminRepository;
@@ -88,8 +87,8 @@ class AdminRequestDetailsController extends GetxController {
     if (clarificationController.text.isNotEmpty) {
       try {
         isLoading.value = true;
-        final expense_id = request['id'];
-        if (expense_id == null) {
+        final expenseId = request['id'];
+        if (expenseId == null) {
           Get.snackbar('Error', 'Invalid Request ID');
           return;
         }
@@ -97,7 +96,7 @@ class AdminRequestDetailsController extends GetxController {
         // id is likely int from API, but safe cast if needed, though dynamic handles it if repo expects dynamic/int
         // Repo expects int.
         await _adminRepository.askClarification(
-          expense_id,
+          expenseId,
           clarificationController.text,
         );
         Get.offNamed(AppRoutes.ADMIN_CLARIFICATION_SUCCESS);
@@ -140,7 +139,9 @@ class AdminRequestDetailsController extends GetxController {
                     fit: BoxFit.contain,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return const Center(child: AppSpinner());
+                      return const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      );
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Center(

@@ -34,6 +34,7 @@ abstract class AppRoutes {
       '/accountant/payment/completed-details';
   static const ACCOUNTANT_ANALYTICS = '/accountant/analytics';
   static const ACCOUNTANT_FINANCIAL_REPORTS = '/accountant/financial-reports';
+  static const ACCOUNTANT_MANAGE_BALANCES = '/accountant/manage-balances';
 
   // Admin
   static const ADMIN_DASHBOARD = '/admin/dashboard';
@@ -68,7 +69,6 @@ abstract class AppRoutes {
   static const CREATE_REQUEST_SUCCESS = '/create-request/success';
   static const MY_REQUESTS = '/my-requests';
   static const REQUEST_DETAILS_READ = '/request-details-read';
-  static const MONTHLY_SPENT = '/monthly-spent';
   static const REQUESTOR_CLARIFICATION = '/requestor/clarification';
 
   // Notifications

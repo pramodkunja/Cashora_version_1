@@ -7,20 +7,13 @@ import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 
 class OrganizationSuccessView extends StatelessWidget {
-  const OrganizationSuccessView({Key? key}) : super(key: key);
+  const OrganizationSuccessView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -36,18 +29,18 @@ class OrganizationSuccessView extends StatelessWidget {
                       width: 120.w,
                       height: 120.w,
                       decoration: BoxDecoration(
-                        color: _greenBg,
+                        color: AppColors.mintBg,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: _green.withOpacity(0.2),
+                            color: AppColors.successGreen.withValues(alpha: 0.2),
                             blurRadius: 30.r,
                             spreadRadius: 4.r,
                           ),
                         ],
                       ),
                       child: Icon(Icons.check_rounded,
-                          color: _green, size: 64.sp),
+                          color: AppColors.successGreen, size: 64.sp),
                     ),
                   ),
                   SizedBox(height: 32.h),
@@ -56,7 +49,7 @@ class OrganizationSuccessView extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.w800,
-                      color: _slate900,
+                      color: AppColors.textDark,
                       height: 1.3,
                     ),
                     textAlign: TextAlign.center,
@@ -66,7 +59,7 @@ class OrganizationSuccessView extends StatelessWidget {
                     AppText.secureWorkspaceReady,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
-                      color: _slate500,
+                      color: AppColors.textSlate,
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -81,7 +74,7 @@ class OrganizationSuccessView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withValues(alpha: 0.03),
                           blurRadius: 12.r,
                           offset: Offset(0, 3.h),
                         ),
@@ -93,11 +86,11 @@ class OrganizationSuccessView extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.all(10.w),
                           decoration: BoxDecoration(
-                            color: _purpleLight,
+                            color: AppColors.purpleSurface,
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                           child: Icon(Icons.mail_outline_rounded,
-                              color: _purple, size: 20.sp),
+                              color: AppColors.primary, size: 20.sp),
                         ),
                         SizedBox(width: 14.w),
                         Expanded(
@@ -109,7 +102,7 @@ class OrganizationSuccessView extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: _slate900,
+                                  color: AppColors.textDark,
                                 ),
                               ),
                               SizedBox(height: 4.h),
@@ -117,7 +110,7 @@ class OrganizationSuccessView extends StatelessWidget {
                                 AppText.checkInboxDesc,
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
-                                  color: _slate500,
+                                  color: AppColors.textSlate,
                                   height: 1.4,
                                 ),
                               ),
@@ -143,7 +136,7 @@ class OrganizationSuccessView extends StatelessWidget {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _purple,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -161,7 +154,7 @@ class OrganizationSuccessView extends StatelessWidget {
                           AppText.didntReceiveEmail,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: _slate500,
+                            color: AppColors.textSlate,
                           ),
                         ),
                         GestureDetector(
@@ -171,9 +164,9 @@ class OrganizationSuccessView extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
-                              color: _purple,
+                              color: AppColors.primary,
                               decoration: TextDecoration.underline,
-                              decorationColor: _purple,
+                              decorationColor: AppColors.primary,
                             ),
                           ),
                         ),

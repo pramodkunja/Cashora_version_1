@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text_styles.dart';
-import '../../../../utils/widgets/app_loader.dart';
 
 class GenericPaymentListTab extends StatelessWidget {
   final RxList<Map<String, dynamic>> dataList;
@@ -12,12 +11,12 @@ class GenericPaymentListTab extends StatelessWidget {
   final String statusLabel;
 
   const GenericPaymentListTab({
-    Key? key,
+    super.key,
     required this.dataList,
     required this.emptyMessage,
     required this.statusColor,
     required this.statusLabel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,7 @@ class GenericPaymentListTab extends StatelessWidget {
               Icon(
                 Icons.inbox_outlined,
                 size: 48.sp,
-                color: AppColors.textSlate.withOpacity(0.5),
+                color: AppColors.textSlate.withValues(alpha: 0.5),
               ),
               SizedBox(height: 16.h),
               Text(
@@ -61,7 +60,7 @@ class GenericPaymentListTab extends StatelessWidget {
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
-                color: Theme.of(context).dividerColor.withOpacity(0.5),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
               ),
             ),
             child: Column(
@@ -107,7 +106,7 @@ class GenericPaymentListTab extends StatelessWidget {
                     vertical: 4.h,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(

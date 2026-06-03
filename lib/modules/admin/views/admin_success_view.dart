@@ -8,19 +8,13 @@ import '../../../../routes/app_routes.dart';
 import '../controllers/admin_dashboard_controller.dart';
 
 class AdminSuccessView extends StatelessWidget {
-  const AdminSuccessView({Key? key}) : super(key: key);
+  const AdminSuccessView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(24.w),
@@ -31,17 +25,17 @@ class AdminSuccessView extends StatelessWidget {
                 width: 120.w,
                 height: 120.w,
                 decoration: BoxDecoration(
-                  color: _greenBg,
+                  color: AppColors.mintBg,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: _green.withOpacity(0.2),
+                      color: AppColors.successGreen.withValues(alpha: 0.2),
                       blurRadius: 30.r,
                       spreadRadius: 4.r,
                     ),
                   ],
                 ),
-                child: Icon(Icons.check_rounded, color: _green, size: 64.sp),
+                child: Icon(Icons.check_rounded, color: AppColors.successGreen, size: 64.sp),
               ),
               SizedBox(height: 32.h),
               Text(
@@ -49,7 +43,7 @@ class AdminSuccessView extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w800,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -58,7 +52,7 @@ class AdminSuccessView extends StatelessWidget {
                 AppText.approvedSuccessDesc,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
-                  color: _slate500,
+                  color: AppColors.textSlate,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -78,7 +72,7 @@ class AdminSuccessView extends StatelessWidget {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _purple,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text_styles.dart';
 
@@ -9,11 +8,11 @@ class UpdateBalancesDialog extends StatelessWidget {
   final VoidCallback onCancel;
 
   const UpdateBalancesDialog({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSave,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +60,7 @@ class UpdateBalancesDialog extends StatelessWidget {
                   style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.0,
-                    color: AppColors.primaryBlue.withOpacity(0.7),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.7),
                     fontSize: 10,
                   ),
                 ),

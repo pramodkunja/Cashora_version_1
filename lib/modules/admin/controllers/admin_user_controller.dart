@@ -6,7 +6,6 @@ import '../../../../routes/app_routes.dart';
 import '../../../../data/repositories/auth_repository.dart';
 import '../../../../data/repositories/department_repository.dart';
 import '../../../../core/services/auth_service.dart';
-import '../../../../utils/widgets/app_loader.dart';
 
 class AdminUserController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
@@ -117,7 +116,10 @@ class AdminUserController extends GetxController {
     if (!_validateForm()) return;
 
     try {
-      Get.dialog(const Center(child: AppSpinner()), barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(strokeWidth: 3)),
+        barrierDismissible: false,
+      );
 
       final response = await _authRepository.addStaff(
         firstName: firstNameController.text.trim(),
@@ -262,9 +264,12 @@ class AdminUserController extends GetxController {
     try {
       if (!_validateForm()) return;
 
-      Get.dialog(const Center(child: AppSpinner()), barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(strokeWidth: 3)),
+        barrierDismissible: false,
+      );
 
-      final user = rxSelectedUser.value;
+      final user = Map<String, dynamic>.from(rxSelectedUser);
       final userId = user['id']?.toString() ?? '';
 
       if (userId.isEmpty) {
@@ -273,11 +278,12 @@ class AdminUserController extends GetxController {
         return;
       }
 
+      // Email intentionally omitted — backend does not allow email changes
+      // via PATCH /users/update/{id}. The form's email field is read-only.
       final response = await _authRepository.updateUser(
         userId: userId,
         firstName: firstNameController.text.trim(),
         lastName: lastNameController.text.trim(),
-        email: emailController.text.trim(),
         phone: phoneController.text.trim(),
         role: selectedRole.value,
         isActive: rxIsActive.value,
@@ -328,16 +334,19 @@ class AdminUserController extends GetxController {
   final rxIsTermsAccepted = false.obs;
 
   void confirmDeactivate(Map<String, dynamic> user) {
-    rxSelectedUser.value = user;
+    rxSelectedUser.assignAll(user);
     rxIsTermsAccepted.value = false;
     Get.toNamed(AppRoutes.ADMIN_DEACTIVATE_USER);
   }
 
   void toggleUserStatus() async {
     try {
-      Get.dialog(const Center(child: AppSpinner()), barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(strokeWidth: 3)),
+        barrierDismissible: false,
+      );
 
-      final user = rxSelectedUser.value;
+      final user = Map<String, dynamic>.from(rxSelectedUser);
       final userId = user['id']?.toString() ?? '';
       // Determine current status. Default to true if missing.
       final bool isActive = user['isActive'] ?? user['is_active'] ?? true;
@@ -352,71 +361,11 @@ class AdminUserController extends GetxController {
         return;
       }
 
-      // We reusing the PATCH endpoint for both activation and deactivation
-      // In auth_repository.dart, updateUser or a customized call can be used.
-      // Since the user previously modified 'deactivateUser' in repo to use PATCH,
-      // let's create a smarter call here.
-
-      // We will use existing deactivateUser for deactivation (which sets is_active=false)
-      // and a new/modified approach for activation.
-      // Actually, looking at repo, deactivateUser does PATCH is_active: false.
-      // We need a way to set is_active: true.
-      // Let's assume we can use updateUser or modify repo?
-      // The most robust way is to use updateUser from the repo if it supports partial updates
-      // OR call a similar method.
-
-      // Let's check `_authRepository.updateUser` again. It calls patch.
-      // So we can use `_authRepository.updateUser` passing only the fields we want?
-      // No, updateUser parameters are required.
-      // Simple Hack: Call `_authRepository.updateUser` with all existing data but flipped status?
-      // Or better: Create `toggleStack` logic if possible.
-
-      // Since I can't easily change Repo signature right now without viewing it again to be sure:
-      // I will assume I need to use `updateUser` with current values + new status.
-
-      // UPDATE: I can verify AuthRepository content from previous context.
-      // deactivateUser uses PATCH /users/update/$userId with {'is_active': false}.
-      // So I can use the same pattern for activate.
-
-      // Let's use `_authRepository.updateUser` logic but implemented here or better
-      // call a new repo method `activateUser`? No, let's try to be cleaner.
-
-      // I'll stick to `_authRepository.updateUser` with *all* fields filled from current user data
-      // for activation, and `deactivateUser` for deactivation (as it is already specific).
-      // Wait, passing all fields might be risky if we only want to toggle status.
-      // Let's look at `deactivateUser` in repo again... it does a specific PATCH with only `is_active: false`.
-      // I should add `activateUser` to repo or make a generic `updateStatus`.
-      // For now, I will implement `toggleUserStatus` in logic and handle the API call.
-
-      // Logic to ensure first and last names are present
-      String firstName = user['first_name'] ?? '';
-      String lastName = user['last_name'] ?? '';
-
-      if (firstName.isEmpty) {
-        String fullName = user['full_name'] ?? user['name'] ?? '';
-        if (fullName.isNotEmpty) {
-          final names = fullName.split(' ');
-          firstName = names.first;
-          if (names.length > 1) {
-            lastName = names.sublist(1).join(' ');
-          }
-        }
-      }
-
+      // PATCH /users/update/{id} accepts partial updates, so toggling
+      // status only sends `is_active` — no need to echo back full profile.
       final response = newStatus
-          ? await _authRepository.updateUser(
-              // Re-activating
-              userId: userId,
-              firstName: firstName,
-              lastName: lastName,
-              email: user['email'] ?? '',
-              phone: user['phone'] ?? user['phone_number'] ?? '',
-              role: user['role'] ?? 'Requestor',
-              isActive: true,
-            )
-          : await _authRepository.deactivateUser(
-              userId: userId,
-            ); // Deactivating
+          ? await _authRepository.activateUser(userId: userId)
+          : await _authRepository.deactivateUser(userId: userId);
 
       Get.back(); // Close loader
 
@@ -446,7 +395,7 @@ class AdminUserController extends GetxController {
   }
 
   void editUser(Map<String, dynamic> user) {
-    rxSelectedUser.value = user;
+    rxSelectedUser.assignAll(user);
     rxIsActive.value = user['is_active'] ?? user['isActive'] ?? true;
 
     // Pre-fill controllers
@@ -463,13 +412,15 @@ class AdminUserController extends GetxController {
     if (firstNameController.text.isEmpty && user.containsKey('full_name')) {
       final names = (user['full_name'] as String).split(' ');
       if (names.isNotEmpty) firstNameController.text = names.first;
-      if (names.length > 1)
+      if (names.length > 1) {
         lastNameController.text = names.sublist(1).join(' ');
+      }
     } else if (firstNameController.text.isEmpty && user.containsKey('name')) {
       final names = (user['name'] as String).split(' ');
       if (names.isNotEmpty) firstNameController.text = names.first;
-      if (names.length > 1)
+      if (names.length > 1) {
         lastNameController.text = names.sublist(1).join(' ');
+      }
     }
 
     Get.toNamed(AppRoutes.ADMIN_EDIT_USER);

@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../core/services/network_service.dart';
 
@@ -14,6 +13,18 @@ class AdminRepository {
       return response.data as Map<String, dynamic>;
     }
     throw Exception('Invalid dashboard response');
+  }
+
+  /// GET /approver/dashboard-stats
+  ///
+  /// Returns `{ pending_count, total_approved_amount }` for the approver
+  /// dashboard summary cards.
+  Future<Map<String, dynamic>> getApproverDashboardStats() async {
+    final response = await _networkService.get('/approver/dashboard-stats');
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+    return const {};
   }
 
   /// GET /admin/history
@@ -70,14 +81,12 @@ class AdminRepository {
   }) async {
     try {
       final expenseId = id is int ? id : int.parse(id.toString());
-      final data = {'action': action};
-      if (reason != null) {
-        data['rejection_reason'] = reason;
-      }
-
       await _networkService.post(
         '/approver/expenses/$expenseId/decision',
-        data: data,
+        data: {
+          'action': action.toLowerCase().trim(),
+          'rejection_reason': reason?.trim(),
+        },
       );
     } catch (e) {
       if (kDebugMode) debugPrint("Error submitting decision: $e");
@@ -93,11 +102,60 @@ class AdminRepository {
     await submitDecision(id, 'reject', reason: reason);
   }
 
+  /// GET /approver/history/{expense_id}
+  ///
+  /// Returns the clarification thread for the approver-side view of an
+  /// expense. Tolerates every shape FastAPI may emit:
+  ///   - bare list:                   `[ {…}, {…} ]`
+  ///   - wrapped under `history`:     `{ "history": [ … ] }`
+  ///   - wrapped under `clarifications`: `{ "clarifications": [ … ] }`
+  ///   - wrapped under `data`:         `{ "data": [ … ] }`
+  ///   - any first List value in a map (last-resort scan)
+  Future<List<Map<String, dynamic>>> getApproverClarificationHistory(int expenseId) async {
+    try {
+      final response = await _networkService.get('/approver/history/$expenseId');
+      final data = response.data;
+      if (kDebugMode) {
+        debugPrint('[ClarificationRepo] /approver/history/$expenseId → type=${data.runtimeType}');
+        debugPrint('[ClarificationRepo] body: $data');
+      }
+
+      List<dynamic>? rawList;
+      if (data is List) {
+        rawList = data;
+      } else if (data is Map) {
+        for (final key in const ['history', 'clarifications', 'data', 'items', 'results']) {
+          if (data[key] is List) {
+            rawList = data[key] as List;
+            break;
+          }
+        }
+        // Last resort: any value that's a List of Maps.
+        rawList ??= data.values.whereType<List>().firstWhere(
+              (l) => l.isNotEmpty && l.first is Map,
+              orElse: () => const [],
+            );
+      }
+
+      if (rawList == null || rawList.isEmpty) return const [];
+      return rawList
+          .whereType<Map>()
+          .map<Map<String, dynamic>>((m) => Map<String, dynamic>.from(m))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error fetching clarification history: $e');
+      rethrow;
+    }
+  }
+
   Future<void> askClarification(int id, String message) async {
     try {
       await _networkService.post(
         '/approver/ask-clarification',
-        data: {'expense_id': id, 'question': message},
+        data: {
+          'expense_id': id, 
+          'question': message.trim(),
+        },
       );
     } catch (e) {
       if (kDebugMode) debugPrint("Error asking clarification: $e");

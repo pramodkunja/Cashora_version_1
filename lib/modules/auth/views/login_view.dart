@@ -4,457 +4,571 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_text_styles.dart';
 import '../../../../utils/app_text.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginView extends GetView<AuthController> {
-  const LoginView({Key? key}) : super(key: key);
+  const LoginView({super.key});
+
+  // ── Light palette tuned for this screen ───────────────────────────────
+  // Top hero zone uses a soft lavender gradient → fades into the white
+  // sheet below. Same `AppColors.primary` / `AppColors.primaryLight` for
+  // every accent (button, focus, decorations).
+  static const Color _bgA = Color(0xFFF0E9FF); // top
+  static const Color _bgB = Color(0xFFF8F7FF); // mid
+  static const Color _bgC = Color(0xFFEEF2FF); // bottom
+
+  static const Color _ink900 = Color(0xFF0F172A);
+  static const Color _ink700 = Color(0xFF334155);
+  static const Color _ink500 = Color(0xFF64748B);
+  static const Color _ink200 = Color(0xFFE2E8F0);
+  static const Color _surface = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
+    // bottom inset is read once and passed into the sheet so content clears
+    // the home-indicator / gesture bar even though the sheet itself extends
+    // all the way to the bottom edge.
+    final double bottomInset = MediaQuery.of(context).padding.bottom;
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 400.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // ── Logo + Branding ──────────────────────────────
-                  const AnimatedLoginLogo(),
-                  SizedBox(height: 32.h),
-
-                  // ── Form Card ────────────────────────────────────
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24.w,
-                      vertical: 32.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 20.r,
-                          offset: Offset(0, 8.h),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Title
-                        Text(
-                          AppText.welcomeBack,
-                          style: GoogleFonts.inter(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1E293B),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 6.h),
-                        Text(
-                          AppText.signInSubtitle,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF94A3B8),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 28.h),
-
-                        // Email
-                        _buildLabel('Email Address'),
-                        SizedBox(height: 8.h),
-                        Obx(
-                          () => TextField(
-                            controller: controller.emailController,
-                            enabled: !controller.isLoading,
-                            textInputAction: TextInputAction.next,
-                            keyboardType: TextInputType.emailAddress,
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: const Color(0xFF1E293B),
-                            ),
-                            decoration: _inputDecoration(
-                              context,
-                              hint: 'name@company.com',
-                              icon: Icons.email_outlined,
-                              disabled: controller.isLoading,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20.h),
-
-                        // Password
-                        _buildLabel('Password'),
-                        SizedBox(height: 8.h),
-                        Obx(
-                          () => TextField(
-                            controller: controller.passwordController,
-                            obscureText: !controller.isPasswordVisible.value,
-                            enabled: !controller.isLoading,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => controller.login(),
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: const Color(0xFF1E293B),
-                            ),
-                            decoration: _inputDecoration(
-                              context,
-                              hint: '••••••••',
-                              icon: Icons.lock_outline_rounded,
-                              disabled: controller.isLoading,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  controller.isPasswordVisible.value
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: const Color(0xFF94A3B8),
-                                  size: 20.sp,
-                                ),
-                                onPressed: controller.togglePasswordVisibility,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Forgot Password
-                        SizedBox(height: 8.h),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () =>
-                                Get.toNamed(AppRoutes.FORGOT_PASSWORD),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              AppText.forgotPassword,
-                              style: GoogleFonts.inter(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24.h),
-
-                        // Sign In Button
-                        Obx(
-                          () => SizedBox(
-                            width: double.infinity,
-                            height: 52.h,
-                            child: ElevatedButton(
-                              onPressed: controller.isLoading
-                                  ? null
-                                  : controller.login,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor:
-                                    AppColors.primary.withOpacity(0.6),
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                              ),
-                              child: controller.isLoading
-                                  ? SizedBox(
-                                      height: 22.h,
-                                      width: 22.h,
-                                      child: const CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : Text(
-                                      AppText.signIn,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // ── Enterprise Setup Footer ──────────────────────
-                  SizedBox(height: 40.h),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Divider(color: Color(0xFFCBD5E1)),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        child: Text(
-                          AppText.enterpriseSetup,
-                          style: GoogleFonts.inter(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF94A3B8),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ),
-                      const Expanded(
-                        child: Divider(color: Color(0xFFCBD5E1)),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // Setup Org Button — outlined grey pill
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          Get.toNamed(AppRoutes.ORGANIZATION_SETUP),
-                      icon: Icon(
-                        Icons.domain_add_outlined,
-                        size: 20.sp,
-                        color: const Color(0xFF64748B),
-                      ),
-                      label: Text(
-                        AppText.setUpOrganization,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF475569),
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFCBD5E1)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        backgroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      backgroundColor: _bgB,
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          _backgroundLayer(),
+          // SafeArea only on the TOP — the white sheet should fill to the
+          // bottom of the screen instead of stopping above the home bar.
+          SafeArea(
+            top: true,
+            bottom: false,
+            child: Column(
+              children: [
+                _buildHeroZone(),
+                Expanded(child: _buildWhiteSheet(bottomInset)),
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────────────────── BACKGROUND ─────────────────────────
+
+  Widget _backgroundLayer() {
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [_bgA, _bgB, _bgC],
+              stops: [0.0, 0.5, 1.0],
+            ),
+          ),
+        ),
+        // Soft corner blooms — concentrated in the top hero zone for visual
+        // depth. Third bloom on the right-mid adds asymmetry/richness.
+        Positioned(
+          top: -90.h,
+          right: -70.w,
+          child: _bloom(280.w, AppColors.primary, 0.20),
+        ),
+        Positioned(
+          top: 40.h,
+          left: -60.w,
+          child: _bloom(200.w, AppColors.primaryLight, 0.28),
+        ),
+        Positioned(
+          top: 140.h,
+          right: -30.w,
+          child: _bloom(140.w, AppColors.primaryLight, 0.22),
+        ),
+      ],
+    );
+  }
+
+  Widget _bloom(double size, Color color, double opacity) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color.withValues(alpha: opacity), color.withValues(alpha: 0.0)],
         ),
       ),
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 13.sp,
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF334155),
+  // ─────────────────── TOP HERO ZONE (light) ────────────────────
+
+  Widget _buildHeroZone() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(28.w, 20.h, 28.w, 28.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _entranceWrap(
+            duration: const Duration(milliseconds: 600),
+            child: _buildBrandLockup(),
+          ),
+          SizedBox(height: 26.h),
+          _entranceWrap(
+            duration: const Duration(milliseconds: 800),
+            child: Text(
+              'Welcome back.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 38.sp,
+                fontWeight: FontWeight.w700,
+                color: _ink900,
+                letterSpacing: -1.2,
+                height: 1.05,
+              ),
+            ),
+          ),
+          SizedBox(height: 10.h),
+          _entranceWrap(
+            duration: const Duration(milliseconds: 1000),
+            child: Text(
+              'Sign in to manage your petty cash workspace.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: _ink500,
+                height: 1.45,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  InputDecoration _inputDecoration(
-    BuildContext context, {
-    required String hint,
-    required IconData icon,
-    bool disabled = false,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: GoogleFonts.inter(
-        fontSize: 14.sp,
-        color: const Color(0xFFCBD5E1),
-      ),
-      prefixIcon: Icon(icon, color: const Color(0xFF94A3B8), size: 20.sp),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: disabled ? const Color(0xFFF8FAFC) : Colors.white,
-      contentPadding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12.r),
-        borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-    );
-  }
-}
-
-class AnimatedLoginLogo extends StatefulWidget {
-  const AnimatedLoginLogo({Key? key}) : super(key: key);
-
-  @override
-  State<AnimatedLoginLogo> createState() => _AnimatedLoginLogoState();
-}
-
-class _AnimatedLoginLogoState extends State<AnimatedLoginLogo>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  final List<String> _letters = ['C', 'a', 's', 'h', 'o', 'r', 'a'];
-  final List<Animation<double>> _letterFadeAnimations = [];
-  final List<Animation<double>> _letterSlideAnimations = [];
-
-  final String _subtitleText = 'Smart petty cash';
-  late List<String> _subtitleLetters;
-  final List<Animation<double>> _subFadeAnimations = [];
-  final List<Animation<double>> _subSlideAnimations = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _subtitleLetters = _subtitleText.split('');
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
-
-    double step = 0.08;
-    for (int i = 0; i < _letters.length; i++) {
-      double start = i * step;
-      _letterFadeAnimations.add(
-        TweenSequence([
-          TweenSequenceItem(
-              tween: Tween<double>(begin: 0.0, end: 1.0), weight: 10),
-          TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 60),
-          TweenSequenceItem(
-              tween: Tween<double>(begin: 1.0, end: 0.0), weight: 10),
-          TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 20),
-        ]).animate(CurvedAnimation(
-            parent: _controller, curve: Interval(start, 1.0))),
-      );
-      _letterSlideAnimations.add(
-        TweenSequence([
-          TweenSequenceItem(
-              tween: Tween<double>(begin: 10.0, end: 0.0)
-                  .chain(CurveTween(curve: Curves.easeOut)),
-              weight: 10),
-          TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 90),
-        ]).animate(CurvedAnimation(
-            parent: _controller, curve: Interval(start, 1.0))),
-      );
-    }
-
-    double subStart = 0.2;
-    double subStep = 0.03;
-    for (int i = 0; i < _subtitleLetters.length; i++) {
-      double start = subStart + (i * subStep);
-      _subFadeAnimations.add(
-        TweenSequence([
-          TweenSequenceItem(
-              tween: Tween<double>(begin: 0.0, end: 1.0), weight: 10),
-          TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 60),
-          TweenSequenceItem(
-              tween: Tween<double>(begin: 1.0, end: 0.0), weight: 10),
-          TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 20),
-        ]).animate(CurvedAnimation(
-            parent: _controller, curve: Interval(start, 1.0))),
-      );
-      _subSlideAnimations.add(
-        TweenSequence([
-          TweenSequenceItem(
-              tween: Tween<double>(begin: 8.0, end: 0.0)
-                  .chain(CurveTween(curve: Curves.easeOut)),
-              weight: 10),
-          TweenSequenceItem(tween: ConstantTween<double>(0.0), weight: 90),
-        ]).animate(CurvedAnimation(
-            parent: _controller, curve: Interval(start, 1.0))),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/cashora_shield.png', height: 56.h),
-            SizedBox(width: 12.w),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: List.generate(_letters.length, (i) {
-                    return Opacity(
-                      opacity: _letterFadeAnimations[i].value,
-                      child: Transform.translate(
-                        offset: Offset(0, _letterSlideAnimations[i].value),
-                        child: Text(
-                          _letters[i],
-                          style: GoogleFonts.outfit(
-                            fontSize: 36.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            letterSpacing: -0.5,
-                            height: 1.0,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 2.w, top: 2.h),
-                  child: Row(
-                    children: List.generate(_subtitleLetters.length, (i) {
-                      return Opacity(
-                        opacity: _subFadeAnimations[i].value,
-                        child: Transform.translate(
-                          offset: Offset(0, _subSlideAnimations[i].value),
-                          child: Text(
-                            _subtitleLetters[i],
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
-                              height: 1.2,
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
+  Widget _buildBrandLockup() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Shield in a gradient circle, wrapped in a subtle accent ring.
+        Container(
+          padding: EdgeInsets.all(3.w),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.25),
+              width: 1.4,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryLight],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.35),
+                  blurRadius: 14,
                 ),
               ],
             ),
+            child: Image.asset(
+              'assets/images/cashora_shield.png',
+              width: 28.w,
+              height: 28.w,
+            ),
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cashora',
+              style: GoogleFonts.outfit(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+                letterSpacing: -0.5,
+                height: 1.0,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              'Smart petty cash',
+              style: GoogleFonts.inter(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
+                color: _ink500,
+                letterSpacing: 0.2,
+                height: 1.2,
+              ),
+            ),
           ],
+        ),
+      ],
+    );
+  }
+
+  // ─────────────────── WHITE SHEET (form) ────────────────────────
+
+  Widget _buildWhiteSheet(double bottomInset) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(42.r),
+          topRight: Radius.circular(42.r),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.12),
+            blurRadius: 28.r,
+            offset: Offset(0, -10.h),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        // Bottom padding includes the system inset so the last form element
+        // doesn't collide with the home indicator / gesture bar.
+        padding: EdgeInsets.fromLTRB(26.w, 14.h, 26.w, 26.h + bottomInset),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Sheet handle — small ergonomic detail
+            Center(
+              child: Container(
+                width: 44.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: _ink200,
+                  borderRadius: BorderRadius.circular(2.h),
+                ),
+              ),
+            ),
+            SizedBox(height: 22.h),
+            _entranceWrap(
+              duration: const Duration(milliseconds: 900),
+              child: Text(
+                'Sign in to continue',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w800,
+                  color: _ink900,
+                ),
+              ),
+            ),
+            SizedBox(height: 4.h),
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1000),
+              child: Text(
+                'Use your work email to access the dashboard.',
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: _ink500,
+                ),
+              ),
+            ),
+            SizedBox(height: 24.h),
+
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1050),
+              child: Obx(
+                () => TextField(
+                  controller: controller.emailController,
+                  enabled: !controller.isLoading,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
+                  style: GoogleFonts.inter(fontSize: 14.sp, color: _ink900),
+                  cursorColor: AppColors.primary,
+                  decoration: _floatingLabelDecoration(
+                    label: 'Email address',
+                    icon: Icons.mail_outline_rounded,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1100),
+              child: Obx(
+                () => TextField(
+                  controller: controller.passwordController,
+                  obscureText: !controller.isPasswordVisible.value,
+                  enabled: !controller.isLoading,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => controller.login(),
+                  style: GoogleFonts.inter(fontSize: 14.sp, color: _ink900),
+                  cursorColor: AppColors.primary,
+                  decoration: _floatingLabelDecoration(
+                    label: 'Password',
+                    icon: Icons.lock_outline_rounded,
+                    suffix: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: _ink500,
+                        size: 20.sp,
+                      ),
+                      onPressed: controller.togglePasswordVisibility,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: 4.h),
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1150),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Get.toNamed(AppRoutes.FORGOT_PASSWORD),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 4.w, vertical: 4.h),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    AppText.forgotPassword,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 18.h),
+
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1200),
+              child: _buildSignInButton(),
+            ),
+
+            SizedBox(height: 22.h),
+
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1300),
+              child: _buildOrDivider(),
+            ),
+            SizedBox(height: 18.h),
+
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1400),
+              child: _buildSetupOrgButton(),
+            ),
+            SizedBox(height: 24.h),
+
+            _entranceWrap(
+              duration: const Duration(milliseconds: 1500),
+              child: Center(
+                child: Text(
+                  'Need help signing in? Contact your admin.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: _ink500,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────────── BUTTONS ─────────────────────────
+
+  Widget _buildSignInButton() {
+    return Obx(() {
+      final bool busy = controller.isLoading;
+      return Container(
+        height: 56.h,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.r),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: busy
+                ? [
+                    AppColors.primary.withValues(alpha: 0.55),
+                    AppColors.primaryLight.withValues(alpha: 0.55),
+                  ]
+                : [AppColors.primary, AppColors.primaryLight],
+          ),
+          boxShadow: busy
+              ? const []
+              : [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.40),
+                    blurRadius: 20.r,
+                    offset: Offset(0, 10.h),
+                  ),
+                ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: busy ? null : controller.login,
+            borderRadius: BorderRadius.circular(16.r),
+            child: Center(
+              child: busy
+                  ? SizedBox(
+                      height: 22.h,
+                      width: 22.h,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          AppText.signIn,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Icon(Icons.arrow_forward_rounded,
+                            color: Colors.white, size: 18.sp),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildOrDivider() {
+    return Row(
+      children: [
+        Expanded(child: Container(height: 1, color: _ink200)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: Text(
+            'OR',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: _ink500,
+              letterSpacing: 1.6,
+            ),
+          ),
+        ),
+        Expanded(child: Container(height: 1, color: _ink200)),
+      ],
+    );
+  }
+
+  Widget _buildSetupOrgButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52.h,
+      child: OutlinedButton.icon(
+        onPressed: () => Get.toNamed(AppRoutes.ORGANIZATION_SETUP),
+        icon: Icon(Icons.domain_add_outlined, size: 20.sp, color: _ink700),
+        label: Text(
+          AppText.setUpOrganization,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: _ink700,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: _ink200),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          backgroundColor: _surface,
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────── DECORATIONS / HELPERS ─────────────────────
+
+  InputDecoration _floatingLabelDecoration({
+    required String label,
+    required IconData icon,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.inter(
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w500,
+        color: _ink500,
+      ),
+      floatingLabelStyle: GoogleFonts.inter(
+        fontSize: 13.sp,
+        fontWeight: FontWeight.w600,
+        color: AppColors.primary,
+      ),
+      prefixIcon: Padding(
+        padding: EdgeInsets.only(left: 12.w, right: 8.w),
+        child: Icon(icon, color: _ink500, size: 20.sp),
+      ),
+      prefixIconConstraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: _surface,
+      contentPadding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: BorderSide(color: _ink200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: BorderSide(color: _ink200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: BorderSide(color: AppColors.primary, width: 1.8),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: BorderSide(color: _ink200),
+      ),
+    );
+  }
+
+  Widget _entranceWrap({required Widget child, required Duration duration}) {
+    return TweenAnimationBuilder<double>(
+      duration: duration,
+      curve: Curves.easeOutCubic,
+      tween: Tween<double>(begin: 0.0, end: 1.0),
+      builder: (context, t, c) {
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - t)),
+            child: c,
+          ),
         );
       },
+      child: child,
     );
   }
 }

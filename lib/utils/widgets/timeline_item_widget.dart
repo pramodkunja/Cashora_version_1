@@ -14,7 +14,7 @@ class TimelineItemWidget extends StatelessWidget {
   final bool isError;
 
   const TimelineItemWidget({
-    Key? key,
+    super.key,
     required this.question,
     required this.response,
     required this.askedAt,
@@ -23,7 +23,7 @@ class TimelineItemWidget extends StatelessWidget {
     this.isSystemEvent = false,
     this.isSuccess = false,
     this.isError = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

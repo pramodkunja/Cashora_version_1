@@ -7,12 +7,12 @@ class CommonSearchBar extends StatelessWidget {
   final VoidCallback? onFilterTap;
 
   const CommonSearchBar({
-    Key? key,
+    super.key,
     this.hintText = 'Search transactions',
     this.controller,
     this.onChanged,
     this.onFilterTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,18 +8,15 @@ import 'tabs/completed_payments_tab.dart';
 import 'tabs/pending_payments_tab.dart';
 
 class AccountantPaymentsView extends GetView<AccountantPaymentsController> {
-  const AccountantPaymentsView({Key? key}) : super(key: key);
+  const AccountantPaymentsView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: _bg,
+        backgroundColor: AppColors.backgroundAlt,
         body: Column(
           children: [
             _buildHeader(context),
@@ -79,18 +76,6 @@ class AccountantPaymentsView extends GetView<AccountantPaymentsController> {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.filter_list_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
         ],
       ),
     );
@@ -120,15 +105,15 @@ class AccountantPaymentsView extends GetView<AccountantPaymentsController> {
             borderRadius: BorderRadius.circular(9.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 6.r,
                 offset: Offset(0, 1.h),
               ),
             ],
           ),
           indicatorSize: TabBarIndicatorSize.tab,
-          labelColor: _purple,
-          unselectedLabelColor: _slate500,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSlate,
           labelStyle: GoogleFonts.inter(
             fontSize: 13.sp,
             fontWeight: FontWeight.w700,

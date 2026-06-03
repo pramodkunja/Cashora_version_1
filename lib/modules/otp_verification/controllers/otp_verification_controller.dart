@@ -120,8 +120,12 @@ class OtpVerificationController extends BaseController {
   @override
   void onClose() {
     _timer?.cancel();
-    for (var c in otpControllers) c.dispose();
-    for (var f in focusNodes) f.dispose();
+    for (var c in otpControllers) {
+      c.dispose();
+    }
+    for (var f in focusNodes) {
+      f.dispose();
+    }
     super.onClose();
   }
 }

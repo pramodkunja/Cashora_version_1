@@ -4,134 +4,127 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
+import '../../../../utils/widgets/cashora_design.dart';
 import '../../profile/controllers/settings_controller.dart';
 
 class AppearanceView extends GetView<SettingsController> {
-  const AppearanceView({Key? key}) : super(key: key);
-
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _slate300 = Color(0xFFCBD5E1);
-  static const _bg = Color(0xFFF8FAFC);
+  const AppearanceView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return Scaffold(
-      backgroundColor: _bg,
-      body: Column(
+      backgroundColor: CashoraColors.bgB,
+      body: Stack(
         children: [
-          _buildHeader(context),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20.w, 28.h, 20.w, 40.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Section label
-                  Padding(
-                    padding: EdgeInsets.only(left: 4.w),
-                    child: Text(
-                      'APP THEME',
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w700,
-                        color: _slate500,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-
-                  // Theme options card
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 12.r,
-                          offset: Offset(0, 3.h),
+          const AppBackground(),
+          SafeArea(
+            top: true,
+            bottom: false,
+            child: Column(
+              children: [
+                AppTopBar(title: 'Appearance', onBack: () => Get.back()),
+                Expanded(
+                  child: WhiteSheet(
+                    bottomInset: bottomInset,
+                    padding:
+                        const EdgeInsets.fromLTRB(24, 14, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        EntranceWrap(
+                          duration: const Duration(milliseconds: 600),
+                          child: const HeroBadge(
+                            icon: Icons.palette_outlined,
+                            diameter: 84,
+                            iconSize: 38,
+                          ),
+                        ),
+                        SizedBox(height: 18.h),
+                        EntranceWrap(
+                          duration: const Duration(milliseconds: 700),
+                          child: const HeroHeadline(
+                            eyebrow: 'APP THEME',
+                            headline: 'Choose your look',
+                            subtitle:
+                                'Pick the theme that feels best — change it anytime.',
+                          ),
+                        ),
+                        SizedBox(height: 24.h),
+                        EntranceWrap(
+                          duration: const Duration(milliseconds: 850),
+                          child: Obx(
+                            () => Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18.r),
+                                border: Border.all(
+                                    color: CashoraColors.ink200),
+                              ),
+                              child: Column(
+                                children: [
+                                  _option(
+                                    icon: Icons.light_mode_rounded,
+                                    label: AppText.lightTheme,
+                                    subtitle: 'Recommended',
+                                    iconColor: const Color(0xFFF59E0B),
+                                    iconBg: const Color(0xFFFFFBEB),
+                                    selected: controller
+                                            .rxPendingThemeMode.value ==
+                                        0,
+                                    onTap: () => controller.selectTheme(0),
+                                    isFirst: true,
+                                  ),
+                                  Divider(
+                                      height: 0,
+                                      indent: 62.w,
+                                      color: CashoraColors.ink200),
+                                  _option(
+                                    icon: Icons.dark_mode_rounded,
+                                    label: AppText.darkTheme,
+                                    subtitle: 'Easy on the eyes',
+                                    iconColor: const Color(0xFF6366F1),
+                                    iconBg: const Color(0xFFEEF2FF),
+                                    selected: controller
+                                            .rxPendingThemeMode.value ==
+                                        1,
+                                    onTap: () => controller.selectTheme(1),
+                                  ),
+                                  Divider(
+                                      height: 0,
+                                      indent: 62.w,
+                                      color: CashoraColors.ink200),
+                                  _option(
+                                    icon: Icons.settings_suggest_rounded,
+                                    label: AppText.systemDefault,
+                                    subtitle: 'Follows device setting',
+                                    iconColor: const Color(0xFF3B82F6),
+                                    iconBg: const Color(0xFFEFF6FF),
+                                    selected: controller
+                                            .rxPendingThemeMode.value ==
+                                        2,
+                                    onTap: () => controller.selectTheme(2),
+                                    isLast: true,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 28.h),
+                        EntranceWrap(
+                          duration: const Duration(milliseconds: 1050),
+                          child: GradientButton(
+                            label: AppText.saveChanges,
+                            onTap: controller.saveThemeChanges,
+                            leadingIcon: Icons.check_rounded,
+                          ),
                         ),
                       ],
                     ),
-                    child: Obx(
-                      () => Column(
-                        children: [
-                          _buildThemeOption(
-                            icon: Icons.light_mode_rounded,
-                            label: AppText.lightTheme,
-                            subtitle: 'Recommended',
-                            iconColor: const Color(0xFFF59E0B),
-                            iconBg: const Color(0xFFFFFBEB),
-                            selected:
-                                controller.rxPendingThemeMode.value == 0,
-                            onTap: () => controller.selectTheme(0),
-                            isFirst: true,
-                          ),
-                          Divider(
-                              height: 0,
-                              indent: 62.w,
-                              color: const Color(0xFFF1F5F9)),
-                          _buildThemeOption(
-                            icon: Icons.dark_mode_rounded,
-                            label: AppText.darkTheme,
-                            subtitle: 'Easy on the eyes',
-                            iconColor: const Color(0xFF6366F1),
-                            iconBg: const Color(0xFFEEF2FF),
-                            selected:
-                                controller.rxPendingThemeMode.value == 1,
-                            onTap: () => controller.selectTheme(1),
-                          ),
-                          Divider(
-                              height: 0,
-                              indent: 62.w,
-                              color: const Color(0xFFF1F5F9)),
-                          _buildThemeOption(
-                            icon: Icons.settings_suggest_rounded,
-                            label: AppText.systemDefault,
-                            subtitle: 'Follows device setting',
-                            iconColor: const Color(0xFF3B82F6),
-                            iconBg: const Color(0xFFEFF6FF),
-                            selected:
-                                controller.rxPendingThemeMode.value == 2,
-                            onTap: () => controller.selectTheme(2),
-                            isLast: true,
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-
-                  SizedBox(height: 36.h),
-
-                  // Save button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52.h,
-                    child: ElevatedButton(
-                      onPressed: controller.saveThemeChanges,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _purple,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                      ),
-                      child: Text(
-                        AppText.saveChanges,
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -139,51 +132,7 @@ class AppearanceView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 12.h,
-        20.w,
-        20.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            'Appearance',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThemeOption({
+  Widget _option({
     required IconData icon,
     required String label,
     required String subtitle,
@@ -197,17 +146,17 @@ class AppearanceView extends GetView<SettingsController> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.vertical(
-        top: isFirst ? Radius.circular(16.r) : Radius.zero,
-        bottom: isLast ? Radius.circular(16.r) : Radius.zero,
+        top: isFirst ? Radius.circular(18.r) : Radius.zero,
+        bottom: isLast ? Radius.circular(18.r) : Radius.zero,
       ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: selected
             ? BoxDecoration(
-                color: _purpleLight.withOpacity(0.4),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.vertical(
-                  top: isFirst ? Radius.circular(16.r) : Radius.zero,
-                  bottom: isLast ? Radius.circular(16.r) : Radius.zero,
+                  top: isFirst ? Radius.circular(18.r) : Radius.zero,
+                  bottom: isLast ? Radius.circular(18.r) : Radius.zero,
                 ),
               )
             : null,
@@ -230,8 +179,8 @@ class AppearanceView extends GetView<SettingsController> {
                     label,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: _slate900,
+                      fontWeight: FontWeight.w700,
+                      color: CashoraColors.ink900,
                     ),
                   ),
                   SizedBox(height: 1.h),
@@ -239,20 +188,21 @@ class AppearanceView extends GetView<SettingsController> {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
-                      color: _slate500,
+                      color: CashoraColors.ink500,
                     ),
                   ),
                 ],
               ),
             ),
-            // Radio
             Container(
               width: 22.w,
               height: 22.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? _purple : _slate300,
+                  color: selected
+                      ? AppColors.primary
+                      : CashoraColors.ink300,
                   width: 2.w,
                 ),
               ),
@@ -261,8 +211,8 @@ class AppearanceView extends GetView<SettingsController> {
                       child: Container(
                         width: 10.w,
                         height: 10.w,
-                        decoration: const BoxDecoration(
-                          color: _purple,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),

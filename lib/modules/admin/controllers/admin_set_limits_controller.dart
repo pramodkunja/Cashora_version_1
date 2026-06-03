@@ -31,15 +31,13 @@ class AdminSetLimitsController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _orgRepository.getApprovalLimits();
-      if (response != null) {
-        // Backend might return 'deemed_limit' or 'deemed_approval_limit'. Handling both or checking repo.
-        // Assuming consistent naming from previous turn, user changed POST key. GET key usually matches.
-        // Safest to support 'deemed_approval_limit' based on user intent, but fallback to 'deemed_limit'.
-        var val =
-            response['deemed_approval_limit'] ?? response['deemed_limit'] ?? 0;
-        deemedLimitController.text = val == 0 ? '' : val.toString();
-      }
-    } catch (e) {
+      // Backend might return 'deemed_limit' or 'deemed_approval_limit'. Handling both or checking repo.
+      // Assuming consistent naming from previous turn, user changed POST key. GET key usually matches.
+      // Safest to support 'deemed_approval_limit' based on user intent, but fallback to 'deemed_limit'.
+      var val =
+          response['deemed_approval_limit'] ?? response['deemed_limit'] ?? 0;
+      deemedLimitController.text = val == 0 ? '' : val.toString();
+        } catch (e) {
       Get.snackbar('Error', 'Failed to fetch limits: ${e.toString()}');
     } finally {
       isLoading.value = false;

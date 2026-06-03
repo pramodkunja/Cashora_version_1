@@ -1,4 +1,4 @@
-﻿import 'package:get/get.dart';
+import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../core/services/network_service.dart';
@@ -8,6 +8,22 @@ class PaymentRepository {
   final NetworkService _networkService;
 
   PaymentRepository(this._networkService);
+
+  /// Whether the dedicated `/payments/*` router is available on the backend.
+  /// Backend ships these routes today — flag is kept so a runtime 404 can
+  /// still flip it off and gate UI, but it defaults to "available".
+  static final RxBool paymentsAvailable = true.obs;
+
+  /// Generic 404 detector for the payments router. When the router is
+  /// missing, we flip `paymentsAvailable` off so UI buttons disable
+  /// themselves on the next rebuild.
+  bool _isPaymentsRouterMissing(Object e) {
+    if (e is DioException && e.response?.statusCode == 404) {
+      paymentsAvailable.value = false;
+      return true;
+    }
+    return false;
+  }
 
   Future<void> recordPayment({
     required double amount,
@@ -26,7 +42,9 @@ class PaymentRepository {
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
+      paymentsAvailable.value = true;
     } catch (e) {
+      if (_isPaymentsRouterMissing(e)) return;
       rethrow;
     }
   }
@@ -34,6 +52,7 @@ class PaymentRepository {
   Future<List<Map<String, dynamic>>> getPaymentHistory() async {
     try {
       final response = await _networkService.get('/payments/history');
+      paymentsAvailable.value = true;
       if (response.data is List) {
         return (response.data as List)
             .map((e) => e as Map<String, dynamic>)
@@ -41,7 +60,7 @@ class PaymentRepository {
       }
       return [];
     } catch (e) {
-      // Return empty list on error for now, or rethrow based on UI needs
+      _isPaymentsRouterMissing(e);
       return [];
     }
   }
@@ -81,8 +100,15 @@ class PaymentRepository {
         // Explicitly set header as per guide to ensure it's passed correctly
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+      paymentsAvailable.value = true;
       return response.data; // Expecting { "payment_id": "..." }
     } catch (e) {
+      if (_isPaymentsRouterMissing(e)) {
+        return const {
+          'unavailable': true,
+          'message': 'Payment processing coming soon',
+        };
+      }
       rethrow;
     }
   }
@@ -108,8 +134,15 @@ class PaymentRepository {
         },
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+      paymentsAvailable.value = true;
       return response.data;
     } catch (e) {
+      if (_isPaymentsRouterMissing(e)) {
+        return const {
+          'unavailable': true,
+          'message': 'Payment processing coming soon',
+        };
+      }
       rethrow;
     }
   }
@@ -123,12 +156,14 @@ class PaymentRepository {
         '/payments/completed',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+      paymentsAvailable.value = true;
 
       if (response.data is Map && response.data['payments'] is List) {
         return List<Map<String, dynamic>>.from(response.data['payments']);
       }
       return [];
     } catch (e) {
+      _isPaymentsRouterMissing(e);
       if (kDebugMode) debugPrint("Error fetching completed payments: $e");
       return [];
     }
@@ -171,5 +206,34 @@ class PaymentRepository {
       return List<Map<String, dynamic>>.from(response.data);
     }
     return [];
+  }
+
+  Future<Map<String, dynamic>> getPaymentStatus(int expenseId) async {
+    try {
+      final storage = Get.find<StorageService>();
+      final token = await storage.read('auth_token');
+
+      final response = await _networkService.get(
+        '/accountant/expenses/$expenseId/payment-status',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.data is Map<String, dynamic>) {
+        return response.data;
+      }
+      return {'status': 'unknown'};
+    } on DioException catch (e) {
+      // TODO(backend): /accountant/expenses/{id}/payment-status not yet
+      // deployed — surface "Status unknown" instead of an error so the UI
+      // doesn't display a stack trace.
+      if (e.response?.statusCode == 404) {
+        return {'status': 'unknown', 'label': 'Status unknown'};
+      }
+      if (kDebugMode) debugPrint("Error fetching payment status: $e");
+      return {'status': 'error', 'message': e.toString()};
+    } catch (e) {
+      if (kDebugMode) debugPrint("Error fetching payment status: $e");
+      return {'status': 'error', 'message': e.toString()};
+    }
   }
 }

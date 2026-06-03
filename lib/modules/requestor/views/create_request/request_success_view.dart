@@ -8,17 +8,8 @@ import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_text.dart';
 
 class RequestSuccessView extends GetView<CreateRequestController> {
-  const RequestSuccessView({Key? key}) : super(key: key);
+  const RequestSuccessView({super.key});
 
-  static const _purple = AppColors.primary;
-  static const _purpleLight = Color(0xFFF0EDFF);
-  static const _green = AppColors.successGreen;
-  static const _greenBg = Color(0xFFECFDF5);
-  static const _amber = AppColors.warningOrange;
-  static const _amberBg = Color(0xFFFFFBEB);
-  static const _slate900 = AppColors.textDark;
-  static const _slate500 = AppColors.textSlate;
-  static const _bg = Color(0xFFF8FAFC);
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +25,8 @@ class RequestSuccessView extends GetView<CreateRequestController> {
     final attachments = args['attachments'] ?? [];
 
     final isApproved = status == 'auto_approved';
-    final iconColor = isApproved ? _green : _amber;
-    final iconBg = isApproved ? _greenBg : _amberBg;
+    final iconColor = isApproved ? AppColors.successGreen : AppColors.warningOrange;
+    final iconBg = isApproved ? AppColors.mintBg : AppColors.amberBg;
     final mainIcon =
         isApproved ? Icons.check_rounded : Icons.hourglass_top_rounded;
     final title =
@@ -44,7 +35,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
         isApproved ? AppText.fundsAdded : AppText.requestSubmittedDesc;
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: AppColors.backgroundAlt,
       body: SafeArea(
         child: Column(
           children: [
@@ -63,13 +54,13 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 8.r,
                           ),
                         ],
                       ),
                       child: Icon(Icons.close_rounded,
-                          color: _slate900, size: 20.sp),
+                          color: AppColors.textDark, size: 20.sp),
                     ),
                   ),
                 ],
@@ -89,7 +80,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: iconColor.withOpacity(0.2),
+                            color: iconColor.withValues(alpha: 0.2),
                             blurRadius: 30.r,
                             spreadRadius: 3.r,
                           ),
@@ -104,7 +95,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                       style: GoogleFonts.inter(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
-                        color: _slate900,
+                        color: AppColors.textDark,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -115,7 +106,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                         subtitle,
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
-                          color: _slate500,
+                          color: AppColors.textSlate,
                           height: 1.5,
                         ),
                         textAlign: TextAlign.center,
@@ -132,7 +123,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                         borderRadius: BorderRadius.circular(20.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 16.r,
                             offset: Offset(0, 4.h),
                           ),
@@ -146,7 +137,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                             style: GoogleFonts.inter(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w700,
-                              color: _slate500,
+                              color: AppColors.textSlate,
                               letterSpacing: 1.2,
                             ),
                           ),
@@ -156,7 +147,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                             style: GoogleFonts.inter(
                               fontSize: 36.sp,
                               fontWeight: FontWeight.w800,
-                              color: _slate900,
+                              color: AppColors.textDark,
                             ),
                           ),
                           SizedBox(height: 20.h),
@@ -180,15 +171,15 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                             icon: isApproved
                                 ? Icons.check_circle_rounded
                                 : Icons.access_time_rounded,
-                            color: isApproved ? _green : _amber,
-                            bg: isApproved ? _greenBg : _amberBg,
+                            color: isApproved ? AppColors.successGreen : AppColors.warningOrange,
+                            bg: isApproved ? AppColors.mintBg : AppColors.amberBg,
                           ),
                           SizedBox(height: 12.h),
                           _statusRow(
                             label: AppText.paymentStatus,
                             value: paymentStatus,
                             icon: Icons.hourglass_empty_rounded,
-                            color: _slate500,
+                            color: AppColors.textSlate,
                             bg: const Color(0xFFF1F5F9),
                           ),
                         ],
@@ -204,7 +195,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                         onPressed: () =>
                             Get.offAllNamed(AppRoutes.REQUESTOR),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _purple,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -243,7 +234,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                         style: GoogleFonts.inter(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
-                          color: _purple,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -264,10 +255,10 @@ class RequestSuccessView extends GetView<CreateRequestController> {
         Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: _purpleLight,
+            color: AppColors.purpleSurface,
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, color: _purple, size: 16.sp),
+          child: Icon(icon, color: AppColors.primary, size: 16.sp),
         ),
         SizedBox(width: 12.w),
         Expanded(
@@ -278,7 +269,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                 label,
                 style: GoogleFonts.inter(
                   fontSize: 11.sp,
-                  color: _slate500,
+                  color: AppColors.textSlate,
                 ),
               ),
               SizedBox(height: 2.h),
@@ -287,7 +278,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
                 style: GoogleFonts.inter(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: _slate900,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -311,7 +302,7 @@ class RequestSuccessView extends GetView<CreateRequestController> {
           label,
           style: GoogleFonts.inter(
             fontSize: 13.sp,
-            color: _slate500,
+            color: AppColors.textSlate,
           ),
         ),
         Container(

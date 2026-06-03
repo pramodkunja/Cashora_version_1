@@ -7,28 +7,32 @@ class SplashController extends GetxController
     with GetSingleTickerProviderStateMixin {
   final AuthService _authService = Get.find<AuthService>();
 
-  final int splashDuration = 8000;
+  /// Drives the bottom progress bar in [SplashView]. Updated in checkpoints
+  /// coordinated with the view's reveal choreography so the bar fills
+  /// alongside the brand animation instead of finishing early.
   final RxDouble progress = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _startLoading();
+    _runSplashSequence();
   }
 
-  void _startLoading() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    progress.value = 0.3;
+  /// Total wall-clock time on splash ≈ 2600 ms — matches the view's animation
+  /// (2400 ms) plus a brief hold so the completed progress bar is visible
+  /// before we navigate away.
+  Future<void> _runSplashSequence() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    progress.value = 0.30;
 
-    await Future.delayed(const Duration(milliseconds: 1000));
-    progress.value = 0.8;
+    await Future.delayed(const Duration(milliseconds: 900));
+    progress.value = 0.75;
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 700));
     progress.value = 1.0;
 
-    Future.delayed(const Duration(milliseconds: 500), () {
-      _navigateToNextScreen();
-    });
+    await Future.delayed(const Duration(milliseconds: 400));
+    _navigateToNextScreen();
   }
 
   void _navigateToNextScreen() async {
@@ -42,10 +46,8 @@ class SplashController extends GetxController
     final bioEnabled = await storage.read('face_id_enabled');
 
     if (bioEnabled == 'true') {
-      // Biometric lock — user must unlock before accessing the app.
       Get.offAllNamed(AppRoutes.LOCK);
     } else {
-      // No biometric — session is already valid, go straight to dashboard.
       _authService.verifySession();
       _routeToDashboard();
     }
