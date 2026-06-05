@@ -49,6 +49,7 @@ abstract class AppRoutes {
   static const ADMIN_HISTORY = '/admin/history';
 
   static const ADMIN_DEPARTMENTS = '/admin/departments';
+  static const ADMIN_CATEGORIES = '/admin/categories';
   static const ADMIN_USER_LIST = '/admin/users';
   static const ADMIN_ADD_USER = '/admin/users/add';
   static const ADMIN_EDIT_USER = '/admin/users/edit';

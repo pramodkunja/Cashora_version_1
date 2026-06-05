@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../utils/widgets/logout_progress_overlay.dart';
 import 'fcm_service.dart';
 import 'storage_service.dart';
 import '../../routes/app_routes.dart'; // Added import
@@ -14,6 +16,10 @@ class AuthService extends GetxService {
   bool get isLoggedIn => currentUser.value != null;
 
   final RxBool isSessionVerified = false.obs;
+
+  /// Guards the "Logging out…" indicator so it's shown at most once even if
+  /// [logout] is triggered concurrently (e.g. a tap plus a 401 auto-logout).
+  bool _logoutOverlayShown = false;
 
   AuthService(this._authRepository, this._storageService);
 
@@ -70,6 +76,10 @@ class AuthService extends GetxService {
   }
 
   Future<void> logout() async {
+    // Immediately surface a blocking "Logging out…" indicator so the tap has
+    // instant feedback while the network calls below run.
+    _showLoggingOutOverlay();
+
     // Best-effort: unregister FCM token before clearing auth state
     if (Get.isRegistered<FCMService>()) {
       await Get.find<FCMService>().unregisterToken();
@@ -85,6 +95,10 @@ class AuthService extends GetxService {
     isSessionVerified.value = false;
     await _storageService.delete('auth_token');
 
+    // Remove the indicator right before navigating so it doesn't linger on
+    // top of the login screen.
+    _hideLoggingOutOverlay();
+
     // Force clear all GetX controllers and state. Skip the navigation
     // if we're already on the login route — calling Get.offAllNamed
     // repeatedly to the same route causes the screen to rebuild and
@@ -92,5 +106,25 @@ class AuthService extends GetxService {
     if (Get.context != null && Get.currentRoute != AppRoutes.LOGIN) {
       Get.offAllNamed(AppRoutes.LOGIN);
     }
+  }
+
+  // ── Logout indicator ─────────────────────────────────────────────────────
+
+  void _showLoggingOutOverlay() {
+    if (_logoutOverlayShown || Get.context == null) return;
+    _logoutOverlayShown = true;
+    // The overlay paints its own scrim, so keep the dialog barrier transparent
+    // to avoid a doubled dim. Non-dismissible: the user can't cancel mid-logout.
+    Get.dialog(
+      const LogoutProgressOverlay(),
+      barrierDismissible: false,
+      barrierColor: Colors.transparent,
+    );
+  }
+
+  void _hideLoggingOutOverlay() {
+    if (!_logoutOverlayShown) return;
+    _logoutOverlayShown = false;
+    if (Get.isDialogOpen ?? false) Get.back();
   }
 }

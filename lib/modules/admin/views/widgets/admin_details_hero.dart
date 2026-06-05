@@ -20,6 +20,8 @@ class AdminDetailsHero extends StatelessWidget {
   final String requestId;
   final String category;
   final String requestType;
+  final String? title;
+  final VoidCallback? onBack;
 
   const AdminDetailsHero({
     super.key,
@@ -31,6 +33,8 @@ class AdminDetailsHero extends StatelessWidget {
     required this.requestId,
     required this.category,
     required this.requestType,
+    this.title,
+    this.onBack,
   });
 
   @override
@@ -57,7 +61,7 @@ class AdminDetailsHero extends StatelessWidget {
           Row(
             children: [
               GestureDetector(
-                onTap: () => Get.back(),
+                onTap: onBack ?? () => Get.back(),
                 child: Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
@@ -71,7 +75,7 @@ class AdminDetailsHero extends StatelessWidget {
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  AppText.requestDetails,
+                  title ?? AppText.requestDetails,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.h3.copyWith(

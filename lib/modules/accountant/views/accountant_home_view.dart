@@ -4,14 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../routes/app_routes.dart';
 import '../../../../utils/app_colors.dart';
-import 'package:cash/utils/formatters/currency_formatter.dart';
-import 'package:cash/utils/formatters/greeting_formatter.dart';
-import 'package:cash/utils/mappers/expense_category_visuals.dart';
 import '../../../../utils/app_text.dart';
-import '../../../../utils/date_helper.dart';
 import '../../../../utils/widgets/skeletons/page_skeletons.dart';
 import '../controllers/accountant_dashboard_controller.dart';
 import 'cash_flow_history_view.dart';
+import 'widgets/accountant_home_hero_card.dart';
+import 'widgets/accountant_home_transactions.dart';
+import 'widgets/accountant_home_header.dart';
 
 class AccountantHomeView extends GetView<AccountantDashboardController> {
   const AccountantHomeView({super.key});
@@ -37,7 +36,13 @@ class AccountantHomeView extends GetView<AccountantDashboardController> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: _buildHeader(context)),
+              SliverToBoxAdapter(
+                child: AccountantHomeHeader(
+                  shortName: controller.shortName,
+                  onBellTap: () =>
+                      Get.toNamed(AppRoutes.ACCOUNTANT_NOTIFICATIONS),
+                ),
+              ),
 
               if (isFirstLoad) ...[
                 SliverPadding(
@@ -50,14 +55,19 @@ class AccountantHomeView extends GetView<AccountantDashboardController> {
                   data == null) ...[
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(20.w, 40.h, 20.w, 100.h),
-                  sliver: SliverToBoxAdapter(child: _buildErrorState()),
+                  sliver: SliverToBoxAdapter(
+                    child: AccountantHomeErrorState(
+                      message: controller.errorMessage.value,
+                      onRetry: controller.fetchDashboard,
+                    ),
+                  ),
                 ),
               ] else if (data != null) ...[
                 // Hero stat card overlapping the gradient header.
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
-                    child: _buildHeroCard(
+                    child: AccountantHomeHeroCard(
                       open: data.accountOverview.openBalance,
                       closing: data.accountOverview.closingBalance,
                       inHand: data.accountOverview.inHandCash,
@@ -122,9 +132,11 @@ class AccountantHomeView extends GetView<AccountantDashboardController> {
                       ),
                       SizedBox(height: 12.h),
                       if (data.todayTransactions.isEmpty)
-                        _buildEmptyTransactions()
+                        const AccountantHomeEmptyTransactions()
                       else
-                        _buildTransactionList(data.todayTransactions),
+                        AccountantHomeTransactionList(
+                          transactions: data.todayTransactions,
+                        ),
                     ]),
                   ),
                 ),
@@ -146,315 +158,6 @@ class AccountantHomeView extends GetView<AccountantDashboardController> {
           ),
         );
       }),
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════════════
-  // HEADER — gradient purple with greeting + name + date + bell
-  // (Identical pattern to admin + requestor dashboards.)
-  // ════════════════════════════════════════════════════════════════════
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(
-        24.w,
-        MediaQuery.of(context).padding.top + 18.h,
-        24.w,
-        26.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Good ${GreetingFormatter.timeOfDay()}',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.75),
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Obx(
-                  () => Text(
-                    controller.shortName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 26.sp,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      height: 1.15,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      size: 11.sp,
-                      color: Colors.white.withValues(alpha: 0.75),
-                    ),
-                    SizedBox(width: 6.w),
-                    Text(
-                      DateHelper.getFormattedDate(),
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: Colors.white.withValues(alpha: 0.75),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () => Get.toNamed(AppRoutes.ACCOUNTANT_NOTIFICATIONS),
-            child: Container(
-              padding: EdgeInsets.all(11.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.16),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-              ),
-              child: Icon(
-                Icons.notifications_none_rounded,
-                color: Colors.white,
-                size: 22.sp,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════════════
-  // HERO CARD — twin balance tiles on top, full-width "In Hand Cash"
-  // strip on the bottom. Same pattern as admin / requestor heroes.
-  // ════════════════════════════════════════════════════════════════════
-  Widget _buildHeroCard({
-    required double open,
-    required double closing,
-    required double inHand,
-    required String growth,
-  }) {
-    final isPositive =
-        growth.trim().startsWith('+') || (!growth.contains('-') && growth.isNotEmpty);
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22.r),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF5B45B0).withValues(alpha: 0.12),
-            blurRadius: 28.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Top: balance tiles
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 18.h, 14.w, 16.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _heroStatTile(
-                    icon: Icons.lock_clock_rounded,
-                    accent: AppColors.primary,
-                    accentBg: AppColors.purpleSurface,
-                    label: AppText.openBalance,
-                    value: '₹${CurrencyFormatter.inr(open)}',
-                  ),
-                ),
-                Container(width: 1, height: 60.h, color: AppColors.slate100),
-                Expanded(
-                  child: _heroStatTile(
-                    icon: Icons.lock_rounded,
-                    accent: AppColors.primary,
-                    accentBg: AppColors.purpleSurface,
-                    label: AppText.closingBalance,
-                    value: '₹${CurrencyFormatter.inr(closing)}',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Bottom: full-width IN HAND CASH strip
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(22.r),
-              ),
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.mintBg,
-                  const Color(0xFFF0FDF4),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x1410B981),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.account_balance_wallet_rounded,
-                    color: AppColors.successGreen,
-                    size: 20.sp,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'IN HAND CASH',
-                        style: GoogleFonts.inter(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF047857),
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '₹${CurrencyFormatter.inr(inHand)}',
-                          maxLines: 1,
-                          style: GoogleFonts.inter(
-                            fontSize: 22.sp,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF064E3B),
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (growth.isNotEmpty)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isPositive
-                              ? Icons.trending_up_rounded
-                              : Icons.trending_down_rounded,
-                          size: 12.sp,
-                          color: isPositive ? AppColors.successGreen : AppColors.errorRed,
-                        ),
-                        SizedBox(width: 3.w),
-                        Text(
-                          growth,
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w800,
-                            color: isPositive ? AppColors.successGreen : AppColors.errorRed,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _heroStatTile({
-    required IconData icon,
-    required Color accent,
-    required Color accentBg,
-    required String label,
-    required String value,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: accentBg,
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, color: accent, size: 18.sp),
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            label.toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textSlate,
-              letterSpacing: 0.7,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              maxLines: 1,
-              style: GoogleFonts.inter(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
-                height: 1.1,
-                letterSpacing: -0.4,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -608,150 +311,6 @@ class AccountantHomeView extends GetView<AccountantDashboardController> {
             ),
           ),
       ],
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════════════
-  // TRANSACTIONS LIST — category-tinted icons (no more all-purple)
-  // ════════════════════════════════════════════════════════════════════
-  Widget _buildTransactionList(List transactions) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: transactions.length,
-      separatorBuilder: (_, _) => SizedBox(height: 10.h),
-      itemBuilder: (_, i) {
-        final tx = transactions[i];
-        final amount = (tx.amount as num).toDouble();
-        final isExpense = amount < 0;
-        final iconType = tx.iconType.toString().toLowerCase();
-        final iconColor = ExpenseCategoryVisuals.colorFor(iconType);
-        final iconBg = ExpenseCategoryVisuals.bgFor(iconType);
-
-        return Container(
-          padding: EdgeInsets.all(14.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 12.r,
-                offset: Offset(0, 3.h),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44.w,
-                height: 44.w,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(
-                  ExpenseCategoryVisuals.iconFor(iconType),
-                  color: iconColor,
-                  size: 22.sp,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tx.title.toString(),
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textDark,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      tx.subtitle.toString(),
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        color: AppColors.textSlate,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                '${isExpense ? '-' : '+'}₹${CurrencyFormatter.inr(amount.abs())}',
-                style: GoogleFonts.inter(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: isExpense ? AppColors.errorRed : AppColors.successGreen,
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildEmptyTransactions() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 40.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.inbox_rounded, size: 48.sp, color: AppColors.slate300),
-          SizedBox(height: 12.h),
-          Text(
-            'No transactions today',
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSlate,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 20.w),
-      decoration: BoxDecoration(
-        color: AppColors.redBg,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.error_outline_rounded, size: 36.sp, color: AppColors.errorRed),
-          SizedBox(height: 8.h),
-          Obx(
-            () => Text(
-              controller.errorMessage.value,
-              style: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.errorRed),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          TextButton(
-            onPressed: controller.fetchDashboard,
-            child: Text('Retry', style: GoogleFonts.inter(color: AppColors.primary)),
-          ),
-        ],
-      ),
     );
   }
 

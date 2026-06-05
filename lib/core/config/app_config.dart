@@ -25,10 +25,14 @@ class AppConfig {
   // dart.vm.product is true in release/profile, false in debug.
   static const bool kIsDebug = !bool.fromEnvironment('dart.vm.product');
 
-  static const String _override =
-      String.fromEnvironment('API_BASE_URL', defaultValue: '');
-  static const String _envName =
-      String.fromEnvironment('APP_ENV', defaultValue: '');
+  static const String _override = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: '',
+  );
+  static const String _envName = String.fromEnvironment(
+    'APP_ENV',
+    defaultValue: '',
+  );
 
   // === Tier URLs ===
   // Developer LAN host. Plain HTTP — only reachable from on-LAN devices.
@@ -36,7 +40,7 @@ class AppConfig {
   // in android/app/src/main/res/xml/network_security_config.xml.
   static const String _devBaseUrl = 'http://192.168.0.149:8000';
   // Pre-prod environment. Replace with the real staging URL when stood up.
-  static const String _stagingBaseUrl = 'https://cashora-staging.nxsys.in';
+  static const String _stagingBaseUrl = 'https://cashora.nxsys.in';
   // Production — the URL real users hit.
   static const String _prodBaseUrl = 'https://cashora.nxsys.in';
 
@@ -80,9 +84,10 @@ class AppConfig {
       case 'prod':
         return _prodBaseUrl;
     }
-    // Default for both debug and release: hit the production backend.
-    // To use the local dev backend, run with --dart-define=APP_ENV=dev.
-    return _prodBaseUrl;
+    // Default: debug → local dev backend, release/profile → production.
+    // Override either way with --dart-define=APP_ENV=<tier> or
+    // --dart-define=API_BASE_URL=https://...
+    return kIsDebug ? _devBaseUrl : _prodBaseUrl;
   }
 
   // Timeouts (in milliseconds)

@@ -15,6 +15,7 @@ import 'core/managers/app_lifecycle_manager.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/payment_repository.dart';
 import 'data/repositories/department_repository.dart';
+import 'data/repositories/category_repository.dart';
 import 'data/repositories/user_repository.dart';
 import 'data/repositories/notification_repository.dart';
 import 'routes/app_pages.dart';
@@ -80,6 +81,10 @@ Future<void> initServices() async {
   ); // Added Payment Repo
   Get.lazyPut(
     () => DepartmentRepository(Get.find<NetworkService>()),
+    fenix: true,
+  );
+  Get.lazyPut(
+    () => CategoryRepository(Get.find<NetworkService>()),
     fenix: true,
   );
 

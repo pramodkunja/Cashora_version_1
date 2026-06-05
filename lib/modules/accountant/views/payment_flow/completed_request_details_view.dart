@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cash/utils/app_colors.dart';
-import 'package:cash/utils/date_helper.dart';
-import 'package:cash/modules/accountant/views/payment_flow/widgets/completed_audit_trail.dart';
-import 'package:cash/modules/accountant/views/payment_flow/widgets/completed_attachments_card.dart';
-import 'package:cash/modules/accountant/views/payment_flow/widgets/completed_payment_card.dart';
-import 'package:cash/utils/app_text.dart';
-import 'package:cash/utils/widgets/skeletons/skeleton_loader.dart';
-import 'package:cash/modules/accountant/controllers/completed_request_details_controller.dart';
+
+import '../../../../utils/app_colors.dart';
+import '../../../../utils/date_helper.dart';
+import '../../../../utils/widgets/skeletons/skeleton_loader.dart';
+import '../../controllers/completed_request_details_controller.dart';
+import 'widgets/completed_attachments_card.dart';
+import 'widgets/completed_audit_trail.dart';
+import 'widgets/completed_details_header.dart';
+import 'widgets/completed_details_hero.dart';
+import 'widgets/completed_details_info_card.dart';
+import 'widgets/completed_payment_card.dart';
 
 class CompletedRequestDetailsView extends StatelessWidget {
   const CompletedRequestDetailsView({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
         if (payment.isEmpty) {
           return _buildErrorState(context, 'No details available');
         }
-        return _buildBody(context, payment);
+        return _buildBody(payment);
       }),
     );
   }
@@ -40,7 +42,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
   Widget _buildErrorState(BuildContext context, String message) {
     return Column(
       children: [
-        _buildHeader(context, referenceCode: '---'),
+        const CompletedDetailsHeader(referenceCode: '---'),
         Expanded(
           child: Center(
             child: Padding(
@@ -68,7 +70,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, Map<String, dynamic> payment) {
+  Widget _buildBody(Map<String, dynamic> payment) {
     final amount = double.tryParse(payment['amount']?.toString() ?? '0') ?? 0.0;
     final createdAt = payment['created_at']?.toString() ?? '';
     final approvedAt = payment['approved_at']?.toString() ?? '';
@@ -82,20 +84,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
 
     final requestorName = _readRequestorName(payment);
     final requestorEmail = _readRequestorEmail(payment);
-
-    // Department can come as a flat string OR nested under requestor/user.
-    String department = payment['department']?.toString() ?? '';
-    if (department.isEmpty || department == 'null') {
-      department = payment['department_name']?.toString() ?? '';
-    }
-    if (department.isEmpty || department == 'null') {
-      final r = payment['requestor'];
-      if (r is Map) {
-        department = (r['department'] ?? r['department_name'] ?? '').toString();
-      }
-    }
-    if (department.isEmpty || department == 'null') department = '---';
-
+    final department = _readDepartment(payment);
     final vendorName = (payment['vendor_name'] ??
             payment['vendor'] ??
             payment['payee_name'] ??
@@ -105,16 +94,7 @@ class CompletedRequestDetailsView extends StatelessWidget {
 
     final purpose = payment['purpose']?.toString() ?? '---';
     final description = payment['description']?.toString() ?? '---';
-    final categoryKey = payment['category']?.toString() ?? '';
-    final categoryMap = {
-      'office_supplies': 'Office Supplies',
-      'travel': 'Travel',
-      'meals': 'Meals',
-      'software': 'Software',
-      'hardware': 'Hardware',
-    };
-    final category = categoryMap[categoryKey] ??
-        (categoryKey.replaceAll('_', ' ').capitalizeFirst ?? '---');
+    final category = _prettyCategory(payment['category']?.toString() ?? '');
 
     final referenceCode = payment['request_id']?.toString() ??
         payment['id']?.toString() ??
@@ -133,19 +113,19 @@ class CompletedRequestDetailsView extends StatelessWidget {
 
     return Column(
       children: [
-        _buildHeader(context, referenceCode: referenceCode),
+        CompletedDetailsHeader(referenceCode: referenceCode),
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 28.h),
             child: Column(
               children: [
-                _buildSuccessHero(
+                CompletedDetailsHero(
                   amount: amount,
                   requestDate: requestDate,
                   paymentDate: paymentDate,
                 ),
                 SizedBox(height: 14.h),
-                _buildRequestInfoCard(
+                CompletedDetailsInfoCard(
                   requestorName: requestorName,
                   requestorEmail: requestorEmail,
                   department: department,
@@ -183,440 +163,12 @@ class CompletedRequestDetailsView extends StatelessWidget {
     );
   }
 
-  // ────────────────────────────────── Header ─────────────────────────────
+  // ────────────────────────── Data extraction ─────────────────────────
+  //
+  // The backend response shape has drifted across releases — these
+  // helpers tolerate every variation we have observed (flat, nested
+  // under `requestor`, nested under `user`, `created_by`, etc.).
 
-  Widget _buildHeader(BuildContext context, {required String referenceCode}) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20.w,
-        MediaQuery.of(context).padding.top + 14.h,
-        20.w,
-        22.h,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.arrow_back_rounded,
-                  color: Colors.white, size: 20.sp),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Payment Details',
-                  style: GoogleFonts.inter(
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  '#$referenceCode',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ──────────────────────────── Success hero card ────────────────────────
-
-  Widget _buildSuccessHero({
-    required double amount,
-    required String requestDate,
-    required String paymentDate,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(22.w, 26.h, 22.w, 22.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.05),
-            blurRadius: 18.r,
-            offset: Offset(0, 6.h),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Circular success badge with ring
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 74.w,
-                height: 74.w,
-                decoration: BoxDecoration(
-                  color: AppColors.successGreen.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              Container(
-                width: 58.w,
-                height: 58.w,
-                decoration: const BoxDecoration(
-                  color: AppColors.successGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.check_rounded,
-                    color: Colors.white, size: 32.sp),
-              ),
-            ],
-          ),
-          SizedBox(height: 14.h),
-          Text(
-            'Payment Successful',
-            style: GoogleFonts.inter(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            AppText.totalPaidAmount,
-            style: GoogleFonts.inter(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSlate,
-              letterSpacing: 0.8,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              '₹${amount.toStringAsFixed(2)}',
-              style: GoogleFonts.inter(
-                fontSize: 34.sp,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
-          SizedBox(height: 20.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundAlt,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Row(
-              children: [
-                Expanded(child: _dateCell('Requested', requestDate)),
-                Container(height: 32.h, width: 1.w, color: AppColors.slate100),
-                Expanded(child: _dateCell('Paid', paymentDate)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _dateCell(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.inter(
-            fontSize: 9.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textSlate,
-            letterSpacing: 0.8,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          value,
-          style: GoogleFonts.inter(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textDark,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ───────────────────────────── Request info ────────────────────────────
-
-  Widget _buildRequestInfoCard({
-    required String requestorName,
-    required String department,
-    required String purpose,
-    required String description,
-    required String category,
-    required String referenceCode,
-    String requestorEmail = '',
-    String vendorName = '',
-  }) {
-    return _sectionCard(
-      icon: Icons.description_rounded,
-      title: AppText.requestInformation,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _infoRow(AppText.requestor, requestorName),
-          if (requestorEmail.isNotEmpty) ...[
-            _divider(),
-            _infoRow('Email', requestorEmail),
-          ],
-          _divider(),
-          _infoRow(AppText.department, department),
-          if (vendorName.isNotEmpty) ...[
-            _divider(),
-            _infoRow('Paid To', vendorName),
-          ],
-          _divider(),
-          _infoRowChip(AppText.category, category),
-          _divider(),
-          _infoBlock(AppText.purpose, purpose),
-          _divider(),
-          _infoBlock(AppText.description, description),
-          _divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                AppText.referenceCode,
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: AppColors.textSlate,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 10.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: AppColors.purpleSurface,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Text(
-                  '#$referenceCode',
-                  style: GoogleFonts.robotoMono(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────────────────── Audit trail ─────────────────────────────
-
-
-  // ───────────────────────────── Helpers ─────────────────────────────────
-
-  Widget _sectionCard({
-    required IconData icon,
-    required String title,
-    required Widget child,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(18.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12.r,
-            offset: Offset(0, 3.h),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: AppColors.purpleSurface,
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 16.sp),
-              ),
-              SizedBox(width: 10.w),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          child,
-        ],
-      ),
-    );
-  }
-
-  Widget _infoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 110.w,
-          child: Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              color: AppColors.textSlate,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: GoogleFonts.inter(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _infoRowChip(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            color: AppColors.textSlate,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: AppColors.purpleSurface,
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _infoBlock(String label, String value) {
-    final hasValue = value.isNotEmpty && value != '---';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 3.w,
-              height: 12.h,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              label.toUpperCase(),
-              style: GoogleFonts.inter(
-                fontSize: 10.sp,
-                color: AppColors.textSlate,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundAlt,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.slate100, width: 1),
-          ),
-          child: Text(
-            hasValue ? value : 'Not provided',
-            style: GoogleFonts.inter(
-              fontSize: 13.sp,
-              fontWeight: hasValue ? FontWeight.w500 : FontWeight.w400,
-              color: hasValue ? AppColors.textDark : AppColors.slate300,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _divider() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Divider(height: 1.h, color: AppColors.slate100),
-    );
-  }
-
-  /// Best-effort requestor name extraction across all backend shapes we
-  /// have observed (flat, nested under `requestor`, nested under `user`,
-  /// `created_by`, etc.).
   String _readRequestorName(Map<String, dynamic> payment) {
     String s(dynamic v) => v?.toString().trim() ?? '';
     bool ok(String v) => v.isNotEmpty && v.toLowerCase() != 'null';
@@ -673,9 +225,6 @@ class CompletedRequestDetailsView extends StatelessWidget {
     return 'Unknown';
   }
 
-  /// Best-effort requestor email extraction across the shapes the backend
-  /// may ship: flat `requestor_email` / `email`, nested `requestor.email`,
-  /// nested `user.email`.
   String _readRequestorEmail(Map<String, dynamic> payment) {
     String s(dynamic v) => v?.toString().trim() ?? '';
     bool ok(String v) => v.isNotEmpty && v.toLowerCase() != 'null';
@@ -697,7 +246,38 @@ class CompletedRequestDetailsView extends StatelessWidget {
     return '';
   }
 
+  String _readDepartment(Map<String, dynamic> payment) {
+    String department = payment['department']?.toString() ?? '';
+    if (department.isEmpty || department == 'null') {
+      department = payment['department_name']?.toString() ?? '';
+    }
+    if (department.isEmpty || department == 'null') {
+      final r = payment['requestor'];
+      if (r is Map) {
+        department = (r['department'] ?? r['department_name'] ?? '').toString();
+      }
+    }
+    if (department.isEmpty || department == 'null') department = '---';
+    return department;
+  }
 
+  String _prettyCategory(String raw) {
+    const map = {
+      'office_supplies': 'Office Supplies',
+      'travel': 'Travel',
+      'meals': 'Meals',
+      'software': 'Software',
+      'hardware': 'Hardware',
+    };
+    if (map.containsKey(raw)) return map[raw]!;
+    if (raw.isEmpty) return '---';
+    final pretty = raw
+        .split('_')
+        .where((w) => w.isNotEmpty)
+        .map((w) => '${w[0].toUpperCase()}${w.substring(1)}')
+        .join(' ');
+    return pretty.isEmpty ? '---' : pretty;
+  }
 
   String _formatTime(String dateStr) {
     if (dateStr.isEmpty) return '---';

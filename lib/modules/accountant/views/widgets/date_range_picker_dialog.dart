@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../utils/app_colors.dart';
+import 'date_range_picker_parts/date_range_picker_body.dart';
+import 'date_range_picker_parts/date_range_picker_footer.dart';
+import 'date_range_picker_parts/date_range_picker_header.dart';
+import 'date_range_picker_parts/date_range_picker_preset.dart';
 
 /// A purple-themed date-range picker dialog that matches the rest of the
 /// app's design system. Renders as a centred rounded card with two quick
@@ -29,7 +32,6 @@ class AppDateRangePickerDialog extends StatefulWidget {
 }
 
 class _AppDateRangePickerDialogState extends State<AppDateRangePickerDialog> {
-
   late DateTime _start;
   late DateTime _end;
 
@@ -41,26 +43,26 @@ class _AppDateRangePickerDialogState extends State<AppDateRangePickerDialog> {
   }
 
   // ── Preset helpers ─────────────────────────────────────────────────
-  void _applyPreset(_Preset p) {
+  void _applyPreset(DateRangePreset p) {
     final now = DateTime.now();
     DateTime newStart;
     DateTime newEnd = DateTime(now.year, now.month, now.day);
     switch (p) {
-      case _Preset.last7:
+      case DateRangePreset.last7:
         newStart = newEnd.subtract(const Duration(days: 6));
         break;
-      case _Preset.last30:
+      case DateRangePreset.last30:
         newStart = newEnd.subtract(const Duration(days: 29));
         break;
-      case _Preset.thisMonth:
+      case DateRangePreset.thisMonth:
         newStart = DateTime(now.year, now.month, 1);
         break;
-      case _Preset.lastMonth:
+      case DateRangePreset.lastMonth:
         final firstOfThisMonth = DateTime(now.year, now.month, 1);
         newEnd = firstOfThisMonth.subtract(const Duration(days: 1));
         newStart = DateTime(newEnd.year, newEnd.month, 1);
         break;
-      case _Preset.last90:
+      case DateRangePreset.last90:
         newStart = newEnd.subtract(const Duration(days: 89));
         break;
     }
@@ -72,21 +74,21 @@ class _AppDateRangePickerDialogState extends State<AppDateRangePickerDialog> {
     });
   }
 
-  _Preset? get _activePreset {
+  DateRangePreset? get _activePreset {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     if (!_sameDay(_end, today)) return null;
     if (_sameDay(_start, today.subtract(const Duration(days: 6)))) {
-      return _Preset.last7;
+      return DateRangePreset.last7;
     }
     if (_sameDay(_start, today.subtract(const Duration(days: 29)))) {
-      return _Preset.last30;
+      return DateRangePreset.last30;
     }
     if (_sameDay(_start, DateTime(now.year, now.month, 1))) {
-      return _Preset.thisMonth;
+      return DateRangePreset.thisMonth;
     }
     if (_sameDay(_start, today.subtract(const Duration(days: 89)))) {
-      return _Preset.last90;
+      return DateRangePreset.last90;
     }
     return null;
   }
@@ -157,7 +159,6 @@ class _AppDateRangePickerDialogState extends State<AppDateRangePickerDialog> {
   @override
   Widget build(BuildContext context) {
     final daysSpan = _end.difference(_start).inDays + 1;
-    final active = _activePreset;
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -176,270 +177,24 @@ class _AppDateRangePickerDialogState extends State<AppDateRangePickerDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Gradient header ──────────────────────────────────────
-            Container(
-              padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 20.h),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF7C68D4), Color(0xFF5B45B0)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.date_range_rounded,
-                        color: Colors.white, size: 18.sp),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Select Date Range',
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          '$daysSpan day${daysSpan == 1 ? '' : 's'} selected',
-                          style: GoogleFonts.inter(
-                            fontSize: 11.sp,
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: EdgeInsets.all(6.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.close_rounded,
-                          color: Colors.white, size: 16.sp),
-                    ),
-                  ),
-                ],
-              ),
+            DateRangePickerHeader(
+              daysSpan: daysSpan,
+              onClose: () => Navigator.of(context).pop(),
             ),
-
-            // ── Body ─────────────────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Quick presets
-                  Text(
-                    'QUICK PRESETS',
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSlate,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
-                    children: [
-                      _presetChip('Last 7 days', _Preset.last7, active),
-                      _presetChip('Last 30 days', _Preset.last30, active),
-                      _presetChip('This month', _Preset.thisMonth, active),
-                      _presetChip('Last 3 months', _Preset.last90, active),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // Custom range
-                  Text(
-                    'CUSTOM RANGE',
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textSlate,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Row(
-                    children: [
-                      Expanded(child: _dateField('START', _start, _pickStart)),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w),
-                        child: Icon(Icons.arrow_forward_rounded,
-                            size: 16.sp, color: AppColors.slate300),
-                      ),
-                      Expanded(child: _dateField('END', _end, _pickEnd)),
-                    ],
-                  ),
-                ],
-              ),
+            DateRangePickerBody(
+              start: _start,
+              end: _end,
+              activePreset: _activePreset,
+              onPresetSelected: _applyPreset,
+              onPickStart: _pickStart,
+              onPickEnd: _pickEnd,
+              formatDate: _formatDate,
             ),
-
-            // ── Footer ───────────────────────────────────────────────
-            Container(
-              padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundAlt,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(24.r),
-                ),
-                border: Border(top: BorderSide(color: AppColors.slate100, width: 1)),
+            DateRangePickerFooter(
+              onCancel: () => Navigator.of(context).pop(),
+              onApply: () => Navigator.of(context).pop(
+                DateTimeRange(start: _start, end: _end),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 44.h,
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.slate300, width: 1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                        ),
-                        child: Text(
-                          'Cancel',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSlate,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    flex: 2,
-                    child: SizedBox(
-                      height: 44.h,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(
-                          DateTimeRange(start: _start, end: _end),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                        ),
-                        child: Text(
-                          'Apply Range',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _presetChip(String label, _Preset preset, _Preset? active) {
-    final selected = preset == active;
-    return GestureDetector(
-      onTap: () => _applyPreset(preset),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.purpleSurface,
-          borderRadius: BorderRadius.circular(100.r),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.28),
-                    blurRadius: 8.r,
-                    offset: Offset(0, 3.h),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w700,
-            color: selected ? Colors.white : AppColors.primary,
-            letterSpacing: 0.2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _dateField(String label, DateTime value, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundAlt,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.slate100, width: 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 9.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSlate,
-                letterSpacing: 1.0,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            Row(
-              children: [
-                Icon(Icons.calendar_today_rounded,
-                    size: 12.sp, color: AppColors.primary),
-                SizedBox(width: 6.w),
-                Expanded(
-                  child: Text(
-                    _formatDate(value),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -447,5 +202,3 @@ class _AppDateRangePickerDialogState extends State<AppDateRangePickerDialog> {
     );
   }
 }
-
-enum _Preset { last7, last30, thisMonth, lastMonth, last90 }
