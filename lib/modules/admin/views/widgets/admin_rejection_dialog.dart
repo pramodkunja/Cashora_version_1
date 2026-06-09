@@ -6,15 +6,28 @@ import '../../../../utils/app_text_styles.dart';
 import '../../../../utils/widgets/buttons/primary_button.dart';
 import '../../../../utils/widgets/buttons/secondary_button.dart';
 
-class AdminRejectionDialog extends StatelessWidget {
+class AdminRejectionDialog extends StatefulWidget {
   final Function(String) onConfirm;
 
   const AdminRejectionDialog({super.key, required this.onConfirm});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController reasonController = TextEditingController();
+  State<AdminRejectionDialog> createState() => _AdminRejectionDialogState();
+}
 
+class _AdminRejectionDialogState extends State<AdminRejectionDialog> {
+  // Owned by State so it persists across rebuilds and is disposed properly,
+  // instead of being recreated on every build (which loses text/focus).
+  final TextEditingController reasonController = TextEditingController();
+
+  @override
+  void dispose() {
+    reasonController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -78,7 +91,7 @@ class AdminRejectionDialog extends StatelessWidget {
             text: AppText.confirmReject,
             onPressed: () {
               if (reasonController.text.isNotEmpty) {
-                onConfirm(reasonController.text);
+                widget.onConfirm(reasonController.text);
               }
             },
             width: double.infinity,

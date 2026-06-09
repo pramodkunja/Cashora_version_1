@@ -25,7 +25,11 @@ import 'modules/auth/controllers/auth_controller.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await _initCrashlytics();
+  // Crashlytics has no web implementation — skip on web to avoid a startup
+  // assertion. Android/iOS still report normally.
+  if (!kIsWeb) {
+    await _initCrashlytics();
+  }
   await initServices();
 
   // Read theme

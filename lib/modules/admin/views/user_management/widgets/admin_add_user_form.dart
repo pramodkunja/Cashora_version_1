@@ -6,17 +6,28 @@ import '../../../../../utils/app_colors.dart';
 import '../../../../../utils/app_text.dart';
 import '../../../controllers/admin_user_controller.dart';
 
-class AdminAddUserForm extends StatelessWidget {
+class AdminAddUserForm extends StatefulWidget {
   const AdminAddUserForm({
     super.key,
     required this.controller,
-    required this.formKey,
     required this.bottomInset,
   });
 
   final AdminUserController controller;
-  final GlobalKey<FormState> formKey;
   final double bottomInset;
+
+  @override
+  State<AdminAddUserForm> createState() => _AdminAddUserFormState();
+}
+
+class _AdminAddUserFormState extends State<AdminAddUserForm> {
+  // Owned by State so it survives rebuilds (e.g. when the keyboard opens and
+  // MediaQuery changes). A GlobalKey recreated on every build would tear down
+  // the Form subtree and steal focus from the field being typed into.
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  AdminUserController get controller => widget.controller;
+  double get bottomInset => widget.bottomInset;
 
   static const Color _ink900 = Color(0xFF0F172A);
   static const Color _ink500 = Color(0xFF64748B);
@@ -45,7 +56,7 @@ class AdminAddUserForm extends StatelessWidget {
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(24.w, 18.h, 24.w, 24.h + bottomInset),
         child: Form(
-          key: formKey,
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -298,7 +309,7 @@ class AdminAddUserForm extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            if (formKey.currentState!.validate()) {
+            if (_formKey.currentState!.validate()) {
               controller.createUser();
             }
           },

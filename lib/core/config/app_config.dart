@@ -56,7 +56,7 @@ class AppConfig {
       case 'prod':
         return 'prod';
     }
-    return kIsDebug ? 'dev' : 'prod';
+    return 'prod';
   }
 
   /// Resolved API base URL. Throws in release builds if the URL would be
@@ -84,10 +84,10 @@ class AppConfig {
       case 'prod':
         return _prodBaseUrl;
     }
-    // Default: debug → local dev backend, release/profile → production.
-    // Override either way with --dart-define=APP_ENV=<tier> or
-    // --dart-define=API_BASE_URL=https://...
-    return kIsDebug ? _devBaseUrl : _prodBaseUrl;
+    // Default: production for every build (debug + release). Devs who need
+    // the LAN backend can opt in with --dart-define=APP_ENV=dev, and a
+    // one-off URL can still be passed via --dart-define=API_BASE_URL=...
+    return _prodBaseUrl;
   }
 
   // Timeouts (in milliseconds)

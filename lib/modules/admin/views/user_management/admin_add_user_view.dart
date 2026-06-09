@@ -14,7 +14,6 @@ class AdminAddUserView extends GetView<AdminUserController> {
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     final double bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
@@ -33,7 +32,6 @@ class AdminAddUserView extends GetView<AdminUserController> {
                 Expanded(
                   child: AdminAddUserForm(
                     controller: controller,
-                    formKey: formKey,
                     bottomInset: bottomInset,
                   ),
                 ),
